@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  user-auth-service:
+    build:
+      context: ./user-auth-service
+    ports:
+      - "9000:9000"
+    env_file:
+      - ./user-auth-service/.env
+    restart: unless-stopped
+
+  restaurant-service:
+    build:
+      context: ./restaurant-service
+    ports:
+      - "9100:9100"
+    env_file:
+      - ./restaurant-service/.env
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: ./order-service
+    ports:
+      - "9200:9200"
+    env_file:
+      - ./order-service/.env
+    restart: unless-stopped
+
+  delivery-service:
+    build:
+      context: ./delivery-service
+    ports:
+      - "9300:9300"
+    env_file:
+      - ./delivery-service/.env
+    restart: unless-stopped
