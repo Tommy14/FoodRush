@@ -1,13 +1,13 @@
 import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import connectDB from './config/order.db.js';
 import cors from 'cors';
 
 import orderRoutes from './routes/order.routes.js';
 
-dotenv.config();
-
 const app = express();
+
+// Connect to DB
+connectDB();
 
 // Middleware
 app.use(cors());
@@ -16,13 +16,11 @@ app.use(express.json());
 // Routes
 app.use('/api/orders', orderRoutes);
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log('MongoDB connected'))
-.catch((err) => console.error('MongoDB connection error:', err));
 
-// Start Server
-const PORT = process.env.PORT || 9200;
-app.listen(PORT, () => {
-  console.log(`Order Service running on port ${PORT}`);
+// Error Handler when route is not found
+app.use((req, res, next) => {
+  logger.error(`Route not found: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({ message: "Route not found" });
 });
+
+export default app;
