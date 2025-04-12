@@ -1,41 +1,34 @@
 create a individual env file for each services and add these
 
 delivery service
-MONGO_URI_DELIVERY_SERVICE=mongodb+srv://gayashaan:8tZESo88njtjrkSq@mernapp.tlvr6cg.mongodb.net/delivery-service?retryWrites=true&w=majority&appName=MERNapp
-DELIVERY_PORT=3003
-DELIVERY_SERVICE_URL=http://localhost:3003
+MONGO_URI_DELIVERY_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/delivery-db?retryWrites=true&w=majority&appName=Cluster
+DELIVERY_PORT=9300
+DELIVERY_SERVICE_URL=http://localhost:9300
 
 order service
-MONGO_URI_ORDER_SERVICE=mongodb+srv://gayashaan:8tZESo88njtjrkSq@mernapp.tlvr6cg.mongodb.net/order-service?retryWrites=true&w=majority&appName=MERNapp
-ORDER_PORT=3001
-ORDER_SERVICE_URL=http://localhost:3001
+MONGO_URI_ORDER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/order-db?retryWrites=true&w=majority&appName=Cluster
+ORDER_PORT=9200
+ORDER_SERVICE_URL=http://localhost:9200
 
 restaurant service
-MONGO_URI_RESTAURANT_SERVICE=mongodb+srv://gayashaan:8tZESo88njtjrkSq@mernapp.tlvr6cg.mongodb.net/restaurant-service?retryWrites=true&w=majority&appName=MERNapp
-RESTAURANT_PORT=3002
-RESTAURANT_SERVIC_URL=http://localhost:3002
+MONGO_URI_RESTAURANT_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/restaurant-db?retryWrites=true&w=majority&appName=Cluster
+RESTAURANT_PORT=9100
+RESTAURANT_SERVIC_URL=http://localhost:9100
 
 user service
-MONGO_URI_USER_SERVICE=mongodb+srv://gayashaan:8tZESo88njtjrkSq@mernapp.tlvr6cg.mongodb.net/user-service?retryWrites=true&w=majority&appName=MERNapp
-USER_PORT=8080
-USER_SERVICE_URL=http://localhost:8080
-
-
-
-
-
-
-
+MONGO_URI_USER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/user-auth-db?retryWrites=true&w=majority&appName=Cluster
+USER_PORT=9000
+USER_SERVICE_URL=http://localhost:9000
 
 
 
 EXTRA IGNOR THESE LINES
 payment service
-MONGO_URI_PAYMENT_SERVICE=mongodb+srv://gayashaan:8tZESo88njtjrkSq@mernapp.tlvr6cg.mongodb.net/payment-service?retryWrites=true&w=majority&appName=MERNapp
-PAYMENT_PORT=3004
-PAYMENT_SERVICE_URL=http://localhost:3004
+MONGO_URI_PAYMENT_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/payment-db?retryWrites=true&w=majority&appName=Cluster
+PAYMENT_PORT=9400
+PAYMENT_SERVICE_URL=http://localhost:9400
 
 notification service
-MONGO_URI_NOTIFICATION_SERVICE=mongodb+srv://gayashaan:8tZESo88njtjrkSq@mernapp.tlvr6cg.mongodb.net/notification-service?retryWrites=true&w=majority&appName=MERNapp
-NOTIFICATION_PORT=3005
-NOTIFICATION_SERVICE_URL=http://localhost:3005
+MONGO_URI_NOTIFICATION_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/notification-db?retryWrites=true&w=majority&appName=Cluster
+NOTIFICATION_PORT=9500
+NOTIFICATION_SERVICE_URL=http://localhost:9500
