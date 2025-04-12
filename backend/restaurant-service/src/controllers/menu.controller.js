@@ -1,4 +1,9 @@
-import MenuItem from '../models/MenuItem.js';
+import {
+  addMenuItemService,
+  getMenuItemsService,
+  updateMenuItemService,
+  deleteMenuItemService
+} from '../services/menu.service.js';
 
 // @desc Create a new menu item
 export const addMenuItem = async (req, res) => {
@@ -6,7 +11,7 @@ export const addMenuItem = async (req, res) => {
     const { name, description, price, isAvailable } = req.body;
     const restaurantId = req.params.id;
 
-    const newItem = new MenuItem({
+    const newItem = await addMenuItemService({
       restaurantId,
       name,
       description,
@@ -14,10 +19,9 @@ export const addMenuItem = async (req, res) => {
       isAvailable
     });
 
-    await newItem.save();
     res.status(201).json({ message: 'Menu item added', data: newItem });
   } catch (error) {
-    res.status(500).json({ message: 'Error adding menu item', error });
+    res.status(500).json({ message: 'Error adding menu item', error: error.message });
   }
 };
 
@@ -25,11 +29,11 @@ export const addMenuItem = async (req, res) => {
 export const getMenuItems = async (req, res) => {
   try {
     const restaurantId = req.params.id;
-    const items = await MenuItem.find({ restaurantId });
+    const items = await getMenuItemsService(restaurantId);
 
     res.status(200).json({ data: items });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching menu items', error });
+    res.status(500).json({ message: 'Error fetching menu items', error: error.message });
   }
 };
 
@@ -38,12 +42,12 @@ export const updateMenuItem = async (req, res) => {
   try {
     const { itemId } = req.params;
 
-    const updated = await MenuItem.findByIdAndUpdate(itemId, req.body, { new: true });
+    const updated = await updateMenuItemService(itemId, req.body);
     if (!updated) return res.status(404).json({ message: 'Menu item not found' });
 
     res.status(200).json({ message: 'Menu item updated', data: updated });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating menu item', error });
+    res.status(500).json({ message: 'Error updating menu item', error: error.message });
   }
 };
 
@@ -52,11 +56,11 @@ export const deleteMenuItem = async (req, res) => {
   try {
     const { itemId } = req.params;
 
-    const deleted = await MenuItem.findByIdAndDelete(itemId);
+    const deleted = await deleteMenuItemService(itemId);
     if (!deleted) return res.status(404).json({ message: 'Menu item not found' });
 
     res.status(200).json({ message: 'Menu item deleted' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting menu item', error });
+    res.status(500).json({ message: 'Error deleting menu item', error: error.message });
   }
 };
