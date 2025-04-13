@@ -36,3 +36,12 @@ services:
     env_file:
       - ./delivery-service/.env
     restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ./notification-service
+    ports:
+      - "9600:9600"
+    env_file:
+      - ./notification-service/.env
+    restart: unless-stopped
