@@ -30,14 +30,22 @@ GOOGLE_API_REFRESH_TOKEN=1//04AVZuP5hDQoBCgYIARAAGAQSNwF-L9IrJWpaf4EPYAITtsRteGJ
 PORT=9600
 
 
-
-
-
-
-
-EXTRA IGNOR THESE LINES
 payment service
 MONGO_URI_PAYMENT_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/payment-db?retryWrites=true&w=majority&appName=Cluster
 PAYMENT_PORT=9400
 PAYMENT_SERVICE_URL=http://localhost:9400
+STRIPE_WEBHOOK_SECRET=whsec_61dfea0afa627b22b14034edff6fef527adfd049dd8eac37690cbc2fc8c5bc8a 
+STRIPE_SECRET_KEY=sk_test_51RDSEWRYcGyOxFbzYlBqmCeeLld7HU7WCKCQ6ZrJzsTzhLd8rkpNvAw5Wmp59hGbkWtAlyvq4mFri20aEDnxzeif00pIOZz4u2
 
+
+#for stripe setup and paymnet-service
+if want to start the paymnet service you have download stripe for windows, for mac refer this link :https://docs.stripe.com/stripe-cli?install-method=windows
+
+after download extract put the env variables
+then open cmd run stripe login do the authentication using our common Foodrush48 email
+then run the below command to start the stripe cli and forward the webhook to our payment service
+stripe listen --forward-to localhost:9400/api/pay/webhook
+sometime you will come new webhook secret, so copy that and put in the env file as STRIPE_WEBHOOK_SECRET
+
+dont run this
+stripe trigger checkout.session.completed
