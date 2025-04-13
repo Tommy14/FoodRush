@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import axios from 'axios';
+
+import {NOTIFICATION_SERVICE_URL} from '../config/index.js'
 
 export const registerUserService = async ({ name, email, password, role }) => {
   const existingUser = await User.findOne({ email });
@@ -19,7 +22,18 @@ export const registerUserService = async ({ name, email, password, role }) => {
     role: role || 'customer'
   });
 
-  await newUser.save();
+  const user = await newUser.save();
+  if (!user) {
+    const error = new Error('Failed to create user');
+    error.statusCode = 500;
+    throw error;
+  }
+  // Send a welcome email to the user
+  try {
+    await sendWelcomeEmail(user);
+  } catch (error) {
+    console.error('User Created But Failed to send welcome email:', error.message);
+  }
   return;
 };
 
@@ -54,3 +68,24 @@ export const loginUserService = async ({ email, password }) => {
     }
   };
 };
+
+// Function to send a welcome email to the user
+async function sendWelcomeEmail(user) {
+  await axios.post(`${NOTIFICATION_SERVICE_URL}/notify/email`, {
+    recipient: {
+      email: user.email,
+    },
+    subject: 'Welcome to FoodRush!',
+    type: 'userAccountCreated', // type should be the key of the templateMap in notification-service -> src -> layouts -> templateMap.js
+    data: {
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      createdAt: new Date().toLocaleString('en-US', {
+        timeZone: 'Asia/Colombo',
+        dateStyle: 'long',
+        timeStyle: 'short'
+      })
+    }
+  });
+}

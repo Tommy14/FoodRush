@@ -20,6 +20,19 @@ MONGO_URI_USER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.n
 USER_PORT=9000
 USER_SERVICE_URL=http://localhost:9000
 
+notification service
+MONGO_URI_NOTIFICATION_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/notification-db?retryWrites=true&w=majority&appName=Cluster
+GOOGLE_API_USER=Foodrush48@gmail.com
+GOOGLE_API_CLIENT_ID=712246912432-9dbuepv17isg9uhvnfv108nkh12fqmqk.apps.googleusercontent.com
+GOOGLE_API_CLIENT_SECRET=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
+GOOGLE_API_REDIRECT_URL=https://developers.google.com/oauthplayground
+GOOGLE_API_REFRESH_TOKEN=1//04AVZuP5hDQoBCgYIARAAGAQSNwF-L9IrJWpaf4EPYAITtsRteGJMypZnzWISJuWYEnrpZQfAyt4Mw6GH82y7viUfk-5D2Y8BXcg
+PORT=9600
+
+
+
+
+
 
 
 EXTRA IGNOR THESE LINES
@@ -28,7 +41,3 @@ MONGO_URI_PAYMENT_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongod
 PAYMENT_PORT=9400
 PAYMENT_SERVICE_URL=http://localhost:9400
 
-notification service
-MONGO_URI_NOTIFICATION_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/notification-db?retryWrites=true&w=majority&appName=Cluster
-NOTIFICATION_PORT=9500
-NOTIFICATION_SERVICE_URL=http://localhost:9500
