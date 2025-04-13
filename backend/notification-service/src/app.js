@@ -22,11 +22,6 @@ app.use(express.json());
 // Routes
 app.use('/api/notify', notificationRoutes);
 
-// Optional: health check
-app.get('/api/', (req, res) => {
-  res.send('Notification Service is up');
-});
-
 // Error Handler when route is not found
 app.use((req, res, next) => {
     // logger.error(`Route not found: ${req.method} ${req.originalUrl}`);
