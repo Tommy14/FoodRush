@@ -26,13 +26,30 @@ NOTIFICATION_SERVICE_URL=http://localhost:9800
 
 
 notification service
+PORT=9800
 MONGO_URI_NOTIFICATION_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/notification-db?retryWrites=true&w=majority&appName=Cluster
+
+#Google OAuth Credentials
 GOOGLE_API_USER=Foodrush48@gmail.com
 GOOGLE_API_CLIENT_ID=712246912432-9dbuepv17isg9uhvnfv108nkh12fqmqk.apps.googleusercontent.com
 GOOGLE_API_CLIENT_SECRET=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
 GOOGLE_API_REDIRECT_URL=https://developers.google.com/oauthplayground
 GOOGLE_API_REFRESH_TOKEN=1//04AVZuP5hDQoBCgYIARAAGAQSNwF-L9IrJWpaf4EPYAITtsRteGJMypZnzWISJuWYEnrpZQfAyt4Mw6GH82y7viUfk-5D2Y8BXcg
-PORT=9800
+
+
+# Twilio Credentials
+TWILIO_ACCOUNT_SID=AC777d7d5ab2d5a2229996515a4d920a3d
+TWILIO_AUTH_TOKEN=d770e33516861a7b952c78fa8d1c625b
+TWILIO_PHONE_NUMBER=+18653550286  # This is your Twilio number
+
+# Meta cloude whatsapp credentials
+META_WA_TOKEN=EAAYtP6ZAPlDMBO4wFGgqmPcUPEcfXZCHZA5NlEo2ZCq3lNJZAUZALlsM4PL8Gm4OZBTVCZBAmSY5pKANIhBQsPF6dYjUngLpVzoQD61wfQImy7zOG9IZCZAYYWm00yS5FtXAvXn4U4Bozc1l5kVMzKAKEmNAbJRoppqiWqzv2o2cyTijYVmJ0tTTkJcTK9zBNmu0m7d8MIQLXQc0jQpWi80vwi9UdH8LQZD
+META_WA_PHONE_ID=621840814346765
+META_WA_BUSSINESS_ID=1172764077497380
+
+
+META_WA_TOKEN_PERM=EAAYtP6ZAPlDMBO6WYicgGNN3qdUuWvowLfg259uAZAvZBzltxUPrrfrBkyUn206kIpZCTJSCEvDc45nybkAWVLlNypWtBJspjw1FIbbBmmt2115jTevwsAqr4msVIp7aHosurZCbelzcFOmZAlVDvESZC34JytbMC7MgtSLzy0WK3SoDsCVFK1eSxktmaDZAIxWa1OQyrujrBkXQlBxZB7nj4Fp3qiUvP66u4kXTd1LbP
+
 
 
 payment service
@@ -54,3 +71,9 @@ sometime you will come new webhook secret, so copy that and put in the env file 
 
 dont run this
 stripe trigger checkout.session.completed
+
+
+#for whatsapp message to work we have to register our number in meta cloude api.untill that no message other than to my number will be sent.
+#implemented the whatsapp message for user registration. 
+#template created for order_placed, order_dellivered_dr, account_created, tenmapltes are created in the meta cloude api. so you just have to use the template name(refere postman)
+#refere the postman to get the payload, and refere the code in user-service -> src -> services> user.service.js to see how to send the message.

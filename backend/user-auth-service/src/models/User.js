@@ -16,6 +16,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  phone: {
+    type: String, //when saving we ahve to save it in +94 format
+  },
   role: {
     type: String,
     enum: ['customer', 'restaurant_admin', 'delivery_person'],

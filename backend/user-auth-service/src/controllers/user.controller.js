@@ -5,10 +5,10 @@ import {
 
 // @desc Register a new user
 export const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, phone ,role } = req.body;
 
   try {
-    await registerUserService({ name, email, password, role });
+    await registerUserService({ name, email, password, phone ,role });
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     const status = err.statusCode || 500;
