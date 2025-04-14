@@ -1,28 +1,34 @@
 import express from 'express';
-import connectDB from './config/restaurant.db.js';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import connectDB from './config/restaurant.db.js';
 
 import restaurantRoutes from './routes/restaurant.routes.js';
 import menuRoutes from './routes/menu.routes.js';
 
-const app = express();
-
-// Connect to DB
+dotenv.config();
 connectDB();
+
+const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Route registration
+// Routes
 app.use('/api/restaurants', restaurantRoutes);
-app.use('/api', menuRoutes);
+app.use('/api/restaurants', menuRoutes); // ✅ This is what you’re missing
 
 
-// Error Handler when route is not found
+// 404 handler
 app.use((req, res, next) => {
-  logger.error(`Route not found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({ message: "Route not found" });
+});
+
+// Optional global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({ message: "Internal Server Error" });
 });
 
 export default app;
