@@ -16,7 +16,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
-app.use('/notify', notificationRoutes);
+app.use('/api/notify', notificationRoutes);
 
 // Error Handler when route is not found
 app.use((req, res, next) => {

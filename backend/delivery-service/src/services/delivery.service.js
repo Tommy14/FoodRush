@@ -46,7 +46,7 @@ export const getDeliveriesByPersonService = async (deliveryPersonId) => {
 
 async function sendDeliveryUpdateEmail(delivery) {
   try {
-    await axios.post(`${NOTIFICATION_SERVICE_URL}/notify/email`, {
+    await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/email`, {
       recipient: {
         email: "thihansig@gmail.com",
       },
