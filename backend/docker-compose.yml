@@ -1,6 +1,12 @@
-version: '3.8'
-
 services:
+  notification-service:
+    build:
+      context: ./notification-service
+    ports:
+      - "9800:9800"
+    env_file:
+      - ./notification-service/.env
+    restart: unless-stopped
   user-auth-service:
     build:
       context: ./user-auth-service
@@ -8,6 +14,10 @@ services:
       - "9000:9000"
     env_file:
       - ./user-auth-service/.env
+    environment:
+      - NOTIFICATION_SERVICE_URL=http://notification-service:9800
+    depends_on:
+      - notification-service
     restart: unless-stopped
 
   restaurant-service:
@@ -35,13 +45,10 @@ services:
       - "9300:9300"
     env_file:
       - ./delivery-service/.env
+    environment:
+      - NOTIFICATION_SERVICE_URL=http://notification-service:9800
+    depends_on:
+      - notification-service
     restart: unless-stopped
 
-  notification-service:
-    build:
-      context: ./notification-service
-    ports:
-      - "9600:9600"
-    env_file:
-      - ./notification-service/.env
-    restart: unless-stopped
+  
