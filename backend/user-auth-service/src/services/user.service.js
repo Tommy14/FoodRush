@@ -5,7 +5,7 @@ import axios from 'axios';
 
 import {NOTIFICATION_SERVICE_URL} from '../config/index.js'
 
-export const registerUserService = async ({ name, email, password, role }) => {
+export const registerUserService = async ({ name, email, password, phone ,role }) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     const error = new Error('User already exists');
@@ -19,6 +19,7 @@ export const registerUserService = async ({ name, email, password, role }) => {
     name,
     email,
     password: hashedPassword,
+    phone,
     role: role || 'customer'
   });
 
@@ -31,6 +32,8 @@ export const registerUserService = async ({ name, email, password, role }) => {
 
   try {
     await sendWelcomeEmail(user);
+    await sendWhatsAppMessage(user);
+    console.log('User Created and Welcome email sent successfully');
   } catch (error) {
     console.error('User Created But Failed to send welcome email:', error.message);
   }
@@ -53,7 +56,7 @@ export const loginUserService = async ({ email, password }) => {
   }
 
   const token = jwt.sign(
-    { userId: user._id, role: user.role },
+    { userId: user._id, role: user.role, email: user.email },
     process.env.JWT_SECRET,
     { expiresIn: '1h' }
   );
@@ -86,6 +89,26 @@ async function sendWelcomeEmail(user) {
         dateStyle: 'long',
         timeStyle: 'short'
       })
+    }
+  });
+}
+
+// Function to send a WhatsApp message to the user
+// please refere the postman payload and adjust the your functions as neccessary
+async function sendWhatsAppMessage(user) {
+  await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/whatsapp`, {
+    phone: user.phone,
+    template: 'account_created',
+    params: {
+      body: [
+        user.name,
+        user.email,
+        new Date().toLocaleString('en-US', {
+          timeZone: 'Asia/Colombo',
+          dateStyle: 'long',
+          timeStyle: 'short'
+        })
+      ]
     }
   });
 }
