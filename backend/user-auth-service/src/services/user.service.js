@@ -28,7 +28,7 @@ export const registerUserService = async ({ name, email, password, role }) => {
     error.statusCode = 500;
     throw error;
   }
-  // Send a welcome email to the user
+
   try {
     await sendWelcomeEmail(user);
   } catch (error) {
