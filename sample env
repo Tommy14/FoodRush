@@ -19,6 +19,9 @@ user service
 MONGO_URI_USER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/user-auth-db?retryWrites=true&w=majority&appName=Cluster
 USER_PORT=9000
 USER_SERVICE_URL=http://localhost:9000
+JWT_SECRET=2f6c0d73a9c14f989c3b6724ab3b3e91f6e4179d121c957f8329df348d6f3b7e23c774c2fda34952c892b9291c4a37d6
+NOTIFICATION_SERVICE_URL=http://localhost:9800
+
 
 notification service
 MONGO_URI_NOTIFICATION_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/notification-db?retryWrites=true&w=majority&appName=Cluster
