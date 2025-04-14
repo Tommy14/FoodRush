@@ -1,10 +1,6 @@
-// src/app.js
 import express from 'express';
 import cors from 'cors';
-import dotenv from "dotenv";
 import notificationRoutes from './routes/notification.routes.js';
-
-dotenv.config(); // Load environment variables
 
 const app = express();
 
@@ -20,12 +16,12 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
-app.use('/notify', notificationRoutes);
+app.use('/api/notify', notificationRoutes);
 
 // Error Handler when route is not found
 app.use((req, res, next) => {
     // logger.error(`Route not found: ${req.method} ${req.originalUrl}`);
-    console.error(`Route not found: ${req.method} ${req.originalUrl}`);
+    console.log(`Route not found: ${req.method} ${req.originalUrl}`);
     res.status(404).json({ message: "Route not found" });
   });
 

@@ -71,7 +71,7 @@ export const loginUserService = async ({ email, password }) => {
 
 // Function to send a welcome email to the user
 async function sendWelcomeEmail(user) {
-  await axios.post(`${NOTIFICATION_SERVICE_URL}/notify/email`, {
+  await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/email`, {
     recipient: {
       email: user.email,
     },
