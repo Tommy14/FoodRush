@@ -15,6 +15,7 @@ restaurant service
 MONGO_URI_RESTAURANT_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/restaurant-db?retryWrites=true&w=majority&appName=Cluster
 RESTAURANT_PORT=9100
 RESTAURANT_SERVIC_URL=http://localhost:9100
+OPENROUTER_API_KEY=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
 
 user service
 MONGO_URI_USER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/user-auth-db?retryWrites=true&w=majority&appName=Cluster
