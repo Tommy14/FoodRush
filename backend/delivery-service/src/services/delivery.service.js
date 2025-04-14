@@ -1,4 +1,6 @@
 import Delivery from '../models/Delivery.js';
+import axios from 'axios';
+import { NOTIFICATION_SERVICE_URL } from '../config/index.js';
 
 export const assignDeliveryService = async ({ orderId, deliveryPersonId }) => {
   const delivery = new Delivery({
@@ -25,7 +27,13 @@ export const updateDeliveryStatusService = async (id, status) => {
     delivery.deliveredAt = new Date();
   }
 
-  await delivery.save();
+  await delivery.save(); // ✅ Save first
+
+  // 📨 Then send email if status is 'delivered'
+  if (status === 'delivered') {
+    await sendDeliveryUpdateEmail(delivery);
+  }
+
   return delivery;
 };
 
@@ -33,3 +41,34 @@ export const getDeliveriesByPersonService = async (deliveryPersonId) => {
   const deliveries = await Delivery.find({ deliveryPersonId }).sort({ createdAt: -1 });
   return deliveries;
 };
+
+
+
+async function sendDeliveryUpdateEmail(delivery) {
+  try {
+    await axios.post(`${NOTIFICATION_SERVICE_URL}/notify/email`, {
+      recipient: {
+        email: "thihansig@gmail.com",
+      },
+      subject: 'Your order has been delivered! 🎉',
+      type: 'orderDelivered', // Must match a key in `templateMap.js` in notification service
+      data: {
+        customerName: "John Doe",
+        restaurantName: "ABC Restaurant",
+        orderId: delivery.orderId,
+        total: "4500.00 LKR",
+        paymentMethod: "Cash on Delivery",
+        orderDateTime: "April 13, 2025, 10:15 PM",
+        deliveryAddress: "123, Galle Road, Colombo",
+        deliveryPerson: "Dinesh Perera",
+        updatedAt: new Date().toLocaleString('en-US', {
+          timeZone: 'Asia/Colombo',
+          dateStyle: 'long',
+          timeStyle: 'short'
+        })
+      }
+    });
+  } catch (err) {
+    console.error('Delivery updated, but failed to send email:', err.message);
+  }
+}
