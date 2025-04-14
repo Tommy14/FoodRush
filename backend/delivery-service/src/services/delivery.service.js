@@ -18,7 +18,6 @@ export const updateDeliveryStatusService = async (id, status) => {
   if (!delivery) {
     throw new Error('Delivery not found');
   }
-
   delivery.status = status;
 
   if (status === 'picked_up') {

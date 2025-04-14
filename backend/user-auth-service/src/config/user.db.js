@@ -10,7 +10,6 @@ const connectDB = async () => {
     console.log("MongoDB connection already established.");
     return dbConnection;
   }
-
   try {
     dbConnection = await mongoose.connect(process.env.MONGO_URI_USER_SERVICE);
     console.log(`MongoDB Connected: ${dbConnection.connection.db.databaseName}`);

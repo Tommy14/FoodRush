@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification
+  template:
+    metadata:
+      labels:
+        app: notification
+    spec:
+      containers:
+        - name: notification
+          image: backend-notification-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 9800
+          env:
+            - name: MONGO_URI_NOTIFICATION_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secret
+                  key: MONGO_URI_NOTIFICATION_SERVICE
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secret
+                  key: JWT_SECRET
+            - name: JWT_EXPIRES_IN
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secret
+                  key: JWT_EXPIRES_IN
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+spec:
+  selector:
+    app: notification
+  ports:
+    - port: 9800
+      targetPort: 9800
+  type: ClusterIP
