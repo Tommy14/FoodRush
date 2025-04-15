@@ -6,7 +6,7 @@ const app = express();
 
 dotenv.config();
 app.use(cors({
-  origin: 'http://localhost:5173',     // ✅ allow your frontend origin
+  origin: 'http://localhost:5173', 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
@@ -21,12 +21,14 @@ import restaurantRoutes from './routes/restaurant.routes.js';
 import orderRoutes from './routes/order.routes.js';
 import deliveryRoutes from './routes/delivery.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
+import menuRoutes from './routes/menu.route.js';
 
 app.use('/bff/auth', authRoutes);
 app.use('/bff/restaurants', restaurantRoutes);
 app.use('/bff/orders', orderRoutes);
 app.use('/bff/delivery', deliveryRoutes);
 app.use('/bff/pay', paymentRoutes);
+app.use('/bff/restaurants', menuRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`BFF running on port ${process.env.PORT}`);
