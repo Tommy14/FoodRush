@@ -5,17 +5,20 @@ MONGO_URI_DELIVERY_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongo
 DELIVERY_PORT=9300
 DELIVERY_SERVICE_URL=http://localhost:9300
 NOTIFICATION_SERVICE_URL=http://localhost:9800
+INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 
 order service
 MONGO_URI_ORDER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/order-db?retryWrites=true&w=majority&appName=Cluster
 ORDER_PORT=9200
 ORDER_SERVICE_URL=http://localhost:9200
+INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 
 restaurant service
 MONGO_URI_RESTAURANT_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/restaurant-db?retryWrites=true&w=majority&appName=Cluster
 RESTAURANT_PORT=9100
 RESTAURANT_SERVIC_URL=http://localhost:9100
 OPENROUTER_API_KEY=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
+INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 
 user service
 MONGO_URI_USER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/user-auth-db?retryWrites=true&w=majority&appName=Cluster
@@ -23,12 +26,14 @@ USER_PORT=9000
 USER_SERVICE_URL=http://localhost:9000
 JWT_SECRET=2f6c0d73a9c14f989c3b6724ab3b3e91f6e4179d121c957f8329df348d6f3b7e23c774c2fda34952c892b9291c4a37d6
 NOTIFICATION_SERVICE_URL=http://localhost:9800
+INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 
 
 
 notification service
 PORT=9800
 MONGO_URI_NOTIFICATION_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/notification-db?retryWrites=true&w=majority&appName=Cluster
+INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 
 #Google OAuth Credentials
 GOOGLE_API_USER=Foodrush48@gmail.com
@@ -59,6 +64,9 @@ PAYMENT_PORT=9400
 PAYMENT_SERVICE_URL=http://localhost:9400
 STRIPE_WEBHOOK_SECRET=whsec_61dfea0afa627b22b14034edff6fef527adfd049dd8eac37690cbc2fc8c5bc8a 
 STRIPE_SECRET_KEY=sk_test_51RDSEWRYcGyOxFbzYlBqmCeeLld7HU7WCKCQ6ZrJzsTzhLd8rkpNvAw5Wmp59hGbkWtAlyvq4mFri20aEDnxzeif00pIOZz4u2
+JWT_SECRET=2f6c0d73a9c14f989c3b6724ab3b3e91f6e4179d121c957f8329df348d6f3b7e23c774c2fda34952c892b9291c4a37d6
+INTERNAL_SERVICE_API_KEY=foodrush@internalKey
+
 
 
 #for stripe setup and paymnet-service

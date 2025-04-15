@@ -1,6 +1,6 @@
 import Delivery from '../models/Delivery.js';
 import axios from 'axios';
-import { NOTIFICATION_SERVICE_URL } from '../config/index.js';
+import { NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY} from '../config/index.js';
 
 export const assignDeliveryService = async ({ orderId, deliveryPersonId }) => {
   const delivery = new Delivery({
@@ -65,6 +65,10 @@ async function sendDeliveryUpdateEmail(delivery) {
           dateStyle: 'long',
           timeStyle: 'short'
         })
+      }
+    }, {
+      headers: {
+        'X-Internal-API-Key': INTERNAL_SERVICE_API_KEY
       }
     });
   } catch (err) {
