@@ -29,23 +29,28 @@ const role = 'delivery_person';
   const navLinks = [...(roleBasedLinks[role] || []), ...baseLinks];
 
   return (
-    <div className="min-h-screen bg-gray-800 text-white w-60 p-6 flex flex-col">
-      <h2 className="text-2xl font-bold mb-8">🚚 DeliverIt</h2>
-      <nav className="flex flex-col gap-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-700 text-white w-64 p-6 pt-24 shadow-lg flex flex-col">
+    <nav className="flex flex-col space-y-3">
         {navLinks.map((link) => (
-          <Link
+        <Link
             key={link.path}
             to={link.path}
-            className={`p-2 rounded hover:bg-gray-700 transition ${
-              pathname === link.path ? 'bg-gray-700 font-semibold' : ''
+            className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+            pathname === link.path
+                ? 'bg-blue-500 text-white shadow-md font-semibold'
+                : 'hover:bg-gray-600 text-gray-300'
             }`}
-          >
+        >
             {link.label}
-          </Link>
+        </Link>
         ))}
-      </nav>
+    </nav>
+
+    <div className="mt-auto pt-6 border-t border-gray-600 text-sm text-center text-gray-400">
+        © {new Date().getFullYear()} FoodRush
     </div>
-  );
+    </div>
+  );  
 };
 
 export default DashSidebar;
