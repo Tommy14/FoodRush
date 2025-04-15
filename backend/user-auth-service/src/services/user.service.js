@@ -72,6 +72,19 @@ export const loginUserService = async ({ email, password }) => {
   };
 };
 
+export const toggleAvailabilityService = async (userId) => {
+  const user = await User.findById(userId);
+
+  if (!user || user.role !== 'delivery_person') {
+    throw new Error('Unauthorized');
+  }
+
+  user.isAvailable = !user.isAvailable;
+  await user.save();
+
+  return user.isAvailable;
+};
+
 // Function to send a welcome email to the user
 async function sendWelcomeEmail(user) {
   await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/email`, {

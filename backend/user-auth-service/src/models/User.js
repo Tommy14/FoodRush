@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
     enum: ['customer', 'admin', 'restaurant_admin', 'delivery_person'],
     default: 'customer'
   },
+  isAvailable: {
+    type: Boolean,
+    default: true
+  },
   createdAt: {
     type: Date,
     default: Date.now

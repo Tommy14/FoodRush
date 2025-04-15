@@ -2,7 +2,8 @@ import express from 'express';
 import {
   assignDelivery,
   updateDeliveryStatus,
-  getDeliveriesByPerson
+  getDeliveriesByPerson,
+  getCompletedDeliveriesByPerson
 } from '../controllers/delivery.controller.js';
 
 import authMiddleware from '../middleware/auth.js';
@@ -20,5 +21,8 @@ router.put('/:id/status', updateDeliveryStatus);
 
 // 📄 Get deliveries assigned to logged-in delivery person
 router.get('/my-deliveries', getDeliveriesByPerson);
+
+// 📄 Get completed deliveries by logged-in delivery person
+router.get('/my-deliveries/completed', getCompletedDeliveriesByPerson);
 
 export default router;
