@@ -25,8 +25,12 @@ router.post('/assign', async (req, res) => {
 
 // Update delivery status
 router.put('/:id/status', async (req, res) => {
+  const deliveryId = req.params.id;
+  const { status } = req.body;
+  console.log(`🔁 Updating delivery status for ${deliveryId} to ${status}`);
+
   try {
-    const response = await axios.put(`${DELIVERY_API}/${req.params.id}/status`, req.body, {
+    const response = await axios.put(`${DELIVERY_API}/${deliveryId}/status`, { status }, {
       headers: {
         Authorization: req.headers.authorization,
       }
@@ -41,6 +45,20 @@ router.put('/:id/status', async (req, res) => {
 router.get('/my-deliveries', async (req, res) => {
   try {
     const response = await axios.get(`${DELIVERY_API}/my-deliveries`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      }
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ message: err.message });
+  }
+});
+
+// Get completed deliveries by current user
+router.get('/my-deliveries/completed', async (req, res) => {
+  try {
+    const response = await axios.get(`${DELIVERY_API}/my-deliveries/completed`, {
       headers: {
         Authorization: req.headers.authorization,
       }

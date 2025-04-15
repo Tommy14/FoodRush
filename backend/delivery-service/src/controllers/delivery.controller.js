@@ -1,7 +1,8 @@
 import {
   assignDeliveryService,
   updateDeliveryStatusService,
-  getDeliveriesByPersonService
+  getDeliveriesByPersonService,
+  getCompletedDeliveriesByPersonService
 } from '../services/delivery.service.js';
 
 // @desc Assign a delivery person to an order
@@ -34,6 +35,17 @@ export const getDeliveriesByPerson = async (req, res) => {
   try {
     const deliveryPersonId = req.user.userId;
     const deliveries = await getDeliveriesByPersonService(deliveryPersonId);
+
+    res.status(200).json({ data: deliveries });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch deliveries', error: error.message });
+  }
+};
+
+export const getCompletedDeliveriesByPerson = async (req, res) => {
+  try {
+    const deliveryPersonId = req.user.userId;
+    const deliveries = await getCompletedDeliveriesByPersonService(deliveryPersonId);
 
     res.status(200).json({ data: deliveries });
   } catch (error) {

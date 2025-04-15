@@ -19,7 +19,7 @@ export const updateDeliveryStatusService = async (id, status) => {
     throw new Error('Delivery not found');
   }
   delivery.status = status;
-
+  console.log(NOTIFICATION_SERVICE_URL);
   if (status === 'picked_up') {
     delivery.pickedUpAt = new Date();
   } else if (status === 'delivered') {
@@ -37,11 +37,17 @@ export const updateDeliveryStatusService = async (id, status) => {
 };
 
 export const getDeliveriesByPersonService = async (deliveryPersonId) => {
-  const deliveries = await Delivery.find({ deliveryPersonId }).sort({ createdAt: -1 });
+  const deliveries = await Delivery.find({
+    deliveryPersonId,
+    status: { $ne: 'delivered' } // $ne = "not equal"
+  }).sort({ createdAt: -1 });
+
   return deliveries;
 };
 
-
+export const getCompletedDeliveriesByPersonService = async (deliveryPersonId) => {
+  return await Delivery.find({ deliveryPersonId, status: 'delivered' }).sort({ deliveredAt: -1 });
+};
 
 async function sendDeliveryUpdateEmail(delivery) {
   try {

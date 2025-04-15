@@ -25,4 +25,18 @@ router.post('/register', async (req, res) => {
   }
 });
 
+router.patch('/toggle-availability', async (req, res) => {
+  try {
+    const response = await axios.patch(`${AUTH_API}/toggle-availability`, req.body, {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ message: err.response?.data?.message || err.message });
+  }
+}
+);
+
 export default router;
