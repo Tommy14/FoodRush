@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import axios from 'axios';
 
-import {NOTIFICATION_SERVICE_URL} from '../config/index.js'
+import {NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY} from '../config/index.js'
 
 export const registerUserService = async ({ name, email, password, phone ,role }) => {
   const existingUser = await User.findOne({ email });
@@ -90,6 +90,10 @@ async function sendWelcomeEmail(user) {
         timeStyle: 'short'
       })
     }
+  }, {
+    headers: {
+      'X-Internal-API-Key': INTERNAL_SERVICE_API_KEY
+    }
   });
 }
 
@@ -109,6 +113,11 @@ async function sendWhatsAppMessage(user) {
           timeStyle: 'short'
         })
       ]
+    }
+  },
+  {
+    headers: {
+      'X-Internal-API-Key': INTERNAL_SERVICE_API_KEY
     }
   });
 }
