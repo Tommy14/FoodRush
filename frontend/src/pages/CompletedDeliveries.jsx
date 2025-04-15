@@ -1,7 +1,7 @@
 // src/pages/CompletedDeliveries.jsx
 
 import { useEffect, useState } from 'react';
-import axios from '../services/axiosInstance';
+import { fetchCompletedDelivery } from '../services/deliveryService';
 import DashSidebar from '../components/DashSidebar';
 
 const CompletedDeliveries = () => {
@@ -9,12 +9,8 @@ const CompletedDeliveries = () => {
 
   const fetchCompletedDeliveries = async () => {
     try {
-      const res = await axios.get('/bff/delivery/my-deliveries/completed', {
-        headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2ZlYTJkZTY5MzMzMWQwNWExNDQzN2QiLCJyb2xlIjoiZGVsaXZlcnlfcGVyc29uIiwiZW1haWwiOiJkZWxpdmVyeUBnbWFpbC5jb20iLCJpYXQiOjE3NDQ3NDEwODksImV4cCI6MTc0NDc0NDY4OX0.yJFMet14O8fS7T9YuhVYFvzCORQtZtAl0ElWMFPUZz4`
-        }
-      });
-      setDeliveries(res.data.data);
+        const res = await fetchCompletedDelivery();
+      setDeliveries(res.data);
     } catch (error) {
       console.error('❌ Failed to fetch completed deliveries:', error);
     }
@@ -28,19 +24,33 @@ const CompletedDeliveries = () => {
     <div className="flex min-h-screen">
       <DashSidebar />
 
-      <main className="flex-1 p-8 bg-gray-100">
+      <main className="flex-1 bg-gray-100 p-8 overflow-auto mt-16">
         <h1 className="text-2xl font-bold mb-6">✅ Completed Deliveries</h1>
 
         {deliveries.length === 0 ? (
           <p className="text-gray-600">No completed deliveries found.</p>
         ) : (
-          <div className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             {deliveries.map((delivery) => (
-              <div key={delivery._id} className="bg-white p-4 shadow rounded-md">
-                <p><strong>Order ID:</strong> {delivery.orderId}</p>
-                <p><strong>Delivered At:</strong> {new Date(delivery.deliveredAt).toLocaleString()}</p>
-                <p><strong>Address:</strong> {delivery.deliveryAddress}</p>
-                <p><strong>Customer:</strong> {delivery.customerName}</p>
+              <div key={delivery._id} className="bg-white rounded-lg shadow-md p-4 mb-6 space-y-2">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="bg-gray-100 p-3 rounded shadow text-sm">
+                    <p className="text-gray-500 font-semibold">Order ID</p>
+                    <p className="text-gray-700 break-all">{delivery.orderId}</p>
+                </div>
+                <div className="bg-gray-100 p-3 rounded shadow text-sm">
+                    <p className="text-gray-500 font-semibold">Delivered At:</p>
+                    <p className="text-gray-700 capitalize">{new Date(delivery.deliveredAt).toLocaleString()}</p>
+                </div>
+                <div className="bg-gray-100 p-3 rounded shadow text-sm">
+                    <p className="text-gray-500 font-semibold">Address</p>
+                    <p className="text-gray-700">{delivery.deliveryAddress || '—'}</p>
+                </div>
+                <div className="bg-gray-100 p-3 rounded shadow text-sm">
+                    <p className="text-gray-500 font-semibold">Customer</p>
+                    <p className="text-gray-700">{delivery.customerName || '—'}</p>
+                </div>
+                </div>
               </div>
             ))}
           </div>

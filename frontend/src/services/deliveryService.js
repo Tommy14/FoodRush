@@ -12,6 +12,6 @@ export const updateDeliveryStatus = async (deliveryId, newStatus) => {
 };
 
 export const fetchCompletedDelivery= async () => {
-    const res = await axios.get(`/bff/delivery//my-deliveries/completed `);
+    const res = await axios.get(`/bff/delivery/my-deliveries/completed `);
     return res.data;
 };
