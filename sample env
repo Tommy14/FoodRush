@@ -86,3 +86,13 @@ stripe trigger checkout.session.completed
 #implemented the whatsapp message for user registration. 
 #template created for order_placed, order_dellivered_dr, account_created, tenmapltes are created in the meta cloude api. so you just have to use the template name(refere postman)
 #refere the postman to get the payload, and refere the code in user-service -> src -> services> user.service.js to see how to send the message.
+
+
+BffEnv
+PORT=5001
+AUTH_SERVICE=http://localhost:9000/api/users
+RESTAURANT_SERVICE=http://localhost:9100/api/restaurants
+ORDER_SERVICE=http://localhost:9200/api/orders
+DELIVERY_SERVICE=http://localhost:9300/api/delivery
+
+JWT_SECRET=2f6c0d73a9c14f989c3b6724ab3b3e91f6e4179d121c957f8329df348d6f3b7e23c774c2fda34952c892b9291c4a37d6
