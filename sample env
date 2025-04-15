@@ -16,7 +16,7 @@ INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 restaurant service
 MONGO_URI_RESTAURANT_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/restaurant-db?retryWrites=true&w=majority&appName=Cluster
 RESTAURANT_PORT=9100
-RESTAURANT_SERVIC_URL=http://localhost:9100
+RESTAURANT_SERVICE_URL=http://localhost:9100
 OPENROUTER_API_KEY=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
 INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 

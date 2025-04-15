@@ -11,10 +11,10 @@ import { requireRole } from '../middleware/role.js';
 
 const router = express.Router();
 
-// 🔓 Public
+// Public
 router.get('/:restaurantId', getRestaurantReviews);
 
-// 🔐 Customers only
+// Customers only
 router.post('/:restaurantId', authMiddleware, requireRole('customer'), addReview);
 router.put('/:restaurantId', authMiddleware, requireRole('customer'), updateReview);
 router.delete('/:restaurantId', authMiddleware, requireRole('customer'), deleteReview);
