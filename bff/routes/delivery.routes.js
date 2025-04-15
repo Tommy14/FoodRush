@@ -27,7 +27,6 @@ router.post('/assign', async (req, res) => {
 router.put('/:id/status', async (req, res) => {
   const deliveryId = req.params.id;
   const { status } = req.body;
-  console.log(`🔁 Updating delivery status for ${deliveryId} to ${status}`);
 
   try {
     const response = await axios.put(`${DELIVERY_API}/${deliveryId}/status`, { status }, {

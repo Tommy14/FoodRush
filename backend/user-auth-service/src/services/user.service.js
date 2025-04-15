@@ -72,6 +72,15 @@ export const loginUserService = async ({ email, password }) => {
   };
 };
 
+export const getAvailabilityService = async (userId) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  return user.isAvailable;
+}
+
 export const toggleAvailabilityService = async (userId) => {
   const user = await User.findById(userId);
 

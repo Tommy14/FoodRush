@@ -33,6 +33,20 @@ const DeliveryDashboard = () => {
     }
   };
 
+  const fetchAvailability = async () => {
+    try {
+      const res = await axios.get('/bff/auth/availability', {
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2ZlYTJkZTY5MzMzMWQwNWExNDQzN2QiLCJyb2xlIjoiZGVsaXZlcnlfcGVyc29uIiwiZW1haWwiOiJkZWxpdmVyeUBnbWFpbC5jb20iLCJpYXQiOjE3NDQ3NDEwODksImV4cCI6MTc0NDc0NDY4OX0.yJFMet14O8fS7T9YuhVYFvzCORQtZtAl0ElWMFPUZz4`
+        }
+      });
+      setIsAvailable(res.data.isAvailable);
+      console.log('Fetched availability:', res.data.isAvailable);
+    } catch (error) {
+      console.error('Failed to fetch availability', error);
+    }
+  };
+
   const toggleAvailability = async () => {
     try {
       const res = await axios.patch('/bff/auth/toggle-availability', {}, {
@@ -41,6 +55,7 @@ const DeliveryDashboard = () => {
         }
       });
       setIsAvailable(res.data.isAvailable);
+      console.log('Availability toggled:', res.data.isAvailable);
     } catch (error) {
       console.error('Failed to toggle availability', error);
     }
@@ -48,6 +63,7 @@ const DeliveryDashboard = () => {
 
   useEffect(() => {
     fetchOrders();
+    fetchAvailability();
   }, []);
   
   return (
