@@ -39,4 +39,17 @@ router.patch('/toggle-availability', async (req, res) => {
 }
 );
 
+router.get('/availability', async (req, res) => {
+  try {
+    const response = await axios.get(`${AUTH_API}/availability`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ message: err.response?.data?.message || err.message });
+  }
+});
+
 export default router;

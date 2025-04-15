@@ -1,7 +1,8 @@
 import {
   registerUserService,
   loginUserService,
-  toggleAvailabilityService
+  toggleAvailabilityService,
+  getAvailabilityService
 } from '../services/user.service.js';
 
 // @desc Register a new user
@@ -27,6 +28,21 @@ export const loginUser = async (req, res) => {
   } catch (err) {
     const status = err.statusCode || 500;
     res.status(status).json({ message: err.message || 'Server error during login' });
+  }
+};
+
+export const getAvailabilityController = async (req, res) => {
+  try {
+    const userId = req.user.userId; // assuming middleware attaches this
+    const isAvailable = await getAvailabilityService(userId);
+
+    res.json({
+      message: 'Availability fetched',
+      isAvailable
+    });
+  } catch (err) {
+    const status = err.message === 'Unauthorized' ? 403 : 500;
+    res.status(status).json({ message: err.message });
   }
 };
 
