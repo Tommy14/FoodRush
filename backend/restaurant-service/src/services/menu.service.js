@@ -1,29 +1,24 @@
 import MenuItem from '../models/MenuItem.js';
+import Restaurant from '../models/Restaurant.js';
 
-export const addMenuItemService = async ({ restaurantId, name, description, price, isAvailable }) => {
-  const newItem = new MenuItem({
-    restaurantId,
-    name,
-    description,
-    price,
-    isAvailable
-  });
-
-  await newItem.save();
-  return newItem;
+export const addMenuItem = async (restaurantId, userId, itemData) => {
+  const restaurant = await Restaurant.findOne({ _id: restaurantId, ownerId: userId, status: 'APPROVED' });
+  if (!restaurant) throw new Error('Not allowed');
+  return await MenuItem.create({ ...itemData, restaurantId });
 };
 
-export const getMenuItemsService = async (restaurantId) => {
-  const items = await MenuItem.find({ restaurantId });
-  return items;
+export const getMenuItems = async (restaurantId) => {
+  return await MenuItem.find({ restaurantId, isAvailable: true });
 };
 
-export const updateMenuItemService = async (itemId, updateData) => {
-  const updated = await MenuItem.findByIdAndUpdate(itemId, updateData, { new: true });
-  return updated;
+export const updateMenuItem = async (restaurantId, itemId, userId, updates) => {
+  const restaurant = await Restaurant.findOne({ _id: restaurantId, ownerId: userId });
+  if (!restaurant) throw new Error('Unauthorized');
+  return await MenuItem.findOneAndUpdate({ _id: itemId, restaurantId }, updates, { new: true });
 };
 
-export const deleteMenuItemService = async (itemId) => {
-  const deleted = await MenuItem.findByIdAndDelete(itemId);
-  return deleted;
+export const deleteMenuItem = async (restaurantId, itemId, userId) => {
+  const restaurant = await Restaurant.findOne({ _id: restaurantId, ownerId: userId });
+  if (!restaurant) throw new Error('Unauthorized');
+  await MenuItem.findOneAndDelete({ _id: itemId, restaurantId });
 };

@@ -7,13 +7,16 @@ import {
 } from '../controllers/menu.controller.js';
 
 import authMiddleware from '../middleware/auth.js';
+import { requireRole } from '../middleware/role.js';
 
 const router = express.Router();
 
-// 🔐 All routes below are protected by JWT
-router.post('/restaurants/:id/menu', authMiddleware, addMenuItem);
-router.get('/restaurants/:id/menu', getMenuItems); // public (optional: protect later)
-router.put('/restaurants/:id/menu/:itemId', authMiddleware, updateMenuItem);
-router.delete('/restaurants/:id/menu/:itemId', authMiddleware, deleteMenuItem);
+// Public menu viewing
+router.get('/:id/menu', getMenuItems);
+
+// Protected for restaurant_admin
+router.post('/:id/menu', authMiddleware, requireRole('restaurant_admin'), addMenuItem);
+router.put('/:id/menu/:itemId', authMiddleware, requireRole('restaurant_admin'), updateMenuItem);
+router.delete('/:id/menu/:itemId', authMiddleware, requireRole('restaurant_admin'), deleteMenuItem);
 
 export default router;

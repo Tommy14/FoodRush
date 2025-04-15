@@ -1,66 +1,60 @@
-import {
-  addMenuItemService,
-  getMenuItemsService,
-  updateMenuItemService,
-  deleteMenuItemService
-} from '../services/menu.service.js';
+import * as menuService from '../services/menu.service.js';
+import { generateMenuDescriptionOR } from '../utils/aiHelper.js';
 
-// @desc Create a new menu item
+
 export const addMenuItem = async (req, res) => {
   try {
-    const { name, description, price, isAvailable } = req.body;
-    const restaurantId = req.params.id;
+    const { name, price, category, description } = req.body;
+    const { id: restaurantId } = req.params;
+    const userId = req.user.userId;
 
-    const newItem = await addMenuItemService({
-      restaurantId,
+    let finalDescription = description;
+
+    // If description not provided, generate using HF
+    if (!finalDescription) {
+      finalDescription = await generateMenuDescriptionOR(name);
+    }
+
+    const itemData = {
       name,
-      description,
       price,
-      isAvailable
-    });
+      category,
+      description: finalDescription
+    };
 
-    res.status(201).json({ message: 'Menu item added', data: newItem });
-  } catch (error) {
-    res.status(500).json({ message: 'Error adding menu item', error: error.message });
+    const item = await menuService.addMenuItem(restaurantId, userId, itemData);
+
+    res.status(201).json(item);
+  } catch (err) {
+    console.error('Error in addMenuItem:', err.message);
+    res.status(403).json({ message: err.message });
   }
 };
 
-// @desc Get all menu items for a restaurant
 export const getMenuItems = async (req, res) => {
-  try {
-    const restaurantId = req.params.id;
-    const items = await getMenuItemsService(restaurantId);
-
-    res.status(200).json({ data: items });
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching menu items', error: error.message });
-  }
+  const items = await menuService.getMenuItems(req.params.id);
+  res.json(items);
 };
 
-// @desc Update a specific menu item
 export const updateMenuItem = async (req, res) => {
   try {
-    const { itemId } = req.params;
-
-    const updated = await updateMenuItemService(itemId, req.body);
-    if (!updated) return res.status(404).json({ message: 'Menu item not found' });
-
-    res.status(200).json({ message: 'Menu item updated', data: updated });
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating menu item', error: error.message });
+    const item = await menuService.updateMenuItem(
+      req.params.id,
+      req.params.itemId,
+      req.user.userId,
+      req.body
+    );
+    res.json(item);
+  } catch (err) {
+    res.status(403).json({ message: err.message });
   }
 };
 
-// @desc Delete a specific menu item
 export const deleteMenuItem = async (req, res) => {
   try {
-    const { itemId } = req.params;
-
-    const deleted = await deleteMenuItemService(itemId);
-    if (!deleted) return res.status(404).json({ message: 'Menu item not found' });
-
-    res.status(200).json({ message: 'Menu item deleted' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting menu item', error: error.message });
+    await menuService.deleteMenuItem(req.params.id, req.params.itemId, req.user.userId);
+    res.json({ message: 'Menu item deleted' });
+  } catch (err) {
+    res.status(403).json({ message: err.message });
   }
 };

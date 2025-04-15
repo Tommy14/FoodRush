@@ -1,65 +1,64 @@
-import {
-  createRestaurantService,
-  getAllRestaurantsService,
-  getRestaurantByIdService,
-  updateRestaurantService,
-  deleteRestaurantService
-} from '../services/restaurant.service.js';
+import * as restaurantService from '../services/restaurant.service.js';
 
-// @desc    Create a new restaurant
 export const createRestaurant = async (req, res) => {
   try {
-    const { name, address, phone, ownerId } = req.body;
-    const newRestaurant = await createRestaurantService({ name, address, phone, ownerId });
-
-    res.status(201).json({ message: 'Restaurant created', data: newRestaurant });
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating restaurant', error: error.message });
+    const restaurant = await restaurantService.createRestaurant(req.body, req.user.userId);
+    res.status(201).json(restaurant);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
-// @desc    Get all restaurants
 export const getAllRestaurants = async (req, res) => {
-  try {
-    const restaurants = await getAllRestaurantsService();
-    res.status(200).json({ data: restaurants });
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching restaurants', error: error.message });
-  }
+  const restaurants = await restaurantService.getAllApprovedRestaurants();
+  res.json(restaurants);
 };
 
-// @desc    Get single restaurant by ID
 export const getRestaurantById = async (req, res) => {
-  try {
-    const restaurant = await getRestaurantByIdService(req.params.id);
-    if (!restaurant) return res.status(404).json({ message: 'Restaurant not found' });
-
-    res.status(200).json({ data: restaurant });
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching restaurant', error: error.message });
+  const restaurant = await restaurantService.getRestaurantById(req.params.id);
+  if (!restaurant || restaurant.status !== 'APPROVED') {
+    return res.status(404).json({ message: 'Restaurant not found or not approved' });
   }
+  res.json(restaurant);
 };
 
-// @desc    Update restaurant
 export const updateRestaurant = async (req, res) => {
-  try {
-    const updated = await updateRestaurantService(req.params.id, req.body);
-    if (!updated) return res.status(404).json({ message: 'Restaurant not found' });
+  const updated = await restaurantService.updateRestaurant(req.params.id, req.user.userId, req.body);
+  if (!updated) return res.status(403).json({ message: 'Update not allowed' });
+  res.json(updated);
+};
 
-    res.status(200).json({ message: 'Restaurant updated', data: updated });
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating restaurant', error: error.message });
+export const deleteRestaurant = async (req, res) => {
+  const deleted = await restaurantService.deleteRestaurant(req.params.id, req.user.userId);
+  if (!deleted) return res.status(403).json({ message: 'Delete not allowed' });
+  res.json({ message: 'Restaurant deleted' });
+};
+
+export const getPendingRestaurants = async (req, res) => {
+  const pending = await restaurantService.getPendingRestaurants();
+  res.json(pending);
+};
+
+export const getAllRestaurantsForAdmin = async (req, res) => {
+  try {
+    const allRestaurants = await restaurantService.getAllRestaurantsForAdmin();
+    res.json(allRestaurants);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to load all restaurants' });
   }
 };
 
-// @desc    Delete restaurant
-export const deleteRestaurant = async (req, res) => {
-  try {
-    const deleted = await deleteRestaurantService(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'Restaurant not found' });
+export const approveRestaurant = async (req, res) => {
+  const approved = await restaurantService.approveRestaurant(req.params.id);
+  if (!approved) return res.status(404).json({ message: 'Restaurant not found' });
+  res.json(approved);
+};
 
-    res.status(200).json({ message: 'Restaurant deleted' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting restaurant', error: error.message });
+export const toggleRestaurantOpenStatus = async (req, res) => {
+  try {
+    const toggled = await restaurantService.toggleRestaurantStatus(req.params.id, req.user.userId);
+    res.json(toggled);
+  } catch (err) {
+    res.status(403).json({ message: err.message });
   }
 };
