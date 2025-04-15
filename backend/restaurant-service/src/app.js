@@ -5,6 +5,7 @@ import connectDB from './config/restaurant.db.js';
 
 import restaurantRoutes from './routes/restaurant.routes.js';
 import menuRoutes from './routes/menu.routes.js';
+import reviewRoutes from './routes/review.routes.js';
 
 dotenv.config();
 connectDB();
@@ -17,7 +18,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/restaurants', restaurantRoutes);
-app.use('/api/restaurants', menuRoutes); // ✅ This is what you’re missing
+app.use('/api/restaurants', menuRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 
 // 404 handler
