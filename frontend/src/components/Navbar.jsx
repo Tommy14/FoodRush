@@ -25,7 +25,7 @@ export default function Navbar() {
         {/* Desktop CTA */}
         <div className="hidden md:block">
           <button className="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition">
-            Sign In
+            <Link to="/signup">Sign Up</Link>
           </button>
         </div>
 
