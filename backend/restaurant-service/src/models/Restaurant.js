@@ -23,6 +23,20 @@ const restaurantSchema = new mongoose.Schema({
   phone: {
     type: String
   },
+  logo: {
+    url: String,
+    publicId: String
+  },
+  coverImage: {
+    url: String,
+    publicId: String
+  },
+  images: [
+    {
+      url: String,
+      publicId: String
+    }
+  ],
   status: {
     type: String,
     enum: ['PENDING', 'APPROVED', 'REJECTED'],
