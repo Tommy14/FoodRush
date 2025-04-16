@@ -20,6 +20,11 @@ RESTAURANT_SERVICE_URL=http://localhost:9100
 OPENROUTER_API_KEY=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
 INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 
+
+CLOUDINARY_CLOUD_NAME=dmrybsytq
+CLOUDINARY_API_KEY=639529596749839
+CLOUDINARY_API_SECRET=LLv92igpMuVVJK4BVxoGNvMngTY
+
 user service
 MONGO_URI_USER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/user-auth-db?retryWrites=true&w=majority&appName=Cluster
 USER_PORT=9000
