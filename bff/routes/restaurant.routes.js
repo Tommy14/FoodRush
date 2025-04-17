@@ -55,7 +55,7 @@ const restaurantUpload = upload.fields([
   { name: 'images', maxCount: 10 }
 ]);
 
-router.use(authenticate);
+// router.use(authenticate);
 
 // Utility function to safely delete file
 const safeDeleteFile = (filePath) => {
@@ -98,6 +98,8 @@ router.get('/:id', async (req, res) => {
     res.status(err.response?.status || 500).json({ message: err.message });
   }
 });
+
+router.use(authenticate);
 
 // Restaurant Admin: Create restaurant with file upload
 router.post('/', restaurantUpload, async (req, res) => {
