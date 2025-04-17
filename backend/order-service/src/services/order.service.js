@@ -23,7 +23,7 @@ export const getOrdersService = async (role, userId) => {
 };
 
 export const getOrderByIdService = async (orderId) => {
-  const order = await Order.findById(orderId).populate('restaurantId');
+  const order = await Order.findById(orderId);
   return order;
 };
 
