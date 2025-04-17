@@ -3,7 +3,8 @@ import {
   getOrdersService,
   getOrderByIdService,
   updateOrderStatusService,
-  cancelOrderService
+  cancelOrderService,
+  getActiveCustomerOrdersService
 } from '../services/order.service.js';
 
 // @desc    Place a new order
@@ -48,6 +49,18 @@ export const getOrderById = async (req, res) => {
     res.status(200).json({ data: order });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching order', error: error.message });
+  }
+};
+
+// @desc    Get active orders for a customer
+export const getActiveCustomerOrders = async (req, res) => {
+  try {
+    const customerId = req.user.userId;
+    const activeOrders = await getActiveCustomerOrdersService(customerId);
+
+    res.status(200).json({ data: activeOrders });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching active orders', error: error.message });
   }
 };
 
