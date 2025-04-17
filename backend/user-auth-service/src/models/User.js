@@ -17,12 +17,20 @@ const userSchema = new mongoose.Schema({
     required: true
   },
   phone: {
-    type: String, //when saving we ahve to save it in +94 format
+    type: String, // should be stored in +94 format
   },
   role: {
     type: String,
     enum: ['customer', 'admin', 'restaurant_admin', 'delivery_person'],
     default: 'customer'
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'other'],
+    default: 'other'
+  },
+  dateOfBirth: {
+    type: Date
   },
   isAvailable: {
     type: Boolean,
