@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import LoadingScreen from "../components/LoadingScreen";
+import LoadingScreen from "../../components/LoadingScreen";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -29,24 +29,66 @@ export default function LoginPage() {
   }, [navigate]);
 
   const handleLogin = async () => {
-    if (email === "demo@foodrush.lk" && password === "123456") {
-      localStorage.setItem("token", "dummyToken");
-      navigate("/u");
-    } else {
+    try {
+      const credentials = { email, password };
+
+      console.log("Login credentials:", credentials); // Debugging line
+  
+      const response = await LoginService(credentials); // ← Call your backend
+  
+      if (response.status === 200) {
+        const { accessToken, user } = response.data;
+  
+        // Save token
+        localStorage.setItem("token", accessToken);
+  
+        // Save user info if needed
+        localStorage.setItem("user", JSON.stringify(user));
+  
+        // Optional: Redirect based on user role
+        switch (user.role) {
+          case "customer":
+            navigate("/");
+            break;
+          case "restaurant_admin":
+            navigate("/restaurant-dashboard");
+            break;
+          case "delivery_person":
+            navigate("/driver-dashboard");
+            break;
+          case "admin":
+            navigate("/admin");
+            break;
+          default:
+            navigate("/u");
+        }
+  
+        // Optional message
+        setSnackbarType("success");
+        setSnackbarMsg("Login successful");
+        setOpenSnackbar(true);
+      } else {
+        setSnackbarType("error");
+        setSnackbarMsg(response.data.message || "Login failed");
+        setOpenSnackbar(true);
+      }
+  
+    } catch (error) {
       setSnackbarType("error");
-      setSnackbarMsg("Invalid credentials");
+      setSnackbarMsg(error?.response?.data?.message || "Something went wrong");
       setOpenSnackbar(true);
     }
   };
+  
 
   if (typeof window !== "undefined" && localStorage.getItem("token")) {
     return <LoadingScreen />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-green-50 to-white flex items-center justify-center px-6">
-      <Paper elevation={4} className="w-full sm:w-[90%] md:w-1/2 p-10 rounded-3xl">
-      <h2 className="text-3xl font-bold text-center text-green-600 mb-8">Create Your Account</h2>
+    <div className="flex items-center justify-center px-6 mb-4">
+      <Paper elevation={4} className="w-full sm:w-[80%] md:w-2/3 p-10 rounded-3xl">
+      <h2 className="text-3xl font-bold text-center text-green-600 mb-8">Welcome Back</h2>
 
         <TextField
           label="Email"

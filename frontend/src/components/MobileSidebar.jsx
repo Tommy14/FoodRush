@@ -24,7 +24,7 @@ export default function MobileSidebar({ isOpen, setIsOpen }) {
           <Link to="/contact" className="hover:text-green-600 transition" onClick={() => setIsOpen(false)}>Contact</Link>
 
           <button className="mt-4 bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition">
-            Sign In
+            <Link to="/auth">Sign Up</Link>
           </button>
         </nav>
       </div>

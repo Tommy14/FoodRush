@@ -5,8 +5,7 @@ import Navbar from '../components/Navbar';
 import About from '../pages/About';
 import DeliveryDashboard from '../pages/DeliveryDashboard';
 import CompletedDeliveries from '../pages/CompletedDeliveries';
-import Signup from '../pages/Signup';
-import Login from '../pages/Login';
+import AuthPage from '../pages/Auth/AuthPage';
 
 export default function AppRoutes() {
   return (
@@ -17,8 +16,7 @@ export default function AppRoutes() {
         <Route path="/about" element={<About />} />
         <Route path="/delivery-panel" element={<DeliveryDashboard />} />
         <Route path="/delivery/completed" element={<CompletedDeliveries />} />
-        <Route path="/signup" element={<Signup/>}/>
-        <Route path="/login" element={<Login />}/>
+        <Route path="/auth" element={<AuthPage />} /> 
       </Routes>
     </>
   );
