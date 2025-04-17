@@ -38,7 +38,7 @@ app.use('/bff/restaurants', restaurantRoutes);
 app.use('/bff/orders', orderRoutes);
 app.use('/bff/delivery', deliveryRoutes);
 app.use('/bff/pay', paymentRoutes);
-app.use('/bff/restaurants', menuRoutes);
+app.use('/bff/menu', menuRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`BFF running on port ${process.env.PORT}`);
