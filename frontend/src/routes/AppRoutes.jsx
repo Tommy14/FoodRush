@@ -5,6 +5,8 @@ import Navbar from '../components/Navbar';
 import About from '../pages/About';
 import DeliveryDashboard from '../pages/DeliveryDashboard';
 import CompletedDeliveries from '../pages/CompletedDeliveries';
+import RestaurantList from '../pages/Restaurants';
+import MenuPage from '../pages/MenuPage';
 import AuthPage from '../pages/Auth/AuthPage';
 
 export default function AppRoutes() {
@@ -16,6 +18,8 @@ export default function AppRoutes() {
         <Route path="/about" element={<About />} />
         <Route path="/delivery-panel" element={<DeliveryDashboard />} />
         <Route path="/delivery/completed" element={<CompletedDeliveries />} />
+        <Route path="/restaurants" element={<RestaurantList />} />
+        <Route path="/restaurants/:restaurantId/menu" element={<MenuPage />} />
         <Route path="/auth" element={<AuthPage />} /> 
       </Routes>
     </>

@@ -15,6 +15,10 @@ const menuItemSchema = new mongoose.Schema({
     type: Number, 
     required: true 
   },
+  image: {
+    url: String,
+    publicId: String
+  },
   description: String,
   category: String,
   isAvailable: { 
