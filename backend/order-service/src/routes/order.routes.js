@@ -4,7 +4,8 @@ import {
   getOrders,
   getOrderById,
   updateOrderStatus,
-  cancelOrder
+  cancelOrder,
+  getActiveCustomerOrders
 } from '../controllers/order.controller.js';
 
 import authMiddleware from '../middleware/auth.js';
@@ -19,6 +20,9 @@ router.post('/', placeOrder);
 
 // 📄 Get all orders (Customer or Restaurant Admin)
 router.get('/', getOrders);
+
+// 📦 Get active orders for a customer
+router.get('/active', getActiveCustomerOrders);
 
 // 🧾 Get single order by ID
 router.get('/:id', getOrderById);

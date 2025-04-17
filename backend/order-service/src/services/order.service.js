@@ -1,5 +1,6 @@
 import Order from '../models/Order.js';
 
+
 export const placeOrderService = async ({ customerId, restaurantId, items, totalAmount, deliveryAddress }) => {
   const newOrder = new Order({
     customerId,
@@ -25,6 +26,17 @@ export const getOrdersService = async (role, userId) => {
 export const getOrderByIdService = async (orderId) => {
   const order = await Order.findById(orderId);
   return order;
+};
+
+export const getActiveCustomerOrdersService = async (customerId) => {
+  const activeStatuses = ['pending', 'accepted', 'preparing', 'ready_for_delivery', 'assigned', 'picked_up', 'delivering', 'delivered']; // ✅ Add all "active" statuses relevant to your app
+
+  const orders = await Order.find({
+    customerId,
+    status: { $in: activeStatuses }
+  }).sort({ createdAt: -1 }); // Optional: recent orders first
+
+  return orders;
 };
 
 export const updateOrderStatusService = async (orderId, status) => {

@@ -37,4 +37,17 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get acive orders for user
+router.get('/active', async (req, res) => {
+  try {
+    const response = await axios.get(`${ORDER_API}/active`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      }
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ message: err.message });
+  }
+});
 export default router;
