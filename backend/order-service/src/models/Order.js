@@ -40,7 +40,12 @@ const orderSchema = new mongoose.Schema({
   deliveryAddress: {
     type: String,
     required: true
-  }
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['cash', 'card'],
+    default: 'cash'
+  },
 }, { timestamps: true });
 
 const Order = mongoose.model('Order', orderSchema);
