@@ -11,6 +11,11 @@ export const getMenuItems = async (restaurantId) => {
   return await MenuItem.find({ restaurantId, isAvailable: true });
 };
 
+export const getMenuItemById = async (itemId) => {
+  const menuItem = await MenuItem.findById(itemId);
+  return menuItem;
+};
+
 export const updateMenuItem = async (restaurantId, itemId, userId, updates) => {
   const restaurant = await Restaurant.findOne({ _id: restaurantId, ownerId: userId });
   if (!restaurant) throw new Error('Unauthorized');
