@@ -21,13 +21,15 @@ const reviewSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  sentiment: {
-    type: String,
-    enum: ['POSITIVE', 'NEGATIVE', 'NEUTRAL'],
-    default: 'NEUTRAL'
-  },
-  stars: {
-    type: String 
+  reactions: {
+    likes: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+      default: []
+    },
+    dislikes: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+      default: []
+    }
   }
 }, { timestamps: true });
 
