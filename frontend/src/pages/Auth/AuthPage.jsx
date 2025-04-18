@@ -19,7 +19,7 @@ export default function AuthPage() {
         >
           {formType === "signup" ? (
             <>
-              <SignUpPage />
+              <SignUpPage onSuccessSwitchToLogin={() => setFormType("login")} />
               <p className="text-sm text-center text-gray-600 mt-4">
                 Already have an account?{" "}
                 <span

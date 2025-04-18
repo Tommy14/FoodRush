@@ -5,7 +5,7 @@ import axios from 'axios';
 
 import {NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY} from '../config/index.js'
 
-export const registerUserService = async ({ name, email, password, phone ,role }) => {
+export const registerUserService = async ({ name, email, password, phone ,role, gender, dob }) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     const error = new Error('User already exists');
@@ -20,7 +20,9 @@ export const registerUserService = async ({ name, email, password, phone ,role }
     email,
     password: hashedPassword,
     phone,
-    role: role || 'customer'
+    role: role || 'customer',
+    gender,
+    dateOfBirth: dob ? new Date(dob) : undefined,
   });
 
   const user = await newUser.save();
@@ -67,7 +69,8 @@ export const loginUserService = async ({ email, password }) => {
       id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
+      phone: user.phone,
     }
   };
 };
