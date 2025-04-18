@@ -16,11 +16,11 @@ const OrderStatus = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetchCustomerOrders();
-      setOrders(res.data.data);
-      console.log('Fetched orders:', res.data.data);
+      const enrichedOrders = await fetchCustomerOrders();
+      setOrders(enrichedOrders);
+      console.log('📦 Orders:', enrichedOrders);
     } catch (error) {
-      console.error('Failed to fetch orders', error);
+      console.error('Failed to fetch orders:', error);
     }
   };
 
@@ -37,7 +37,8 @@ const OrderStatus = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {orders.map((order) => {
-            const currentStep = statusSteps.indexOf(order.status);
+            const effectiveStatus = order.deliveryStatus || order.status;
+            const currentStep = statusSteps.indexOf(effectiveStatus);
 
             return (
               <div
@@ -52,7 +53,7 @@ const OrderStatus = () => {
                         key={step}
                         className={`capitalize truncate w-full text-center ${
                           index === currentStep
-                            ? 'text-blue-700 font-semibold'
+                            ? 'text-blue-700 font-semibold animate-pulse'
                             : index < currentStep
                             ? 'text-green-600'
                             : 'text-gray-400'
@@ -63,11 +64,13 @@ const OrderStatus = () => {
                     ))}
                   </div>
 
-                  {/* Animated Gradient Progress Bar */}
+                  {/* Animated Progress Bar */}
                   <div className="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 animate-pulse rounded-full transition-all duration-700 ease-in-out"
-                      style={{ width: `${((currentStep + 1) / statusSteps.length) * 100}%` }}
+                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 animate-pulse rounded-full"
+                      style={{
+                        width: `${((currentStep + 1) / statusSteps.length) * 100}%`
+                      }}
                     ></div>
                   </div>
                 </div>
@@ -81,8 +84,8 @@ const OrderStatus = () => {
 
                   <div>
                     <p className="text-gray-400 text-xs">Status</p>
-                    <p className={`capitalize font-semibold ${order.status === 'delivered' ? 'text-green-600' : 'text-yellow-600'}`}>
-                      {order.status.replaceAll('_', ' ')}
+                    <p className={`capitalize font-semibold ${effectiveStatus === 'delivered' ? 'text-green-600' : 'text-yellow-600'}`}>
+                      {effectiveStatus.replace(/_/g, ' ')}
                     </p>
                   </div>
 

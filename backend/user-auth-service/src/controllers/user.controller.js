@@ -2,7 +2,8 @@ import {
   registerUserService,
   loginUserService,
   toggleAvailabilityService,
-  getAvailabilityService
+  getAvailabilityService,
+  getUserByIdService
 } from '../services/user.service.js';
 
 // @desc Register a new user
@@ -28,6 +29,23 @@ export const loginUser = async (req, res) => {
   } catch (err) {
     const status = err.statusCode || 500;
     res.status(status).json({ message: err.message || 'Server error during login' });
+  }
+};
+
+// @desc Get user by ID
+export const getUserByIdController = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await getUserByIdService(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error('❌ Error fetching user by ID:', err.message);
+    res.status(500).json({ message: 'Server error while fetching user' });
   }
 };
 

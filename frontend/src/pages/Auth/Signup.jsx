@@ -234,7 +234,7 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
                   <MenuItem value="customer">Customer</MenuItem>
                   <MenuItem value="restaurant_admin">Restaurant Admin</MenuItem>
                   <MenuItem value="delivery_person">Delivery Person</MenuItem>
-                  <MenuItem value="Admin">Admin</MenuItem>
+                  <MenuItem value="admin">Admin</MenuItem>
                 </Select>
               </FormControl>
 

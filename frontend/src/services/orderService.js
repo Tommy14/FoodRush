@@ -1,56 +1,62 @@
 // src/services/orderService.js
 
-import axios from './axiosInstance'; // ✅ Axios instance with base URL
+import { apiPrivate } from '../config/api';
 
-// Fetch all orders placed by the logged-in customer
+/**
+ * Fetch all active orders for the currently logged-in customer.
+ * Enriches the order with delivery status if relevant.
+ * @returns {Promise<Object[]>} Enriched list of customer orders
+ */
 export const fetchCustomerOrders = async () => {
-  const res = await axios.get('/bff/orders/active', {
-    headers: {
-      Authorization: 'Bearer <your-token>' // replace or dynamically inject
-    }
-  });
+  try {
+    const res = await apiPrivate.get('/orders/active');
+    const orders = res.data.data;
 
-  const orders = res.data.data;
-
-  // Fetch delivery status for orders that are ready_for_delivery or later
-  const enrichedOrders = await Promise.all(
-    orders.map(async (order) => {
-      if (['ready_for_delivery', 'assigned', 'picked_up', 'delivered'].includes(order.status)) {
-        try {
-          const deliveryRes = await axios.get(`/bff/delivery/order/${order._id}`, {
-            headers: {
-              Authorization: 'Bearer <your-token>'
-            }
-          });
-
-          const deliveryStatus = deliveryRes.data.status;
-          return { ...order, deliveryStatus };
-        } catch (err) {
-          console.warn('No delivery found for order:', order._id);
-          return order; // fallback
+    const enrichedOrders = await Promise.all(
+      orders.map(async (order) => {
+        if (['ready_for_delivery', 'assigned', 'picked_up', 'delivered'].includes(order.status)) {
+          try {
+            const deliveryRes = await apiPrivate.get(`/delivery/order/${order._id}`);
+            return { ...order, deliveryStatus: deliveryRes.data.status };
+          } catch (err) {
+            console.warn('No delivery found for order:', order._id);
+            return order; // fallback
+          }
         }
-      }
-      return order;
-    })
-  );
+        return order;
+      })
+    );
 
-  return enrichedOrders;
+    return enrichedOrders;
+  } catch (error) {
+    throw error;
+  }
 };
 
-// (Optional) Get a specific order by ID
-export const fetchOrderById = async (orderId, token) => {
-  return axios.get(`/bff/orders/${orderId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+/**
+ * Get a specific order by ID.
+ * @param {string} orderId - Order ID to fetch
+ * @returns {Promise<Object>}
+ */
+export const fetchOrderById = async (orderId) => {
+  try {
+    const res = await apiPrivate.get(`/orders/${orderId}`);
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
-// (Optional) Cancel an order
-export const cancelOrder = async (orderId, token) => {
-  return axios.patch(`/bff/orders/${orderId}/cancel`, {}, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+/**
+ * Cancel an order.
+ * @param {string} orderId - Order ID to cancel
+ * @returns {Promise<Object>}
+ */
+export const cancelOrder = async (orderId) => {
+  try {
+    const res = await apiPrivate.patch(`/orders/${orderId}/cancel`);
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
 };
