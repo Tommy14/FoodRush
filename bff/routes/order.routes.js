@@ -51,3 +51,17 @@ router.get('/active', async (req, res) => {
   }
 });
 export default router;
+
+//get order by id
+router.get('/:id', async (req, res) => {
+  try {
+    const response = await axios.get(`${ORDER_API}/${req.params.id}`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      }
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ message: err.message });
+  }
+});

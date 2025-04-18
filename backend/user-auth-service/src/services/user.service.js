@@ -75,6 +75,25 @@ export const loginUserService = async ({ email, password }) => {
   };
 };
 
+//get by id
+export const getUserByIdService = async (userId) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    const error = new Error('User not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    phone: user.phone,
+  };
+}
+
+
 export const getAvailabilityService = async (userId) => {
   const user = await User.findById(userId);
   if (!user) {

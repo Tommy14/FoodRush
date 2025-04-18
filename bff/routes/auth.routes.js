@@ -11,7 +11,7 @@ router.post('/login', async (req, res) => {
       const response = await axios.post(`${AUTH_API}/login`, req.body);
       res.json(response.data);
     } catch (err) {
-      console.error(err.message); // 🔍 Print error for debugging
+      console.error(err.message);
       res.status(err.response?.status || 500).json({ message: err.message });
     }
   });
@@ -19,6 +19,19 @@ router.post('/login', async (req, res) => {
 router.post('/register', async (req, res) => {
   try {
     const response = await axios.post(`${AUTH_API}/register`, req.body);
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ message: err.response?.data?.message || err.message });
+  }
+});
+
+router.get('/by/:id', async (req, res) => {
+  try {
+    const response = await axios.get(`${AUTH_API}/by/${req.params.id}`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    });
     res.json(response.data);
   } catch (err) {
     res.status(err.response?.status || 500).json({ message: err.response?.data?.message || err.message });

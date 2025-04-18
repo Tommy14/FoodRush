@@ -7,6 +7,7 @@ import { logout } from "../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 
 
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -58,6 +59,14 @@ export default function Navbar() {
                 >
                   Profile
                 </Link>
+                {user?.role === 'delivery_person' && (
+                  <Link
+                    to="/delivery-panel"
+                    className="px-4 py-2 hover:bg-gray-100 transition"
+                  >
+                    Delivery
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="text-left w-full px-4 py-2 hover:bg-red-100 text-red-600 transition"
