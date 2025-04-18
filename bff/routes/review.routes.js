@@ -20,24 +20,17 @@ const buildUrl = (path) => {
   return `${getServiceBaseUrl()}/api/reviews/${path}`;
 };
 
-// PUBLIC: Get all reviews for a restaurant
+// PUBLIC: Get all reviews for a restaurant with pagination and sorting
 router.get("/restaurants/:restaurantId/reviews", async (req, res) => {
   try {
     const { restaurantId } = req.params;
     const { page, limit, sort } = req.query;
 
     const url = buildUrl(`restaurants/${restaurantId}/reviews`);
-    console.log(`Fetching reviews for restaurant: ${restaurantId}`);
-    console.log(`URL: ${url}`);
-
     const response = await axios.get(url, { params: { page, limit, sort } });
     res.json(response.data);
   } catch (err) {
     console.error("Error fetching reviews:", err.message);
-    if (err.response) {
-      console.error("Response status:", err.response.status);
-      console.error("Response data:", err.response.data);
-    }
     res.status(err.response?.status || 500).json({ message: err.message });
   }
 });
@@ -46,11 +39,7 @@ router.get("/restaurants/:restaurantId/reviews", async (req, res) => {
 router.get("/restaurants/:restaurantId/reviews/summary", async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    
     const url = buildUrl(`restaurants/${restaurantId}/reviews/summary`);
-    console.log(`Fetching review summary for restaurant: ${restaurantId}`);
-    console.log(`URL: ${url}`);
-
     const response = await axios.get(url);
     res.json(response.data);
   } catch (err) {
@@ -59,103 +48,91 @@ router.get("/restaurants/:restaurantId/reviews/summary", async (req, res) => {
   }
 });
 
-// CUSTOMER: Add review
+// CUSTOMER: Add review for a restaurant
 router.post(
-    "/restaurants/:restaurantId/reviews",
-    authenticate,
-    async (req, res) => {
-      try {
-        const { restaurantId } = req.params;
-        
-        const url = buildUrl(`restaurants/${restaurantId}/reviews`);
-        console.log(`Adding review for restaurant: ${restaurantId}`);
-        console.log(`URL: ${url}`);
-        
-        const response = await axios.post(
-          url,
-          req.body,
-          { headers: { Authorization: req.headers.authorization } }
-        );
-        res.status(201).json(response.data);
-      } catch (err) {
-        console.error('Error adding review:', err.message);
-        res.status(err.response?.status || 403).json({ message: err.message });
-      }
+  "/restaurants/:restaurantId/reviews",
+  authenticate,
+  async (req, res) => {
+    try {
+      const { restaurantId } = req.params;
+      const url = buildUrl(`restaurants/${restaurantId}/reviews`);
+      
+      const response = await axios.post(
+        url,
+        req.body,
+        { headers: { Authorization: req.headers.authorization } }
+      );
+      res.status(201).json(response.data);
+    } catch (err) {
+      console.error('Error adding review:', err.message);
+      res.status(err.response?.status || 403).json({ message: err.message });
     }
-  );
+  }
+);
 
-//  CUSTOMER: Update review
+// CUSTOMER: Update an existing review
 router.put(
-    "/restaurants/:restaurantId/reviews/:reviewId",
-    authenticate,
-    async (req, res) => {
-      try {
-        const { restaurantId, reviewId } = req.params;
-        
-        const url = buildUrl(`restaurants/${restaurantId}/reviews/${reviewId}`);
-        console.log(`Updating review ${reviewId} for restaurant: ${restaurantId}`);
-        console.log(`URL: ${url}`);
-        
-        const response = await axios.put(
-          url,
-          req.body,
-          { headers: { Authorization: req.headers.authorization } }
-        );
-        res.json(response.data);
-      } catch (err) {
-        console.error('Error updating review:', err.message);
-        res.status(err.response?.status || 403).json({ message: err.message });
-      }
+  "/restaurants/:restaurantId/reviews/:reviewId",
+  authenticate,
+  async (req, res) => {
+    try {
+      const { restaurantId, reviewId } = req.params;
+      const url = buildUrl(`restaurants/${restaurantId}/reviews/${reviewId}`);
+      
+      const response = await axios.put(
+        url,
+        req.body,
+        { headers: { Authorization: req.headers.authorization } }
+      );
+      res.json(response.data);
+    } catch (err) {
+      console.error('Error updating review:', err.message);
+      res.status(err.response?.status || 403).json({ message: err.message });
     }
-  );
+  }
+);
 
-// CUSTOMER: Delete review
+// CUSTOMER: Delete a review
 router.delete(
-    "/restaurants/:restaurantId/reviews/:reviewId",
-    authenticate,
-    async (req, res) => {
-      try {
-        const { restaurantId, reviewId } = req.params;
-        
-        const url = buildUrl(`restaurants/${restaurantId}/reviews/${reviewId}`);
-        console.log(`Deleting review ${reviewId} for restaurant: ${restaurantId}`);
-        console.log(`URL: ${url}`);
-        
-        const response = await axios.delete(
-          url,
-          { headers: { Authorization: req.headers.authorization } }
-        );
-        res.json(response.data);
-      } catch (err) {
-        console.error('Error deleting review:', err.message);
-        res.status(err.response?.status || 403).json({ message: err.message });
-      }
+  "/restaurants/:restaurantId/reviews/:reviewId",
+  authenticate,
+  async (req, res) => {
+    try {
+      const { restaurantId, reviewId } = req.params;
+      const url = buildUrl(`restaurants/${restaurantId}/reviews/${reviewId}`);
+      
+      const response = await axios.delete(
+        url,
+        { headers: { Authorization: req.headers.authorization } }
+      );
+      res.json(response.data);
+    } catch (err) {
+      console.error('Error deleting review:', err.message);
+      res.status(err.response?.status || 403).json({ message: err.message });
     }
-  );
+  }
+);
 
-// CUSTOMER: Toggle reaction
+// 🔐 CUSTOMER: Toggle reaction (like/dislike) on a review
 router.patch(
-    "/restaurants/:restaurantId/reviews/:reviewId/react",
-    authenticate,
-    async (req, res) => {
-      try {
-        const { restaurantId, reviewId } = req.params;
-        
-        const url = buildUrl(`restaurants/${restaurantId}/reviews/${reviewId}/react`);
-        console.log(`Toggling reaction for review ${reviewId} of restaurant: ${restaurantId}`);
-        console.log(`URL: ${url}`);
-        
-        const response = await axios.patch(
-          url,
-          req.body,
-          { headers: { Authorization: req.headers.authorization } }
-        );
-        res.json(response.data);
-      } catch (err) {
-        console.error('Error toggling reaction:', err.message);
-        res.status(err.response?.status || 403).json({ message: err.message });
-      }
+  "/restaurants/:restaurantId/reviews/:reviewId/react",
+  authenticate,
+  async (req, res) => {
+    try {
+      const { restaurantId, reviewId } = req.params;
+      const url = buildUrl(`restaurants/${restaurantId}/reviews/${reviewId}/react`);
+      
+      const response = await axios.patch(
+        url,
+        req.body,
+        { headers: { Authorization: req.headers.authorization } }
+      );
+      res.json(response.data);
+    } catch (err) {
+      console.error('Error toggling reaction:', err.message);
+      res.status(err.response?.status || 403).json({ message: err.message });
     }
-  );
+  }
+);
 
 export default router;
