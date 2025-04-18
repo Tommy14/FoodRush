@@ -7,13 +7,18 @@ import Feature from "../components/FeatureHighlights";
 import DownloadApp from "../components/DownloadApp";
 import StatsSection from "../components/StatsSection";
 import RestaurantShowcase from "../components/RestaurantShowcase";
+import { useSelector } from "react-redux";
+
 
 
 export default function Home() {
   const slides = [hero1, hero2, hero3];
   const [current, setCurrent] = useState(0);
   const [showTopBtn, setShowTopBtn] = useState(false);
+  const authState = useSelector((state) => state.auth);
 
+  console.log("Redux Auth State:", authState);
+  
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);

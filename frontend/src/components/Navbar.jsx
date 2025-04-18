@@ -2,9 +2,23 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HiMenu } from 'react-icons/hi';
 import MobileSidebar from './MobileSidebar';
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../store/slices/authSlice";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
+  };
+
 
   return (
     <>
@@ -24,10 +38,37 @@ export default function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden md:block">
-          <button className="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition">
-            <Link to="/auth">Sign Up</Link>
-          </button>
+          {!isAuthenticated ? (
+            <Link
+              to="/auth"
+              className="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition"
+            >
+              Sign Up
+            </Link>
+          ) : (
+            <div className="relative group">
+              <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition">
+                {user?.name?.split(" ")[0] || "User"}
+              </button>
+
+              <div className="absolute hidden group-hover:flex flex-col bg-white shadow-lg rounded-md top-10 right-0 min-w-[140px] text-sm border">
+                <Link
+                  to="/profile"
+                  className="px-4 py-2 hover:bg-gray-100 transition"
+                >
+                  Profile
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-left w-full px-4 py-2 hover:bg-red-100 text-red-600 transition"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+
 
         {/* Mobile Icon */}
         <div className="md:hidden">

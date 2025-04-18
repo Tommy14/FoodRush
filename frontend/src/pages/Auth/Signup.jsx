@@ -13,8 +13,10 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import {SignupService} from "../../services/authService";
+import CircularProgress from "@mui/material/CircularProgress";
 
-export default function SignUpPage() {
+export default function SignUpPage({ onSuccessSwitchToLogin }) {
   const [page, setPage] = useState(0);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -30,13 +32,14 @@ export default function SignUpPage() {
   const [snackbarMsg, setSnackbarMsg] = useState("");
   const [snackbarType, setSnackbarType] = useState("success");
   const [role, setRole] = useState("customer");
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) navigate("/u");
+    if (token) navigate("/");
   }, [navigate]);
 
   const showMessage = (type, msg) => {
@@ -47,6 +50,7 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // Start spinner
 
     const formattedPhone = phone.startsWith("+94")
       ? phone
@@ -66,15 +70,20 @@ export default function SignUpPage() {
     try {
       const response = await SignupService(data);
       if (response.status === 200) {
-        showMessage("success", response.data.message);
-        navigate("/login");
+        showMessage("success", "Signup successful. Redirecting to login...");
+
+        // Wait a second, then go to login
+        setTimeout(() => {
+          setIsLoading(false);
+          onSuccessSwitchToLogin();
+        }, 2000);
       } else {
-       
         showMessage("error", response.data.message);
+        setIsLoading(false);
       }
     } catch (err) {
-      
       showMessage("error", "Signup failed.");
+      setIsLoading(false);
     }
   };
 
@@ -236,13 +245,19 @@ export default function SignUpPage() {
                         }}>
                   Back
                 </Button>
-                <Button variant="contained" type="submit"
-                    sx={{
-                    borderRadius: "10px",
-                    }}
+                <Button
+                  variant="contained"
+                  type="submit"
+                  sx={{ borderRadius: "10px" }}
+                  disabled={isLoading}
                 >
-                  Submit
+                  {isLoading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Submit"
+                  )}
                 </Button>
+
               </div>
             </>
           )}
