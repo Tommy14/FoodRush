@@ -14,7 +14,7 @@ export const fetchCustomerOrders = async () => {
 
     const enrichedOrders = await Promise.all(
       orders.map(async (order) => {
-        if (['ready_for_delivery', 'assigned', 'picked_up', 'delivered'].includes(order.status)) {
+        if (['placed', 'preparing', 'ready_for_delivery', 'assigned', 'picked_up', 'delivered'].includes(order.status)) {
           try {
             const deliveryRes = await apiPrivate.get(`/delivery/order/${order._id}`);
             return { ...order, deliveryStatus: deliveryRes.data.status };

@@ -1,6 +1,6 @@
 import Delivery from '../models/Delivery.js';
 import axios from 'axios';
-import { NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY} from '../config/index.js';
+import { NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY, ORDER_SERVICE_URL, SYSTEM_JWT, USER_SERVICE_URL, RESTAURANT_SERVIC_URL} from '../config/index.js';
 
 export const assignDeliveryService = async ({ orderId, deliveryPersonId }) => {
   const delivery = new Delivery({
@@ -18,17 +18,33 @@ export const updateDeliveryStatusService = async (id, status) => {
   if (!delivery) {
     throw new Error('Delivery not found');
   }
+
   delivery.status = status;
-  console.log(NOTIFICATION_SERVICE_URL);
+
   if (status === 'picked_up') {
     delivery.pickedUpAt = new Date();
   } else if (status === 'delivered') {
     delivery.deliveredAt = new Date();
   }
 
-  await delivery.save(); // ✅ Save first
+  await delivery.save();
 
-  // 📨 Then send email if status is 'delivered'
+  // 🛰️ Notify Order Service about status change
+  if (['picked_up', 'delivered'].includes(status)) {
+    try {
+      await axios.put(`${ORDER_SERVICE_URL}/api/orders/${delivery.orderId}/status`, {
+        status: status
+      }, {
+        headers: {
+          Authorization: `Bearer ${SYSTEM_JWT}`
+        }
+      });
+    } catch (err) {
+      console.error('❌ Failed to update order status in Order Service:', err.message);
+    }
+  }
+
+  // 📧 Send notification email if delivered
   if (status === 'delivered') {
     await sendDeliveryUpdateEmail(delivery);
   }
@@ -50,22 +66,46 @@ export const getCompletedDeliveriesByPersonService = async (deliveryPersonId) =>
 };
 
 async function sendDeliveryUpdateEmail(delivery) {
+  const order = await axios.get(`${ORDER_SERVICE_URL}/api/orders/${delivery.orderId}`, {
+    headers: {
+      Authorization: `Bearer ${SYSTEM_JWT}`
+    }
+  });
+
+  const customer = await axios.get(`${USER_SERVICE_URL}/api/users/by/${order.data.data.customerId}`, {
+    headers: {
+      Authorization: `Bearer ${SYSTEM_JWT}`
+    }
+  });
+
+  const deliveryPerson = await axios.get(`${USER_SERVICE_URL}/api/users/by/${delivery.deliveryPersonId}`, {
+    headers: {
+      Authorization: `Bearer ${SYSTEM_JWT}`
+    }
+  });
+
   try {
     await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/email`, {
       recipient: {
-        email: "thihansig@gmail.com",
+        email: customer.data.email,
       },
       subject: 'Your order has been delivered! 🎉',
       type: 'orderDelivered', // Must match a key in `templateMap.js` in notification service
       data: {
-        customerName: "John Doe",
-        restaurantName: "ABC Restaurant",
+        customerName: customer.data.name,
+        restaurantName: 'Test',
         orderId: delivery.orderId,
-        total: "4500.00 LKR",
-        paymentMethod: "Cash on Delivery",
-        orderDateTime: "April 13, 2025, 10:15 PM",
-        deliveryAddress: "123, Galle Road, Colombo",
-        deliveryPerson: "Dinesh Perera",
+        total: order.data.data.totalAmount,
+        paymentMethod: order.data.data.paymentMethod,
+        orderDateTime: new Date(order.data.data.createdAt).toLocaleString('en-US', {
+          timeZone: 'Asia/Colombo',
+          dateStyle: 'long',
+          timeStyle: 'short'
+        }),
+        deliveryAddress: order.data.data.deliveryAddress,
+        deliveryPerson: [
+            {name: deliveryPerson.data.name},
+        ],
         updatedAt: new Date().toLocaleString('en-US', {
           timeZone: 'Asia/Colombo',
           dateStyle: 'long',

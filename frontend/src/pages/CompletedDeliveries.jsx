@@ -10,7 +10,7 @@ const CompletedDeliveries = () => {
   const loadCompletedDeliveries = async () => {
     try {
       const res = await fetchCompletedDeliveries(); 
-      setDeliveries(res.data);
+      setDeliveries(res);
     } catch (error) {
       console.error('Failed to fetch completed deliveries:', error);
     }

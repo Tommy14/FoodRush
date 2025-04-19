@@ -29,7 +29,11 @@ export default function orderPlacedLayout(data) {
         <p style="margin:0 0 20px;">${deliveryAddress}</p>
   
         <h4 style="margin:0 0 6px;">Delivered by</h4>
-        <p style="margin:0 0 20px;">${deliveryPerson}</p>
+        <p style="margin:0 0 20px;">
+          ${Array.isArray(deliveryPerson)
+            ? deliveryPerson.map(dp => `${dp.name}`).join('<br>')
+            : 'N/A'}
+        </p>
   
         <div style="text-align:center;margin-top:30px;">
           <a href="#" style="margin:0 10px;color:#1f8a43;text-decoration:none;">Contact Support</a> |

@@ -29,7 +29,7 @@ export const getOrderByIdService = async (orderId) => {
 };
 
 export const getActiveCustomerOrdersService = async (customerId) => {
-  const activeStatuses = ['pending', 'accepted', 'preparing', 'ready_for_delivery', 'assigned', 'picked_up', 'delivering', 'delivered']; // ✅ Add all "active" statuses relevant to your app
+  const activeStatuses = ['placed', 'preparing', 'ready_for_delivery', 'picked_up', 'delivered']; // ✅ Add all "active" statuses relevant to your app
 
   const orders = await Order.find({
     customerId,
