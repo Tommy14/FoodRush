@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchCustomerOrders } from '../services/orderService';
+import DashSidebar from '../components/DashSidebar';
 
 const statusSteps = [
   'pending',
@@ -29,6 +30,8 @@ const OrderStatus = () => {
   }, []);
 
   return (
+  <div className="flex min-h-screen">
+    <DashSidebar />
     <div className="min-h-screen bg-gray-100 px-10 py-24">
       <h1 className="text-4xl font-extrabold mb-10 text-gray-800">📦 My Orders</h1>
 
@@ -115,6 +118,7 @@ const OrderStatus = () => {
         </div>
       )}
     </div>
+  </div>
   );
 };
 

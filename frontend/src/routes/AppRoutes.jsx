@@ -10,6 +10,7 @@ import RestaurantList from '../pages/Restaurants';
 import MenuPage from '../pages/MenuPage';
 import AuthPage from '../pages/Auth/AuthPage';
 import OrderStatus from '../pages/OrderStatus';
+import ProfileRedirect from '../pages/ProfileRedirect';
 
 export default function AppRoutes() {
   return (
@@ -24,6 +25,7 @@ export default function AppRoutes() {
         <Route path="/restaurants/:restaurantId/menu" element={<MenuPage />} />
         <Route path="/auth" element={<AuthPage />} /> 
         <Route path="/my-orders" element={<OrderStatus />} />
+        <Route path="/profile" element={<ProfileRedirect />} />
       </Routes>
     </>
   );

@@ -51,16 +51,16 @@ export default function LoginPage() {
         setTimeout(() => {
           switch (user.role) {
             case "customer":
-              navigate("/");
+              navigate("/profile");
               break;
             case "restaurant_admin":
-              navigate("/restaurant-dashboard");
+              navigate("/profile");
               break;
             case "delivery_person":
-              navigate("/delivery-panel");
+              navigate("/profile");
               break;
             case "admin":
-              navigate("/admin");
+              navigate("/profile");
               break;
             default:
               navigate("/u");
