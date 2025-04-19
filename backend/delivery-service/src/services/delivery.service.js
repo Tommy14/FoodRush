@@ -1,6 +1,6 @@
 import Delivery from '../models/Delivery.js';
 import axios from 'axios';
-import { NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY, ORDER_SERVICE_URL, SYSTEM_JWT, USER_SERVICE_URL, RESTAURANT_SERVIC_URL} from '../config/index.js';
+import { NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY, ORDER_SERVICE_URL, SYSTEM_JWT, USER_SERVICE_URL, RESTAURANT_SERVICE_URL} from '../config/index.js';
 
 export const assignDeliveryService = async ({ orderId, deliveryPersonId }) => {
   const delivery = new Delivery({
@@ -83,6 +83,11 @@ async function sendDeliveryUpdateEmail(delivery) {
       Authorization: `Bearer ${SYSTEM_JWT}`
     }
   });
+  const restaurant = await axios.get(`${RESTAURANT_SERVICE_URL}/api/restaurants/${order.data.data.restaurantId}`, {
+    headers: {
+      Authorization: `Bearer ${SYSTEM_JWT}`
+    }
+  });
 
   try {
     await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/email`, {
@@ -93,7 +98,7 @@ async function sendDeliveryUpdateEmail(delivery) {
       type: 'orderDelivered', // Must match a key in `templateMap.js` in notification service
       data: {
         customerName: customer.data.name,
-        restaurantName: 'Test',
+        restaurantName: restaurant.data.name,
         orderId: delivery.orderId,
         total: order.data.data.totalAmount,
         paymentMethod: order.data.data.paymentMethod,
