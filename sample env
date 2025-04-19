@@ -1,19 +1,19 @@
-create a individual env file for each services and add these
-
-delivery service
+deliveryservice
 MONGO_URI_DELIVERY_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/delivery-db?retryWrites=true&w=majority&appName=Cluster
 DELIVERY_PORT=9300
 DELIVERY_SERVICE_URL=http://localhost:9300
 NOTIFICATION_SERVICE_URL=http://localhost:9800
 INTERNAL_SERVICE_API_KEY=foodrush@internalKey
+SYSTEM_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZWxpdmVyeS1zeXN0ZW0iLCJyb2xlIjoiZGVsaXZlcnlfc2VydmljZSIsImlhdCI6MTc0NTA4NjU3OCwiZXhwIjoxNzc2NjIyNTc4fQ.4Y9L4f3JZFLnbpASpqDi1TL_TcLIHoFGiOZrLTyfoRE
 
-order service
+orderservice
 MONGO_URI_ORDER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/order-db?retryWrites=true&w=majority&appName=Cluster
 ORDER_PORT=9200
 ORDER_SERVICE_URL=http://localhost:9200
 INTERNAL_SERVICE_API_KEY=foodrush@internalKey
+SYSTEM_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZWxpdmVyeS1zeXN0ZW0iLCJyb2xlIjoiZGVsaXZlcnlfc2VydmljZSIsImlhdCI6MTc0NTA4NjU3OCwiZXhwIjoxNzc2NjIyNTc4fQ.4Y9L4f3JZFLnbpASpqDi1TL_TcLIHoFGiOZrLTyfoRE
 
-restaurant service
+restaurantservice
 MONGO_URI_RESTAURANT_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/restaurant-db?retryWrites=true&w=majority&appName=Cluster
 RESTAURANT_PORT=9100
 RESTAURANT_SERVICE_URL=http://localhost:9100
@@ -25,7 +25,7 @@ CLOUDINARY_CLOUD_NAME=dmrybsytq
 CLOUDINARY_API_KEY=639529596749839
 CLOUDINARY_API_SECRET=LLv92igpMuVVJK4BVxoGNvMngTY
 
-user service
+userservice
 MONGO_URI_USER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/user-auth-db?retryWrites=true&w=majority&appName=Cluster
 USER_PORT=9000
 USER_SERVICE_URL=http://localhost:9000
@@ -35,12 +35,12 @@ INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 
 
 
-notification service
+notificationservice
 PORT=9800
 MONGO_URI_NOTIFICATION_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/notification-db?retryWrites=true&w=majority&appName=Cluster
 INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 
-#Google OAuth Credentials
+GoogleOAuthCredentials
 GOOGLE_API_USER=Foodrush48@gmail.com
 GOOGLE_API_CLIENT_ID=712246912432-9dbuepv17isg9uhvnfv108nkh12fqmqk.apps.googleusercontent.com
 GOOGLE_API_CLIENT_SECRET=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
@@ -48,12 +48,12 @@ GOOGLE_API_REDIRECT_URL=https://developers.google.com/oauthplayground
 GOOGLE_API_REFRESH_TOKEN=1//04AVZuP5hDQoBCgYIARAAGAQSNwF-L9IrJWpaf4EPYAITtsRteGJMypZnzWISJuWYEnrpZQfAyt4Mw6GH82y7viUfk-5D2Y8BXcg
 
 
-# Twilio Credentials
+TwilioCredentials
 TWILIO_ACCOUNT_SID=AC777d7d5ab2d5a2229996515a4d920a3d
 TWILIO_AUTH_TOKEN=d770e33516861a7b952c78fa8d1c625b
-TWILIO_PHONE_NUMBER=+18653550286  # This is your Twilio number
+TWILIO_PHONE_NUMBER=+18653550286
 
-# Meta cloude whatsapp credentials
+MetaCloudeWhatsappCredentials
 META_WA_TOKEN=EAAYtP6ZAPlDMBO4wFGgqmPcUPEcfXZCHZA5NlEo2ZCq3lNJZAUZALlsM4PL8Gm4OZBTVCZBAmSY5pKANIhBQsPF6dYjUngLpVzoQD61wfQImy7zOG9IZCZAYYWm00yS5FtXAvXn4U4Bozc1l5kVMzKAKEmNAbJRoppqiWqzv2o2cyTijYVmJ0tTTkJcTK9zBNmu0m7d8MIQLXQc0jQpWi80vwi9UdH8LQZD
 META_WA_PHONE_ID=621840814346765
 META_WA_BUSSINESS_ID=1172764077497380
@@ -63,7 +63,7 @@ META_WA_TOKEN_PERM=EAAYtP6ZAPlDMBO6WYicgGNN3qdUuWvowLfg259uAZAvZBzltxUPrrfrBkyUn
 
 
 
-payment service
+paymentservice
 MONGO_URI_PAYMENT_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/payment-db?retryWrites=true&w=majority&appName=Cluster
 PAYMENT_PORT=9400
 PAYMENT_SERVICE_URL=http://localhost:9400
