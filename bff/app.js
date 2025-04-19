@@ -32,6 +32,8 @@ import orderRoutes from './routes/order.routes.js';
 import deliveryRoutes from './routes/delivery.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import menuRoutes from './routes/menu.route.js';
+import reviewRoutes from './routes/review.routes.js';
+// import locationRoutes from './routes/location.routes.js';
 
 app.use('/bff/auth', authRoutes);
 app.use('/bff/restaurants', restaurantRoutes);
@@ -39,9 +41,12 @@ app.use('/bff/orders', orderRoutes);
 app.use('/bff/delivery', deliveryRoutes);
 app.use('/bff/pay', paymentRoutes);
 app.use('/bff/menu', menuRoutes);
+app.use('/bff/reviews', reviewRoutes);
+// app.use('/bff/location', locationRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`BFF running on port ${process.env.PORT}`);
 });
 
 export default app;
+
