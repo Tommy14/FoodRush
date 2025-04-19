@@ -19,30 +19,30 @@ export default function AuthPage() {
         >
           {formType === "signup" ? (
             <>
-              <SignUpPage onSuccessSwitchToLogin={() => setFormType("login")} />
-              <p className="text-sm text-center text-gray-600 mt-4">
-                Already have an account?{" "}
-                <span
-                  onClick={() => setFormType("login")}
-                  className="text-green-600 font-semibold cursor-pointer"
-                >
-                  Log in
-                </span>
-              </p>
-            </>
+            <LoginPage />
+            <p className="text-sm text-center text-gray-600 mt-4">
+              Don’t have an account?{" "}
+              <span
+                onClick={() => setFormType("signup")}
+                className="text-green-600 font-semibold cursor-pointer"
+              >
+                Sign up
+              </span>
+            </p>
+          </>
           ) : (
             <>
-              <LoginPage />
-              <p className="text-sm text-center text-gray-600 mt-4">
-                Don’t have an account?{" "}
-                <span
-                  onClick={() => setFormType("signup")}
-                  className="text-green-600 font-semibold cursor-pointer"
-                >
-                  Sign up
-                </span>
-              </p>
-            </>
+            <SignUpPage onSuccessSwitchToLogin={() => setFormType("login")} />
+            <p className="text-sm text-center text-gray-600 mt-4">
+              Already have an account?{" "}
+              <span
+                onClick={() => setFormType("login")}
+                className="text-green-600 font-semibold cursor-pointer"
+              >
+                Log in
+              </span>
+            </p>
+          </>
           )}
         </motion.div>
       </AnimatePresence>

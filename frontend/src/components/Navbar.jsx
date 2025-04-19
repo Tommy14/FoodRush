@@ -44,7 +44,7 @@ export default function Navbar() {
               to="/auth"
               className="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition"
             >
-              Sign Up
+              Sign In
             </Link>
           ) : (
             <div className="relative group">
@@ -59,14 +59,7 @@ export default function Navbar() {
                 >
                   Profile
                 </Link>
-                {user?.role === 'delivery_person' && (
-                  <Link
-                    to="/delivery-panel"
-                    className="px-4 py-2 hover:bg-gray-100 transition"
-                  >
-                    Delivery
-                  </Link>
-                )}
+
                 <button
                   onClick={handleLogout}
                   className="text-left w-full px-4 py-2 hover:bg-red-100 text-red-600 transition"

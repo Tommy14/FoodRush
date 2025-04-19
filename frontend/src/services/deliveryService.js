@@ -54,17 +54,46 @@ export const updateDeliveryStatus = async (deliveryId, newStatus) => {
 };
 
 /**
- * Fetch completed deliveries for the current delivery person.
- * @returns {Promise<Object>} List of completed delivery orders
+ * Fetch completed deliveries and enrich with customer name and delivery address.
+ * @returns {Promise<Object[]>} Enriched completed delivery orders
  */
 export const fetchCompletedDeliveries = async () => {
   try {
-    const response = await apiPrivate.get('/delivery/my-deliveries/completed');
-    return response.data;
+    const res = await apiPrivate.get('/delivery/my-deliveries/completed');
+    const deliveries = res.data.data;
+
+    const enriched = await Promise.all(
+      deliveries.map(async (delivery) => {
+        let deliveryAddress = 'N/A';
+        let customerName = 'N/A';
+
+        try {
+          const orderRes = await apiPrivate.get(`/orders/${delivery.orderId}`);
+          const order = orderRes.data;
+          deliveryAddress = order.data.deliveryAddress;
+          const customerId = order.data.customerId;
+
+          const customerRes = await apiPrivate.get(`/auth/by/${customerId}`);
+          const customer = customerRes.data;
+          customerName = customer.name;
+        } catch (err) {
+          console.warn('Enrichment failed for delivery:', delivery._id);
+        }
+
+        return {
+          ...delivery,
+          deliveryAddress,
+          customerName
+        };
+      })
+    );
+
+    return enriched;
   } catch (error) {
     throw error;
   }
 };
+
 
 /**
  * Fetch the current availability status of the delivery person.

@@ -28,7 +28,7 @@ const DashSidebar = () => {
   }, []);
 
   const guestLinks = [
-    { label: 'Login', path: '/auth' },
+    { label: 'Login', path: '/u' },
     { label: 'Sign Up', path: '/auth' }
   ];
 
