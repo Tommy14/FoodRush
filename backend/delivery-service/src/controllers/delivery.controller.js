@@ -2,8 +2,27 @@ import {
   assignDeliveryService,
   updateDeliveryStatusService,
   getDeliveriesByPersonService,
-  getCompletedDeliveriesByPersonService
+  getCompletedDeliveriesByPersonService,
+  autoAssignDeliveryService
 } from '../services/delivery.service.js';
+
+// @desc Assign a delivery person automatically to an order
+export const autoAssignDelivery = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    if (!orderId) {
+      return res.status(400).json({ message: 'Order ID is required' });
+    }
+
+    const delivery = await autoAssignDeliveryService(orderId);;
+
+    res.status(201).json({ message: 'Delivery assigned', data: delivery });
+  } catch (error) {
+    console.error('Error assigning delivery:', error.message);
+    res.status(500).json({ message: 'Failed to assign delivery', error: error.message });
+  }
+};
+
 
 // @desc Assign a delivery person to an order
 export const assignDelivery = async (req, res) => {
