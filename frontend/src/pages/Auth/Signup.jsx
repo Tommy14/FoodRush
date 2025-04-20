@@ -88,9 +88,9 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
   };
 
   return (
-    <div className="w-full flex items-center justify-center px-6 mb-2">
-      <div className="w-full sm:w-3/4 lg:w-1/2 bg-white p-10 rounded-xl shadow-xl">
-        <h2 className="text-3xl font-bold text-center text-green-600 mb-8">Create Your Account</h2>
+    <div className="w-full flex items-center justify-center">
+      <div className="w-full sm:w-3/4 lg:w-1/2 bg-white pt-10 pb-10 pl-5 pr-5 rounded-xl shadow-xl">
+        <h2 className="text-3xl font-bold text-center text-green-600 mb-8">Create Your Account </h2>
         <form onSubmit={handleSubmit}>
           {page === 0 && (
             <>
