@@ -1,52 +1,96 @@
 import mongoose from 'mongoose';
 
 const restaurantSchema = new mongoose.Schema({
-  ownerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', required: true
-  },
-  restaurantId: {
-    type: String,
-    required: true,
-    unique: true,
-    default: () => `rest_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`
-  },  
   name: {
     type: String,
     required: true,
     trim: true
   },
-  address: {
+  description: {
     type: String,
     required: true
   },
-  phone: {
+  cuisineTypes: [{
+    type: String,
+    required: true
+  }],
+  priceRange: {
+    type: String,
+    enum: ['$', '$$', '$$$', '$$$$'],
+    default: '$$'
+  },
+  contactPhone: {
+    type: String,
+    required: true
+  },
+  contactEmail: {
     type: String
   },
+  // We'll store basic address info here for quick access
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    postalCode: String,
+    country: String
+  },
+  // Reference to location in the location service
+  locationId: {
+    type: String
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   logo: {
-    url: String,
-    publicId: String
+    type: String
   },
   coverImage: {
-    url: String,
-    publicId: String
+    type: String
   },
-  images: [
-    {
-      url: String,
-      publicId: String
-    }
-  ],
+  images: [{
+    type: String
+  }],
+  rating: {
+    type: Number,
+    default: 0
+  },
+  reviewCount: {
+    type: Number,
+    default: 0
+  },
+  isOpen: {
+    type: Boolean,
+    default: true
+  },
   status: {
     type: String,
     enum: ['PENDING', 'APPROVED', 'REJECTED'],
     default: 'PENDING'
   },
-  isOpen: {
-    type: Boolean,
-    default: false
+  openingHours: {
+    monday: { open: String, close: String, isClosed: Boolean },
+    tuesday: { open: String, close: String, isClosed: Boolean },
+    wednesday: { open: String, close: String, isClosed: Boolean },
+    thursday: { open: String, close: String, isClosed: Boolean },
+    friday: { open: String, close: String, isClosed: Boolean },
+    saturday: { open: String, close: String, isClosed: Boolean },
+    sunday: { open: String, close: String, isClosed: Boolean }
   },
-}, { timestamps: true });
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
 
-const Restaurant = mongoose.model('Restaurant', restaurantSchema);
-export default Restaurant;
+restaurantSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+export default mongoose.model('Restaurant', restaurantSchema);

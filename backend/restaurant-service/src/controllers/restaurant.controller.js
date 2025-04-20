@@ -1,31 +1,145 @@
 import * as restaurantService from '../services/restaurant.service.js';
 import * as imageService from '../services/image.service.js';
+import Restaurant from '../models/Restaurant.js';
+import axios from 'axios';
+import mongoose from 'mongoose';
+
+// Update the createRestaurant function
 
 export const createRestaurant = async (req, res) => {
+  console.log('Auth User Object:', req.user);  // For debugging
+  const userId = req.user.id || req.user.userId; // Handle both formats  
   try {
+    console.log('Restaurant Service - Create Restaurant Request');
+    
+    // Log received data for debugging
+    console.log('Body fields:', Object.keys(req.body));
+    console.log('Files:', req.files ? Object.keys(req.files) : 'No files');
+    
+    // Extract and process data
     let imageData = {};
     
     // Handle logo upload
     if (req.files && req.files.logo) {
+      console.log('Processing logo...');
       imageData.logo = await imageService.uploadImage(req.files.logo[0], 'restaurants/logos');
     }
     
     // Handle cover image upload
     if (req.files && req.files.coverImage) {
+      console.log('Processing cover image...');
       imageData.coverImage = await imageService.uploadImage(req.files.coverImage[0], 'restaurants/covers');
     }
     
     // Handle multiple restaurant images
     if (req.files && req.files.images) {
+      console.log('Processing gallery images...');
       imageData.images = await imageService.uploadMultipleImages(req.files.images, 'restaurants/gallery');
     }
     
-    // Combine the form data with the image data
-    const restaurantData = { ...req.body, ...imageData };
+    // Parse JSON string fields if they're strings
+    let parsedData = { ...req.body };
     
+    // Handle cuisineTypes - ensure it's an array
+    if (req.body.cuisineTypes) {
+      console.log('Processing cuisine types:', req.body.cuisineTypes);
+      
+      // If it's a single string value
+      if (typeof req.body.cuisineTypes === 'string') {
+        try {
+          // Check if it's a JSON string array
+          if (req.body.cuisineTypes.startsWith('[') && req.body.cuisineTypes.endsWith(']')) {
+            parsedData.cuisineTypes = JSON.parse(req.body.cuisineTypes);
+          } else {
+            // It's a single value
+            parsedData.cuisineTypes = [req.body.cuisineTypes];
+          }
+        } catch (e) {
+          console.error('Error parsing cuisineTypes:', e);
+          parsedData.cuisineTypes = [req.body.cuisineTypes];
+        }
+      } 
+      // If it's already an array from middleware parsing, keep as is
+    }
+
+    // Parse address if it's a string
+    if (req.body.address && typeof req.body.address === 'string') {
+      try {
+        console.log('Parsing address...');
+        parsedData.address = JSON.parse(req.body.address);
+      } catch (e) {
+        console.error('Error parsing address:', e);
+      }
+    }
+    
+    // Parse openingHours if it's a string
+    if (req.body.openingHours && typeof req.body.openingHours === 'string') {
+      try {
+        console.log('Parsing opening hours...');
+        parsedData.openingHours = JSON.parse(req.body.openingHours);
+      } catch (e) {
+        console.error('Error parsing openingHours:', e);
+      }
+    }
+    
+    // Combine the form data with the image data
+    const restaurantData = { ...parsedData, ...imageData };
+    
+    console.log('Creating restaurant in database...');
+    // 1. First create the restaurant
     const restaurant = await restaurantService.createRestaurant(restaurantData, req.user.userId);
+    
+    console.log('Restaurant created in database, now handling location...');
+    // 2. Then create location in the location service if we have an address
+    if (restaurant && restaurant.address) {
+      try {
+        const addressObj = restaurant.address;
+        
+        // Format the address for geocoding
+        const formattedAddress = `${addressObj.street}, ${addressObj.city}, ${addressObj.state}, ${addressObj.postalCode}, ${addressObj.country || 'Sri Lanka'}`;
+        
+        // First geocode the address to get coordinates
+        const locationServiceUrl = process.env.LOCATION_SERVICE_URL || 'http://localhost:9500/api/location';
+        
+        console.log('Geocoding address:', formattedAddress);
+        const geocodeResponse = await axios.post(`${locationServiceUrl}/geocode`, {
+          address: formattedAddress
+        });
+        
+        if (geocodeResponse.data && geocodeResponse.data.coordinates) {
+          console.log('Saving location with coordinates:', geocodeResponse.data.coordinates);
+          // Then save the location
+          const locationResponse = await axios.post(`${locationServiceUrl}`, {
+            entityId: restaurant._id.toString(),
+            entityType: 'restaurant',
+            address: addressObj,
+            coordinates: geocodeResponse.data.coordinates,
+            placeId: geocodeResponse.data.placeId || ''
+          }, {
+            headers: {
+              Authorization: req.headers.authorization
+            }
+          });
+          
+          // Update restaurant with locationId
+          if (locationResponse.data && locationResponse.data._id) {
+            console.log('Updating restaurant with locationId:', locationResponse.data._id);
+            await restaurantService.updateRestaurantLocation(
+              restaurant._id,
+              locationResponse.data._id
+            );
+          }
+        }
+      } catch (locationError) {
+        console.error('Error saving location:', locationError.message);
+        // We continue even if location saving fails
+      }
+    }
+    
+    console.log('Restaurant creation complete.');
     res.status(201).json(restaurant);
   } catch (err) {
+    console.error('Create restaurant error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -189,5 +303,21 @@ export const toggleRestaurantOpenStatus = async (req, res) => {
     res.json(toggled);
   } catch (err) {
     res.status(403).json({ message: err.message });
+  }
+};
+
+export const getOwnerRestaurants = async (req, res) => {
+  try {
+    console.log('Authenticated User:', req.user);
+
+    const userId = req.user.userId || req.user.id;
+    const ownerId = new mongoose.Types.ObjectId(userId); // ✅ FIXED
+
+    const restaurants = await Restaurant.find({ owner: ownerId });
+
+    res.json(restaurants);
+  } catch (error) {
+    console.error('Get owner restaurants error:', error);
+    res.status(500).json({ message: error.message });
   }
 };
