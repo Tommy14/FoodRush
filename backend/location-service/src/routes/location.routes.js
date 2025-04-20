@@ -5,7 +5,8 @@ import authMiddleware from '../middleware/auth.js';
 const router = express.Router();
 
 // Public routes
-router.post('/geocode', locationController.geocodeAddress); // Changed to POST
+router.get('/autocomplete', locationController.getPlaceSuggestions);
+router.post('/geocode', locationController.geocodeAddress);
 router.get('/reverse-geocode', locationController.reverseGeocode);
 router.get('/nearby', locationController.findNearbyRestaurants);
 router.get('/:entityType/:entityId', locationController.getLocation);
