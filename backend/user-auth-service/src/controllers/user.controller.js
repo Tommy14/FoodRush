@@ -3,7 +3,8 @@ import {
   loginUserService,
   toggleAvailabilityService,
   getAvailabilityService,
-  getUserByIdService
+  getUserByIdService,
+  getUsersByRoleService
 } from '../services/user.service.js';
 
 // @desc Register a new user
@@ -48,6 +49,22 @@ export const getUserByIdController = async (req, res) => {
     res.status(500).json({ message: 'Server error while fetching user' });
   }
 };
+
+export const getUsersByRoleController = async (req, res) => {
+  try {
+    const role = req.params.role;
+    const users = await getUsersByRoleService(role);
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: 'No users found' });
+    }
+
+    res.json(users);
+  } catch (err) {
+    console.error('❌ Error fetching users by role:', err.message);
+    res.status(500).json({ message: 'Server error while fetching users' });
+  }
+}
 
 export const getAvailabilityController = async (req, res) => {
   try {
