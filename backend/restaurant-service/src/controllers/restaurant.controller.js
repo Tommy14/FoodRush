@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 // Update the createRestaurant function
 
 export const createRestaurant = async (req, res) => {
-  console.log('Auth User Object:', req.user);  // For debugging
+  console.log('Auth User Object:', req.user);
   const userId = req.user.id || req.user.userId; // Handle both formats  
   try {
     console.log('Restaurant Service - Create Restaurant Request');
@@ -20,21 +20,46 @@ export const createRestaurant = async (req, res) => {
     let imageData = {};
     
     // Handle logo upload
-    if (req.files && req.files.logo) {
-      console.log('Processing logo...');
-      imageData.logo = await imageService.uploadImage(req.files.logo[0], 'restaurants/logos');
+    if (req.files && req.files.logo && req.files.logo[0]) {
+      console.log('Processing logo file path:', req.files.logo[0].path);
+      try {
+        const logoResult = await imageService.uploadImage(
+          req.files.logo[0].path,
+          'restaurants/logos'
+        );
+        // Store both URL and publicId
+        imageData.logo = logoResult.url;
+        console.log('Logo uploaded successfully:', imageData.logo);
+      } catch (uploadErr) {
+        console.error('Logo upload error:', uploadErr);
+      }
     }
     
     // Handle cover image upload
-    if (req.files && req.files.coverImage) {
-      console.log('Processing cover image...');
-      imageData.coverImage = await imageService.uploadImage(req.files.coverImage[0], 'restaurants/covers');
+    if (req.files && req.files.coverImage && req.files.coverImage[0]) {
+      try {
+        const coverResult = await imageService.uploadImage(
+          req.files.coverImage[0].path,
+          'restaurants/covers'
+        );
+        imageData.coverImage = coverResult.url;
+      } catch (uploadErr) {
+        console.error('Cover image upload error:', uploadErr);
+      }
     }
     
     // Handle multiple restaurant images
-    if (req.files && req.files.images) {
-      console.log('Processing gallery images...');
-      imageData.images = await imageService.uploadMultipleImages(req.files.images, 'restaurants/gallery');
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      try {
+        const uploadPromises = req.files.images.map(file => 
+          imageService.uploadImage(file.path, 'restaurants/gallery')
+        );
+        
+        const results = await Promise.all(uploadPromises);
+        imageData.images = results.map(result => result.url);
+      } catch (uploadErr) {
+        console.error('Gallery images upload error:', uploadErr);
+      }
     }
     
     // Parse JSON string fields if they're strings
@@ -43,43 +68,31 @@ export const createRestaurant = async (req, res) => {
     // Handle cuisineTypes - ensure it's an array
     if (req.body.cuisineTypes) {
       console.log('Processing cuisine types:', req.body.cuisineTypes);
-      
-      // If it's a single string value
       if (typeof req.body.cuisineTypes === 'string') {
         try {
-          // Check if it's a JSON string array
-          if (req.body.cuisineTypes.startsWith('[') && req.body.cuisineTypes.endsWith(']')) {
-            parsedData.cuisineTypes = JSON.parse(req.body.cuisineTypes);
-          } else {
-            // It's a single value
-            parsedData.cuisineTypes = [req.body.cuisineTypes];
-          }
+          // Try to parse it as JSON first (if it's a stringified array)
+          parsedData.cuisineTypes = JSON.parse(req.body.cuisineTypes);
         } catch (e) {
-          console.error('Error parsing cuisineTypes:', e);
+          // If parsing fails, treat it as a single string value
           parsedData.cuisineTypes = [req.body.cuisineTypes];
         }
-      } 
-      // If it's already an array from middleware parsing, keep as is
+      }
+      // Make sure cuisineTypes is always an array
+      if (!Array.isArray(parsedData.cuisineTypes)) {
+        parsedData.cuisineTypes = [parsedData.cuisineTypes];
+      }
     }
 
     // Parse address if it's a string
     if (req.body.address && typeof req.body.address === 'string') {
-      try {
-        console.log('Parsing address...');
-        parsedData.address = JSON.parse(req.body.address);
-      } catch (e) {
-        console.error('Error parsing address:', e);
-      }
+      console.log('Parsing address...');
+      parsedData.address = JSON.parse(req.body.address);
     }
     
     // Parse openingHours if it's a string
     if (req.body.openingHours && typeof req.body.openingHours === 'string') {
-      try {
-        console.log('Parsing opening hours...');
-        parsedData.openingHours = JSON.parse(req.body.openingHours);
-      } catch (e) {
-        console.error('Error parsing openingHours:', e);
-      }
+      console.log('Parsing opening hours...');
+      parsedData.openingHours = JSON.parse(req.body.openingHours);
     }
     
     // Combine the form data with the image data
@@ -87,52 +100,35 @@ export const createRestaurant = async (req, res) => {
     
     console.log('Creating restaurant in database...');
     // 1. First create the restaurant
-    const restaurant = await restaurantService.createRestaurant(restaurantData, req.user.userId);
+    const restaurant = await restaurantService.createRestaurant(restaurantData, userId);
     
     console.log('Restaurant created in database, now handling location...');
     // 2. Then create location in the location service if we have an address
     if (restaurant && restaurant.address) {
       try {
-        const addressObj = restaurant.address;
-        
-        // Format the address for geocoding
-        const formattedAddress = `${addressObj.street}, ${addressObj.city}, ${addressObj.state}, ${addressObj.postalCode}, ${addressObj.country || 'Sri Lanka'}`;
-        
-        // First geocode the address to get coordinates
-        const locationServiceUrl = process.env.LOCATION_SERVICE_URL || 'http://localhost:9500/api/location';
-        
-        console.log('Geocoding address:', formattedAddress);
-        const geocodeResponse = await axios.post(`${locationServiceUrl}/geocode`, {
-          address: formattedAddress
-        });
-        
-        if (geocodeResponse.data && geocodeResponse.data.coordinates) {
-          console.log('Saving location with coordinates:', geocodeResponse.data.coordinates);
-          // Then save the location
-          const locationResponse = await axios.post(`${locationServiceUrl}`, {
-            entityId: restaurant._id.toString(),
-            entityType: 'restaurant',
-            address: addressObj,
-            coordinates: geocodeResponse.data.coordinates,
-            placeId: geocodeResponse.data.placeId || ''
-          }, {
-            headers: {
-              Authorization: req.headers.authorization
-            }
-          });
-          
-          // Update restaurant with locationId
-          if (locationResponse.data && locationResponse.data._id) {
-            console.log('Updating restaurant with locationId:', locationResponse.data._id);
-            await restaurantService.updateRestaurantLocation(
-              restaurant._id,
-              locationResponse.data._id
-            );
+        console.log('Creating location for restaurant...');
+        const locationResponse = await axios.post(
+          process.env.LOCATION_SERVICE_URL || 'http://localhost:4002/api/locations',
+          {
+            restaurantId: restaurant._id,
+            address: restaurant.address
+          },
+          {
+            headers: { 'Content-Type': 'application/json' }
           }
+        );
+        
+        if (locationResponse.data && locationResponse.data.locationId) {
+          // Update restaurant with location ID reference
+          await restaurantService.updateRestaurantLocation(
+            restaurant._id,
+            locationResponse.data.locationId
+          );
+          console.log('Location created and linked to restaurant');
         }
-      } catch (locationError) {
-        console.error('Error saving location:', locationError.message);
-        // We continue even if location saving fails
+      } catch (locationErr) {
+        console.error('Location service error:', locationErr);
+        // Continue even if location service fails
       }
     }
     
@@ -147,35 +143,54 @@ export const createRestaurant = async (req, res) => {
 export const updateRestaurant = async (req, res) => {
   try {
     let imageData = {};
-    
+
     // Handle logo upload
-    if (req.files && req.files.logo) {
-      // Get the current restaurant to check if we need to delete an existing logo
-      const currentRestaurant = await restaurantService.getRestaurantById(req.params.id);
-      if (currentRestaurant && currentRestaurant.logo && currentRestaurant.logo.publicId) {
-        await imageService.deleteImage(currentRestaurant.logo.publicId);
+    if (req.files && req.files.logo && req.files.logo[0]) {
+      console.log("Processing logo:", req.files.logo[0]);
+      try {
+        const logoResult = await imageService.uploadImage(
+          req.files.logo[0].path,
+          "restaurants/logos"
+        );
+        imageData.logo = logoResult.url;
+        console.log("Logo uploaded successfully:", imageData.logo);
+      } catch (uploadErr) {
+        console.error("Logo upload error:", uploadErr);
       }
-      imageData.logo = await imageService.uploadImage(req.files.logo[0], 'restaurants/logos');
     }
-    
+
     // Handle cover image upload
     if (req.files && req.files.coverImage) {
       // Get the current restaurant to check if we need to delete an existing cover image
-      const currentRestaurant = await restaurantService.getRestaurantById(req.params.id);
-      if (currentRestaurant && currentRestaurant.coverImage && currentRestaurant.coverImage.publicId) {
+      const currentRestaurant = await restaurantService.getRestaurantById(
+        req.params.id
+      );
+      if (
+        currentRestaurant &&
+        currentRestaurant.coverImage &&
+        currentRestaurant.coverImage.publicId
+      ) {
         await imageService.deleteImage(currentRestaurant.coverImage.publicId);
       }
-      imageData.coverImage = await imageService.uploadImage(req.files.coverImage[0], 'restaurants/covers');
+      imageData.coverImage = await imageService.uploadImage(
+        req.files.coverImage[0],
+        "restaurants/covers"
+      );
     }
-    
+
     // Handle multiple restaurant images
     if (req.files && req.files.images) {
       // Add new images to the restaurant
-      const newImages = await imageService.uploadMultipleImages(req.files.images, 'restaurants/gallery');
-      
+      const newImages = await imageService.uploadMultipleImages(
+        req.files.images,
+        "restaurants/gallery"
+      );
+
       // Get the current restaurant
-      const currentRestaurant = await restaurantService.getRestaurantById(req.params.id);
-      
+      const currentRestaurant = await restaurantService.getRestaurantById(
+        req.params.id
+      );
+
       // Combine existing and new images
       if (currentRestaurant && currentRestaurant.images) {
         imageData.images = [...currentRestaurant.images, ...newImages];
@@ -183,12 +198,17 @@ export const updateRestaurant = async (req, res) => {
         imageData.images = newImages;
       }
     }
-    
+
     // Combine the form data with the image data
     const restaurantData = { ...req.body, ...imageData };
-    
-    const updated = await restaurantService.updateRestaurant(req.params.id, req.user.userId, restaurantData);
-    if (!updated) return res.status(403).json({ message: 'Update not allowed' });
+
+    const updated = await restaurantService.updateRestaurant(
+      req.params.id,
+      req.user.userId,
+      restaurantData
+    );
+    if (!updated)
+      return res.status(403).json({ message: "Update not allowed" });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -311,7 +331,7 @@ export const getOwnerRestaurants = async (req, res) => {
     console.log('Authenticated User:', req.user);
 
     const userId = req.user.userId || req.user.id;
-    const ownerId = new mongoose.Types.ObjectId(userId); // ✅ FIXED
+    const ownerId = new mongoose.Types.ObjectId(userId); 
 
     const restaurants = await Restaurant.find({ owner: ownerId });
 

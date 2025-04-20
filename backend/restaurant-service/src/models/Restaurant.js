@@ -49,15 +49,6 @@ const restaurantSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  logo: {
-    type: String
-  },
-  coverImage: {
-    type: String
-  },
-  images: [{
-    type: String
-  }],
   rating: {
     type: Number,
     default: 0
@@ -84,6 +75,15 @@ const restaurantSchema = new mongoose.Schema({
     saturday: { open: String, close: String, isClosed: Boolean },
     sunday: { open: String, close: String, isClosed: Boolean }
   },
+  logo: {
+    type: String
+  },
+  coverImage: {
+    type: String
+  },
+  images: [{
+    type: String
+  }],
   createdAt: {
     type: Date,
     default: Date.now
