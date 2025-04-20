@@ -93,6 +93,24 @@ export const getUserByIdService = async (userId) => {
   };
 }
 
+//get user by role
+export const getUsersByRoleService = async (role) => {
+  const users = await User.find({ role });
+  if (!users) {
+    const error = new Error('No users found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return users.map(user => ({
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    phone: user.phone,
+    isAvailable: user.isAvailable,
+  }));
+}
 
 export const getAvailabilityService = async (userId) => {
   const user = await User.findById(userId);
