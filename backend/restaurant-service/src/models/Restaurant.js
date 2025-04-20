@@ -1,6 +1,12 @@
 import mongoose from 'mongoose';
+import { v4 as uuidv4 } from 'uuid'; 
 
 const restaurantSchema = new mongoose.Schema({
+  restaurantId: {
+    type: String,
+    unique: true,
+    default: () => uuidv4()
+  },
   name: {
     type: String,
     required: true,
