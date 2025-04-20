@@ -13,27 +13,32 @@ export default function SessionManager({ children }) {
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const interval = setInterval(() => {
+      const token = localStorage.getItem("token");
 
-    if (token && isAuthenticated) {
-      try {
-        const decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
+      if (token && isAuthenticated) {
+        try {
+          const decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
 
-        if (decoded.exp < currentTime) {
-          setExpired(true); // Show snackbar
+          if (decoded.exp < currentTime) {
+            setExpired(true); // Show snackbar
+            clearInterval(interval); // stop checking after expired
 
-          setTimeout(() => {
-            dispatch(logout());
-            navigate("/auth");
-          }, 2000);
+            setTimeout(() => {
+              dispatch(logout());
+              navigate("/auth");
+            }, 2000);
+          }
+        } catch (error) {
+          console.error("Invalid token", error);
+          dispatch(logout());
+          navigate("/auth");
         }
-      } catch (error) {
-        console.error("Invalid token", error);
-        dispatch(logout());
-        navigate("/auth");
       }
-    }
+    }, 15000); // check every 15 seconds
+
+    return () => clearInterval(interval); // cleanup
   }, [dispatch, navigate, isAuthenticated]);
 
   return (
@@ -42,10 +47,11 @@ export default function SessionManager({ children }) {
 
       <Snackbar
         open={expired}
-        autoHideDuration={2000}
+        autoHideDuration={3000}
+        onClose={() => setExpired(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity="warning" variant="filled">
+        <Alert onClose={() => setExpired(false)} severity="warning" variant="filled">
           Session expired. Please login again.
         </Alert>
       </Snackbar>

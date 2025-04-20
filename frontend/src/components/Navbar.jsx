@@ -17,7 +17,7 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const location = useLocation();
-  const dashboardPaths = ["/restaurant-dashboard", "/delivery-panel", "/admin"];
+  const dashboardPaths = ["/restaurant-dashboard", "/delivery-panel", "/admin", "/delivery/completed"];
   const 
   isDashboard = dashboardPaths.includes(location.pathname);
 

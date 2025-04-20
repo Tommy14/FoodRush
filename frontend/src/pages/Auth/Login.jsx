@@ -80,7 +80,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center">
-      <Paper elevation={4} className="w-full sm:w-[80%] md:w-2/4 pt-10 pb-10 pl-5 pr-5 rounded-3xl"
+      <Paper elevation={4} className="w-full sm:w-[80%] md:w-3/4 pt-10 pb-10 pl-8 pr-8 rounded-3xl"
       sx={{ borderRadius: "10px"}}>
       <h2 className="text-3xl font-bold text-center text-green-600 mb-8">Welcome Back</h2>
 
