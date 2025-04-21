@@ -2,6 +2,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import jwtDecode from 'jwt-decode';
+import { FaStore, FaClipboardList, FaPlusCircle, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
 
 const DashSidebar = () => {
   const { pathname } = useLocation();
@@ -28,21 +29,23 @@ const DashSidebar = () => {
   }, []);
 
   const guestLinks = [
-    { label: 'Login', path: '/u' },
-    { label: 'Sign Up', path: '/auth' }
+    { label: 'Login', path: '/u', icon: <FaUserCircle className="mr-2" /> },
+    { label: 'Sign Up', path: '/auth', icon: <FaUserCircle className="mr-2" /> }
   ];
 
-  const baseLinks = [{ label: 'Logout', path: '/logout' }];
+  const baseLinks = [{ label: 'Logout', path: '/logout', icon: <FaSignOutAlt className="mr-2" /> }];
 
   const roleBasedLinks = {
-    customer: [{ label: 'My Orders', path: '/my-orders' }],
+    customer: [{ label: 'My Orders', path: '/my-orders', icon: <FaClipboardList className="mr-2" /> }],
     restaurant_admin: [
-      { label: 'Manage Restaurants', path: '/restaurants' },
-      { label: 'Orders', path: '/orders' }
+      { label: 'My Restaurants', path: '/manage-restaurants', icon: <FaStore className="mr-2" /> },
+      { label: 'Orders', path: '/restaurant-orders', icon: <FaClipboardList className="mr-2" /> },
+      { label: 'Create Restaurant', path: '/create-restaurant', icon: <FaPlusCircle className="mr-2" /> }
+
     ],
     delivery_person: [
-      { label: 'My Deliveries', path: '/delivery-panel' },
-      { label: 'Completed', path: '/delivery/completed' }
+      { label: 'My Deliveries', path: '/delivery-panel', icon: <FaClipboardList className="mr-2" /> },
+      { label: 'Completed', path: '/delivery/completed', icon: <FaClipboardList className="mr-2" /> }
     ],
     guest: guestLinks
   };
@@ -59,12 +62,13 @@ const DashSidebar = () => {
           <Link
             key={link.path}
             to={link.path}
-            className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+            className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center ${
               pathname === link.path
                 ? 'bg-blue-500 text-white shadow-md font-semibold'
                 : 'hover:bg-gray-600 text-gray-300'
             }`}
           >
+            {link.icon}
             {link.label}
           </Link>
         ))}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import hero1 from "../assets/hero1.jpg";
 import hero2 from "../assets/hero2.jpg";
 import hero3 from "../assets/hero3.jpg";
@@ -16,6 +17,7 @@ export default function Home() {
   const [current, setCurrent] = useState(0);
   const [showTopBtn, setShowTopBtn] = useState(false);
   const authState = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   console.log("Redux Auth State:", authState);
   
@@ -40,6 +42,9 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
+  const handleOrderNow = () => {
+    navigate('/restaurants');
+  };
 
 
   return (
@@ -61,8 +66,11 @@ export default function Home() {
           <p className="max-w-xl mb-6 text-lg">
             Choose from a diverse menu crafted with the finest ingredients. Elevate your dining experience with FoodRush.
           </p>
-          <button className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-full text-lg font-medium">
-            View Menu
+          <button 
+            onClick={handleOrderNow}
+            className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-full text-lg font-medium"
+            >
+            Order now
           </button>
         </div>
       </section>
