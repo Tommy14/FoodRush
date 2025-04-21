@@ -45,11 +45,15 @@ export const toggleRestaurantStatus = async (id, ownerId) => {
 };
 
 
-export const updateRestaurantLocation = async (restaurantId, locationId) => {
+export const updateRestaurantLocation = async (restaurantId, locationId, coordinates) => {
   try {
+    // Update both the locationId reference and the embedded coordinates
     return await Restaurant.findByIdAndUpdate(
       restaurantId,
-      { locationId },
+      { 
+        locationId: locationId,
+        'location.coordinates': coordinates || [0, 0]
+      },
       { new: true }
     );
   } catch (error) {

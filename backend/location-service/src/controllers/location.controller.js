@@ -3,15 +3,24 @@ import * as locationService from "../services/location.service.js";
 import * as mapsService from "../services/maps.service.js";
 
 // Geocode an address
+// In location.controller.js
 export const geocodeAddress = async (req, res) => {
   try {
     const { address } = req.body;
+    console.log("Received address for geocoding:", address);
 
     if (!address) {
       return res.status(400).json({ message: "Address is required" });
     }
 
-    const geocodeResult = await mapsService.geocodeAddress(address);
+    // If address is an object, convert it to a string
+    const addressToGeocode = typeof address === 'object' 
+      ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''}, ${address.postalCode || ''}, ${address.country || ''}`
+      : address;
+      
+    console.log("Geocoding this address:", addressToGeocode);
+
+    const geocodeResult = await mapsService.geocodeAddress(addressToGeocode);
     res.json(geocodeResult);
   } catch (error) {
     console.error("Geocode error:", error);

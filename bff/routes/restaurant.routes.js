@@ -88,10 +88,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-
-
-router.use(authenticate);
-
+// router.use(authenticate);
+// Add authentication middleware for protected routes
+router.use('/owner', authenticate);
+router.use('/admin', authenticate);
 // Restaurant Admin: Get all restaurants for the owner
 router.get('/owner', async (req, res) => {
   try {
@@ -137,6 +137,57 @@ router.get('/admin/pending', async (req, res) => {
   }
 });
 // Modify the POST route handler for restaurant creation
+
+
+// Public: Get single restaurant by ID
+router.get('/:id', async (req, res) => {
+  try {
+    console.log('BFF - Fetching restaurant details for ID:', req.params.id);
+    
+    // Prepare headers to forward any auth token if present
+    const headers = {};
+    if (req.headers.authorization) {
+      headers.Authorization = req.headers.authorization;
+    }
+    
+    // Forward the request with any auth headers
+    const response = await axios.get(`${RESTAURANT_API}/${req.params.id}`, { headers });
+    
+    // Enrich response with owner details if available
+    if (response.data && response.data.owner) {
+      try {
+        const USER_API = process.env.USER_SERVICE;
+        const ownerResponse = await axios.get(`${USER_API}/users/${response.data.owner}`, { headers });
+        
+        if (ownerResponse.data) {
+          response.data.ownerName = ownerResponse.data.name;
+          response.data.ownerId = ownerResponse.data._id;
+        }
+      } catch (ownerErr) {
+        console.error('Unable to fetch owner details:', ownerErr.message);
+        // Continue without owner details
+      }
+    }
+    
+    console.log('Restaurant details retrieved successfully');
+    res.json(response.data);
+  } catch (err) {
+    console.error(`Error fetching restaurant ${req.params.id}:`, err.message);
+    
+    if (err.response) {
+      return res.status(err.response.status).json(err.response.data);
+    }
+    
+    res.status(500).json({ 
+      message: 'Failed to fetch restaurant details',
+      error: err.message 
+    });
+  }
+});
+
+// General authentication middleware for remaining routes
+router.use(authenticate);
+
 
 // Restaurant Admin: Create restaurant with file upload
 router.post('/', restaurantUpload, async (req, res) => {
@@ -391,14 +442,7 @@ router.patch('/:id/toggle', async (req, res) => {
   }
 });
 
-// Public: Get single restaurant by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const response = await axios.get(`${RESTAURANT_API}/${req.params.id}`);
-    res.json(response.data);
-  } catch (err) {
-    res.status(err.response?.status || 500).json({ message: err.message });
-  }
-});
+
+
 
 export default router;

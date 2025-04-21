@@ -63,7 +63,13 @@ export const createRestaurant = async (req, res) => {
     }
     
     // Parse JSON string fields if they're strings
-    let parsedData = { ...req.body };
+    let parsedData = { 
+      ...req.body,
+      location: {
+        type: 'Point',
+        coordinates: [0, 0] // Initialize with zeros to prevent geo errors
+      }
+    };
     
     // Handle cuisineTypes - ensure it's an array
     if (req.body.cuisineTypes) {
@@ -95,45 +101,97 @@ export const createRestaurant = async (req, res) => {
       parsedData.openingHours = JSON.parse(req.body.openingHours);
     }
     
-    // Combine the form data with the image data
-    const restaurantData = { ...parsedData, ...imageData };
-    
+    // Create the restaurant first
     console.log('Creating restaurant in database...');
-    // 1. First create the restaurant
-    const restaurant = await restaurantService.createRestaurant(restaurantData, userId);
+    const restaurant = await restaurantService.createRestaurant({...parsedData, ...imageData}, userId);
     
-    console.log('Restaurant created in database, now handling location...');
-    // 2. Then create location in the location service if we have an address
+    // Now we have the restaurant object, process location
     if (restaurant && restaurant.address) {
       try {
-        console.log('Creating location for restaurant...');
-        const locationResponse = await axios.post(
-          process.env.LOCATION_SERVICE_URL || 'http://localhost:4002/api/locations',
-          {
-            restaurantId: restaurant._id,
-            address: restaurant.address
-          },
-          {
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
-        
-        if (locationResponse.data && locationResponse.data.locationId) {
-          // Update restaurant with location ID reference
-          await restaurantService.updateRestaurantLocation(
-            restaurant._id,
-            locationResponse.data.locationId
+        console.log("Creating location for restaurant...");
+        console.log("Address to geocode:", JSON.stringify(restaurant.address));
+
+        // Prepare a properly formatted address object
+        const addressToGeocode = {
+          street: restaurant.address.street || "",
+          city: restaurant.address.city || "",
+          state: restaurant.address.state || "",
+          postalCode: restaurant.address.postalCode || "",
+          country: restaurant.address.country || "US", // Default country if missing
+          formattedAddress:
+            restaurant.address.formattedAddress ||
+            `${restaurant.address.street || ""}, ${
+              restaurant.address.city || ""
+            }, ${restaurant.address.state || ""}`,
+        };
+
+        let geocodeResponse;
+        try {
+          geocodeResponse = await axios.post(
+            `${process.env.LOCATION_SERVICE_URL}/api/location/geocode`,
+            { address: addressToGeocode },
+            { headers: { "Content-Type": "application/json" } }
           );
-          console.log('Location created and linked to restaurant');
+        } catch (geocodeErr) {
+          console.error("Geocoding request failed:", geocodeErr.message);
+          if (geocodeErr.response) {
+            console.error("Response status:", geocodeErr.response.status);
+            console.error("Response data:", geocodeErr.response.data);
+          }
+        }
+
+        // If geocoding succeeded, save the location
+        // In createRestaurant function, update how you handle the location response:
+
+        // If geocoding succeeded, save the location
+        if (geocodeResponse.data && geocodeResponse.data.coordinates) {
+          const locationData = {
+            entityId: restaurant._id,
+            entityType: "restaurant",
+            address: {
+              ...restaurant.address,
+              formattedAddress:
+                geocodeResponse.data.formattedAddress || undefined,
+            },
+            coordinates: geocodeResponse.data.coordinates,
+            placeId: geocodeResponse.data.placeId || null,
+          };
+
+          console.log("Saving location data:", JSON.stringify(locationData));
+
+          const locationResponse = await axios.post(
+            `${process.env.LOCATION_SERVICE_URL}/api/location`,
+            locationData,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${process.env.INTERNAL_SERVICE_API_KEY}` // ✅ Inject the token
+              }
+            }
+          );
+
+          // Update restaurant with location ID and coordinates
+          if (locationResponse.data && locationResponse.data._id) {
+            await Restaurant.findByIdAndUpdate(restaurant._id, {
+              "location.coordinates": geocodeResponse.data.coordinates,
+              locationId: locationResponse.data._id,
+            });
+            console.log("Location created and linked to restaurant");
+          }
+        } else {
+          console.error("Geocoding failed for address:", restaurant.address);
         }
       } catch (locationErr) {
-        console.error('Location service error:', locationErr);
-        // Continue even if location service fails
+        console.error('Location service error:', locationErr.message);
+        if (locationErr.response) {
+          console.error('Response data:', locationErr.response.data);
+        }
       }
     }
     
     console.log('Restaurant creation complete.');
-    res.status(201).json(restaurant);
+    const updatedRestaurant = await Restaurant.findById(restaurant._id);
+    res.status(201).json(updatedRestaurant);
   } catch (err) {
     console.error('Create restaurant error:', err);
     res.status(500).json({ message: err.message });
@@ -290,11 +348,18 @@ export const getAllRestaurants = async (req, res) => {
 };
 
 export const getRestaurantById = async (req, res) => {
-  const restaurant = await restaurantService.getRestaurantById(req.params.id);
-  if (!restaurant || restaurant.status !== 'APPROVED') {
-    return res.status(404).json({ message: 'Restaurant not found or not approved' });
+  try {
+    const restaurant = await restaurantService.getRestaurantById(req.params.id);
+
+    if (!restaurant) {
+      return res.status(404).json({ message: 'Restaurant not found' });
+    }
+
+    res.json(restaurant);
+  } catch (err) {
+    console.error('Error in getRestaurantById:', err);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
-  res.json(restaurant);
 };
 
 export const getPendingRestaurants = async (req, res) => {

@@ -41,8 +41,20 @@ const restaurantSchema = new mongoose.Schema({
     country: String
   },
   // Reference to location in the location service
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], 
+      default: [0, 0] 
+    }
+  },
+  // Add a reference to the location service entry
   locationId: {
-    type: String
+    type: mongoose.Schema.Types.ObjectId
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
