@@ -19,7 +19,11 @@ router.post('/checkout', async (req, res) => {
     });
     res.json(response.data);
   } catch (err) {
-    res.status(err.response?.status || 500).json({ message: err.message });
+      const status = err.response?.status || 500;
+      const message = err.response?.data?.message || "Server error";
+
+      console.error("BFF Login Error:", message);
+      res.status(status).json({ message });
   }
 });
 
