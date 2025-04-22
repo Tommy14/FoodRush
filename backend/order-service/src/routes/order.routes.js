@@ -47,25 +47,25 @@ export default router;
 
 // const router = express.Router();
 
-// // 🔐 All routes require authentication
+// //  All routes require authentication
 // router.use(authMiddleware);
 
-// // 📦 Place a new order (Customer)
+// //  Place a new order (Customer)
 // router.post('/', placeOrder);
 
-// // 📄 Get all orders (Customer or Restaurant Admin)
+// //  Get all orders (Customer or Restaurant Admin)
 // router.get('/', getOrders);
 
-// // 📦 Get active orders for a customer
+// //  Get active orders for a customer
 // router.get('/active', getActiveCustomerOrders);
 
-// // 🧾 Get single order by ID
+// //  Get single order by ID
 // router.get('/:id', getOrderById);
 
-// // 🔁 Update order status (Restaurant or Delivery Personnel)
+// //  Update order status (Restaurant or Delivery Personnel)
 // router.put('/:id/status', updateOrderStatus);
 
-// // ❌ Cancel order (Customer)
+// //  Cancel order (Customer)
 // router.patch('/:id/cancel', cancelOrder);
 
 // export default router;
