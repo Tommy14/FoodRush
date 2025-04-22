@@ -15,7 +15,7 @@ export default function userAccountCreatedLayout(data) {
         </p>
   
         <div style="margin:30px 0;">
-          <a href="https://foodrush.app/login" style="padding:10px 20px;background:#1b5e20;color:white;border-radius:6px;text-decoration:none;font-size:14px;">Sign In Now</a>
+          <a href="http://192.168.1.4:5173/auth" style="padding:10px 20px;background:#1b5e20;color:white;border-radius:6px;text-decoration:none;font-size:14px;">Sign In Now</a>
         </div>
   
         <p style="font-size:12px;color:#999;">
