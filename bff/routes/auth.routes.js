@@ -11,8 +11,11 @@ router.post('/login', async (req, res) => {
       const response = await axios.post(`${AUTH_API}/login`, req.body);
       res.json(response.data);
     } catch (err) {
-      console.error(err.message);
-      res.status(err.response?.status || 500).json({ message: err.message });
+      const status = err.response?.status || 500;
+      const message = err.response?.data?.message || "Server error";
+
+      console.error("BFF Login Error:", message);
+      res.status(status).json({ message });
     }
   });
 
@@ -21,7 +24,11 @@ router.post('/register', async (req, res) => {
     const response = await axios.post(`${AUTH_API}/register`, req.body);
     res.json(response.data);
   } catch (err) {
-    res.status(err.response?.status || 500).json({ message: err.response?.data?.message || err.message });
+      const status = err.response?.status || 500;
+      const message = err.response?.data?.message || "Server error";
+
+      console.error("BFF Login Error:", message);
+      res.status(status).json({ message });
   }
 });
 
@@ -34,7 +41,11 @@ router.get('/by/:id', async (req, res) => {
     });
     res.json(response.data);
   } catch (err) {
-    res.status(err.response?.status || 500).json({ message: err.response?.data?.message || err.message });
+      const status = err.response?.status || 500;
+      const message = err.response?.data?.message || "Server error";
+
+      console.error("BFF Login Error:", message);
+      res.status(status).json({ message });
   }
 });
 
@@ -47,7 +58,11 @@ router.patch('/toggle-availability', async (req, res) => {
     });
     res.json(response.data);
   } catch (err) {
-    res.status(err.response?.status || 500).json({ message: err.response?.data?.message || err.message });
+      const status = err.response?.status || 500;
+      const message = err.response?.data?.message || "Server error";
+
+      console.error("BFF Login Error:", message);
+      res.status(status).json({ message });
   }
 }
 );
@@ -61,7 +76,11 @@ router.get('/availability', async (req, res) => {
     });
     res.json(response.data);
   } catch (err) {
-    res.status(err.response?.status || 500).json({ message: err.response?.data?.message || err.message });
+      const status = err.response?.status || 500;
+      const message = err.response?.data?.message || "Server error";
+
+      console.error("BFF Login Error:", message);
+      res.status(status).json({ message });
   }
 });
 

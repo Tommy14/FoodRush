@@ -23,6 +23,7 @@ export const registerUserService = async ({ name, email, password, phone ,role, 
     role: role || 'customer',
     gender,
     dateOfBirth: dob ? new Date(dob) : undefined,
+    isActive: role === 'customer' ? true : false,
   });
 
   const user = await newUser.save();
@@ -44,9 +45,16 @@ export const registerUserService = async ({ name, email, password, phone ,role, 
 
 export const loginUserService = async ({ email, password }) => {
   const user = await User.findOne({ email });
+
   if (!user) {
     const error = new Error('Invalid credentials');
     error.statusCode = 400;
+    throw error;
+  }
+
+  if (!user.isActive) {
+    const error = new Error('Account not yet activated. Please contact admin.');
+    error.statusCode = 403;
     throw error;
   }
 
