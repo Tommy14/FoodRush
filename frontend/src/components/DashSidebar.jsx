@@ -3,11 +3,18 @@ import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import jwtDecode from 'jwt-decode';
 import { FaStore, FaClipboardList, FaPlusCircle, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../store/slices/authSlice";
+
 
 const DashSidebar = () => {
   const { pathname } = useLocation();
   const [role, setRole] = useState('guest');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -33,7 +40,17 @@ const DashSidebar = () => {
     { label: 'Sign Up', path: '/auth', icon: <FaUserCircle className="mr-2" /> }
   ];
 
-  const baseLinks = [{ label: 'Logout', path: '/logout', icon: <FaSignOutAlt className="mr-2" /> }];
+//   const baseLinks = [{ label: 'Logout', path: '/logout', icon: <FaSignOutAlt className="mr-2" /> }];
+  const baseLinks = [
+    {
+      label: "Logout",
+      action: () => {
+        dispatch(logout());
+        navigate("/auth");
+      }
+    }
+  ];
+  
 
   const roleBasedLinks = {
     customer: [{ label: 'My Orders', path: '/my-orders', icon: <FaClipboardList className="mr-2" /> }],
@@ -58,7 +75,16 @@ const DashSidebar = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-700 text-white w-64 p-6 pt-24 shadow-lg flex flex-col">
       <nav className="flex flex-col space-y-3">
-        {navLinks.map((link) => (
+      {navLinks.map((link) =>
+        link.action ? (
+          <button
+            key={link.label}
+            onClick={link.action}
+            className="px-4 py-2 text-left rounded-lg w-full transition-all duration-300 hover:bg-gray-600 text-gray-300"
+          >
+            {link.label}
+          </button>
+        ) : (
           <Link
             key={link.path}
             to={link.path}
@@ -71,7 +97,9 @@ const DashSidebar = () => {
             {link.icon}
             {link.label}
           </Link>
-        ))}
+        )
+      )}
+
       </nav>
 
       <div className="mt-auto pt-6 border-t border-gray-600 text-sm text-center text-gray-400">

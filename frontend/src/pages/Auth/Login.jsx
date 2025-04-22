@@ -30,7 +30,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) navigate("/u");
+    if (token) navigate("/");
   }, [navigate]);
 
   const handleLogin = async () => {
@@ -51,19 +51,10 @@ export default function LoginPage() {
         setTimeout(() => {
           switch (user.role) {
             case "customer":
-              navigate("/profile");
-              break;
-            case "restaurant_admin":
-              navigate("/profile");
-              break;
-            case "delivery_person":
-              navigate("/profile");
-              break;
-            case "admin":
-              navigate("/profile");
+              navigate("/");
               break;
             default:
-              navigate("/u");
+              navigate("/profile");
           }
         }, 1500); // 1.5 seconds delay
 
@@ -88,8 +79,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center px-6 mb-4">
-      <Paper elevation={4} className="w-full sm:w-[80%] md:w-2/4 p-10 rounded-3xl">
+    <div className="flex items-center justify-center">
+      <Paper elevation={4} className="w-full sm:w-[80%] md:w-3/4 pt-10 pb-10 pl-8 pr-8 rounded-3xl"
+      sx={{ borderRadius: "10px"}}>
       <h2 className="text-3xl font-bold text-center text-green-600 mb-8">Welcome Back</h2>
 
         <TextField
@@ -123,10 +115,10 @@ export default function LoginPage() {
         <Button
           variant="contained"
           fullWidth
-          sx={{ borderRadius: "999px", mt: 3, py: 1.5 }}
+          sx={{ borderRadius: "10px", mt: 3, py: 1.5 }}
           onClick={handleLogin}
         >
-          Sign In
+          Log In
         </Button>
 
         <Snackbar

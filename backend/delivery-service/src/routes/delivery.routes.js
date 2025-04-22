@@ -3,7 +3,8 @@ import {
   assignDelivery,
   updateDeliveryStatus,
   getDeliveriesByPerson,
-  getCompletedDeliveriesByPerson
+  getCompletedDeliveriesByPerson,
+  autoAssignDelivery
 } from '../controllers/delivery.controller.js';
 
 import authMiddleware from '../middleware/auth.js';
@@ -15,6 +16,9 @@ router.use(authMiddleware);
 
 // 📥 Assign a delivery person (admin/system)
 router.post('/assign', assignDelivery);
+
+// 📥 Auto-assign a delivery person (system)
+router.post('/auto-assign', autoAssignDelivery);
 
 // 🔁 Update delivery status (delivery person)
 router.put('/:id/status', updateDeliveryStatus);
