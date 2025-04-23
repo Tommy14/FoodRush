@@ -3,32 +3,56 @@ import cloudinary from '../config/cloudinary.js';
 
 /**
  * Upload a single image to Cloudinary
- * @param {Object} file - The file object from multer
+ * @param {String|Object} file - File path string or file object from multer
  * @param {String} folder - The folder in Cloudinary to store the image
  * @returns {Promise<Object>} - The Cloudinary upload result
  */
 export const uploadImage = async (file, folder = 'restaurants') => {
   try {
-    if (!file) return null;
+    if (!file) {
+      console.error('No file provided to uploadImage');
+      return null;
+    }
+    
+    // Determine if we have a file path string or a file object
+    const filePath = typeof file === 'string' ? file : file.path;
+    
+    console.log(`Uploading image from path: ${filePath}`);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      console.error(`File does not exist at path: ${filePath}`);
+      throw new Error('File not found');
+    }
     
     // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(file.path, {
+    const result = await cloudinary.uploader.upload(filePath, {
       folder: folder,
       resource_type: 'image'
     });
     
+    console.log(`Successfully uploaded to Cloudinary: ${result.secure_url}`);
+    
     // Remove the file from local storage after upload
-    fs.unlinkSync(file.path);
+    fs.unlinkSync(filePath);
     
     return {
       url: result.secure_url,
       publicId: result.public_id
     };
   } catch (error) {
-    // Remove the file if upload failed
-    if (file && file.path) {
-      fs.unlinkSync(file.path);
+    console.error('Error in uploadImage:', error);
+    
+    // Remove the file if upload failed and it exists
+    try {
+      const filePath = typeof file === 'string' ? file : file.path;
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (cleanupError) {
+      console.error('Error cleaning up file:', cleanupError);
     }
+    
     throw new Error(`Failed to upload image: ${error.message}`);
   }
 };

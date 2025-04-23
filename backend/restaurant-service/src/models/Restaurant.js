@@ -1,52 +1,114 @@
 import mongoose from 'mongoose';
+import { v4 as uuidv4 } from 'uuid'; 
 
 const restaurantSchema = new mongoose.Schema({
-  ownerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', required: true
-  },
   restaurantId: {
     type: String,
-    required: true,
     unique: true,
-    default: () => `rest_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`
-  },  
+    default: () => uuidv4()
+  },
   name: {
     type: String,
     required: true,
     trim: true
   },
-  address: {
+  description: {
     type: String,
     required: true
   },
-  phone: {
+  cuisineTypes: [{
+    type: String,
+    required: true
+  }],
+  priceRange: {
+    type: String,
+    enum: ['$', '$$', '$$$', '$$$$'],
+    default: '$$'
+  },
+  contactPhone: {
+    type: String,
+    required: true
+  },
+  contactEmail: {
     type: String
   },
-  logo: {
-    url: String,
-    publicId: String
+  // We'll store basic address info here for quick access
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    postalCode: String,
+    country: String
   },
-  coverImage: {
-    url: String,
-    publicId: String
-  },
-  images: [
-    {
-      url: String,
-      publicId: String
+  // Reference to location in the location service
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], 
+      default: [0, 0] 
     }
-  ],
+  },
+  // Add a reference to the location service entry
+  locationId: {
+    type: mongoose.Schema.Types.ObjectId
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  rating: {
+    type: Number,
+    default: 0
+  },
+  reviewCount: {
+    type: Number,
+    default: 0
+  },
+  isOpen: {
+    type: Boolean,
+    default: true
+  },
   status: {
     type: String,
     enum: ['PENDING', 'APPROVED', 'REJECTED'],
     default: 'PENDING'
   },
-  isOpen: {
-    type: Boolean,
-    default: false
+  openingHours: {
+    monday: { open: String, close: String, isClosed: Boolean },
+    tuesday: { open: String, close: String, isClosed: Boolean },
+    wednesday: { open: String, close: String, isClosed: Boolean },
+    thursday: { open: String, close: String, isClosed: Boolean },
+    friday: { open: String, close: String, isClosed: Boolean },
+    saturday: { open: String, close: String, isClosed: Boolean },
+    sunday: { open: String, close: String, isClosed: Boolean }
   },
-}, { timestamps: true });
+  logo: {
+    type: String
+  },
+  coverImage: {
+    type: String
+  },
+  images: [{
+    type: String
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
 
-const Restaurant = mongoose.model('Restaurant', restaurantSchema);
-export default Restaurant;
+restaurantSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+export default mongoose.model('Restaurant', restaurantSchema);

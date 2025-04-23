@@ -3,7 +3,7 @@ import Restaurant from '../models/Restaurant.js';
 export const createRestaurant = async (data, ownerId) => {
   return await Restaurant.create({
     ...data,
-    ownerId,
+    owner: ownerId,
     status: 'PENDING',
     isOpen: false
   });
@@ -22,11 +22,11 @@ export const getRestaurantById = async (id) => {
 };
 
 export const updateRestaurant = async (id, ownerId, data) => {
-  return await Restaurant.findOneAndUpdate({ _id: id, ownerId }, data, { new: true });
+  return await Restaurant.findOneAndUpdate({ _id: id, owner: ownerId }, data, { new: true });
 };
 
 export const deleteRestaurant = async (id, ownerId) => {
-  return await Restaurant.findOneAndDelete({ _id: id, ownerId });
+  return await Restaurant.findOneAndDelete({ _id: id, owner: ownerId });
 };
 
 export const getPendingRestaurants = async () => {
@@ -38,8 +38,33 @@ export const approveRestaurant = async (id) => {
 };
 
 export const toggleRestaurantStatus = async (id, ownerId) => {
-  const restaurant = await Restaurant.findOne({ _id: id, ownerId, status: 'APPROVED' });
+  const restaurant = await Restaurant.findOne({ _id: id, owner: ownerId, status: 'APPROVED' });
   if (!restaurant) throw new Error('Unauthorized or restaurant not approved');
   restaurant.isOpen = !restaurant.isOpen;
   return await restaurant.save();
 };
+
+
+export const updateRestaurantLocation = async (restaurantId, locationId, coordinates) => {
+  try {
+    // Update both the locationId reference and the embedded coordinates
+    return await Restaurant.findByIdAndUpdate(
+      restaurantId,
+      { 
+        locationId: locationId,
+        'location.coordinates': coordinates || [0, 0]
+      },
+      { new: true }
+    );
+  } catch (error) {
+    console.error('Error updating restaurant location:', error);
+    throw error;
+  }
+};
+
+// Add to restaurant.service.js
+export const getRestaurantsByOwnerId = async (ownerId) => {
+  return await Restaurant.find({ owner: ownerId })
+    .sort({ createdAt: -1 });
+};
+

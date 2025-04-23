@@ -55,7 +55,6 @@ const restaurantUpload = upload.fields([
   { name: 'images', maxCount: 10 }
 ]);
 
-// router.use(authenticate);
 
 // Utility function to safely delete file
 const safeDeleteFile = (filePath) => {
@@ -89,63 +88,181 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Public: Get single restaurant by ID
-router.get('/:id', async (req, res) => {
+// router.use(authenticate);
+// Add authentication middleware for protected routes
+router.use('/owner', authenticate);
+router.use('/admin', authenticate);
+// Restaurant Admin: Get all restaurants for the owner
+router.get('/owner', async (req, res) => {
   try {
-    const response = await axios.get(`${RESTAURANT_API}/${req.params.id}`);
+    const response = await axios.get(`${RESTAURANT_API}/owner`, {
+      headers: {
+        Authorization: req.headers.authorization
+      }
+    });
+    res.json(response.data);
+  } catch (err) {
+    console.error('Get owner restaurants error:', err);
+    res.status(err.response?.status || 500).json({ 
+      message: err.response?.data?.message || 'Failed to fetch your restaurants'
+    });
+  }
+});
+
+// Admin: Get all restaurants
+router.get('/admin/all', async (req, res) => {
+  try {
+    const response = await axios.get(`${RESTAURANT_API}/admin/all`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    });
     res.json(response.data);
   } catch (err) {
     res.status(err.response?.status || 500).json({ message: err.message });
   }
 });
 
+// Admin: Get pending restaurants
+router.get('/admin/pending', async (req, res) => {
+  try {
+    const response = await axios.get(`${RESTAURANT_API}/admin/pending`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ message: err.message });
+  }
+});
+// Modify the POST route handler for restaurant creation
+
+
+// Public: Get single restaurant by ID
+router.get('/:id', async (req, res) => {
+  try {
+    console.log('BFF - Fetching restaurant details for ID:', req.params.id);
+    
+    // Prepare headers to forward any auth token if present
+    const headers = {};
+    if (req.headers.authorization) {
+      headers.Authorization = req.headers.authorization;
+    }
+    
+    // Forward the request with any auth headers
+    const response = await axios.get(`${RESTAURANT_API}/${req.params.id}`, { headers });
+    
+    // Enrich response with owner details if available
+    if (response.data && response.data.owner) {
+      try {
+        const USER_API = process.env.USER_SERVICE;
+        const ownerResponse = await axios.get(`${USER_API}/users/${response.data.owner}`, { headers });
+        
+        if (ownerResponse.data) {
+          response.data.ownerName = ownerResponse.data.name;
+          response.data.ownerId = ownerResponse.data._id;
+        }
+      } catch (ownerErr) {
+        console.error('Unable to fetch owner details:', ownerErr.message);
+        // Continue without owner details
+      }
+    }
+    
+    console.log('Restaurant details retrieved successfully');
+    res.json(response.data);
+  } catch (err) {
+    console.error(`Error fetching restaurant ${req.params.id}:`, err.message);
+    
+    if (err.response) {
+      return res.status(err.response.status).json(err.response.data);
+    }
+    
+    res.status(500).json({ 
+      message: 'Failed to fetch restaurant details',
+      error: err.message 
+    });
+  }
+});
+
+// General authentication middleware for remaining routes
 router.use(authenticate);
+
 
 // Restaurant Admin: Create restaurant with file upload
 router.post('/', restaurantUpload, async (req, res) => {
   try {
+    console.log('BFF - Restaurant creation request received');
+    console.log('Request body:', req.body);
+    console.log('Request files:', req.files ? Object.keys(req.files) : 'No files');
+    
     const formData = new FormData();
     
-    // Add JSON data
+    // Add JSON data - handle fields that need to be JSON strings properly
     Object.keys(req.body).forEach(key => {
-      formData.append(key, req.body[key]);
+      // For arrays like cuisineTypes, we need special handling
+      if (key === 'cuisineTypes') {
+        if (Array.isArray(req.body[key])) {
+          req.body[key].forEach(item => {
+            formData.append(key, item);
+          });
+        } else {
+          // If it's a single value
+          formData.append(key, req.body[key]);
+        }
+      } 
+      // For objects that need to be sent as JSON strings
+      else if (key === 'address' || key === 'openingHours') {
+        try {
+          // Check if it's already a string
+          const value = typeof req.body[key] === 'string' 
+            ? req.body[key] 
+            : JSON.stringify(req.body[key]);
+          formData.append(key, value);
+        } catch (e) {
+          console.error(`Error processing ${key}:`, e);
+          formData.append(key, req.body[key]);
+        }
+      }
+      // For regular fields
+      else {
+        formData.append(key, req.body[key]);
+      }
     });
     
     // Add files if they exist
     if (req.files) {
       // Handle logo file
       if (req.files.logo && req.files.logo[0]) {
-        formData.append('logo', trackedReadStream(req.files.logo[0].path), {
+        console.log('Adding logo file:', req.files.logo[0].originalname);
+        formData.append('logo', fs.createReadStream(req.files.logo[0].path), {
           filename: req.files.logo[0].originalname,
-          contentType: req.files.logo[0].mimetype,
-          knownLength: req.files.logo[0].size
+          contentType: req.files.logo[0].mimetype
         });
       }
       
       // Handle coverImage file
       if (req.files.coverImage && req.files.coverImage[0]) {
-        formData.append('coverImage', trackedReadStream(req.files.coverImage[0].path), {
+        console.log('Adding cover image:', req.files.coverImage[0].originalname);
+        formData.append('coverImage', fs.createReadStream(req.files.coverImage[0].path), {
           filename: req.files.coverImage[0].originalname,
-          contentType: req.files.coverImage[0].mimetype,
-          knownLength: req.files.coverImage[0].size
+          contentType: req.files.coverImage[0].mimetype
         });
       }
       
       // Handle multiple gallery images
       if (req.files.images) {
+        console.log('Adding gallery images:', req.files.images.length);
         req.files.images.forEach(image => {
-          formData.append('images', trackedReadStream(image.path), {
+          formData.append('images', fs.createReadStream(image.path), {
             filename: image.originalname,
-            contentType: image.mimetype,
-            knownLength: image.size
+            contentType: image.mimetype
           });
         });
       }
     }
     
-    // Debug information
-    console.log('FormData headers:', formData.getHeaders());
-    
+    console.log('Forwarding request to restaurant service...');
     const response = await axios.post(`${RESTAURANT_API}/`, formData, {
       headers: {
         ...formData.getHeaders(),
@@ -155,22 +272,61 @@ router.post('/', restaurantUpload, async (req, res) => {
       maxBodyLength: Infinity
     });
     
-    // Clean up temp files
-    // cleanupFiles(req.files);
+    console.log('Restaurant created successfully');
+    
+    // Clean up temp files after successful creation
+    if (req.files) {
+      Object.keys(req.files).forEach(key => {
+        const files = req.files[key];
+        if (Array.isArray(files)) {
+          files.forEach(file => {
+            fs.unlink(file.path, err => {
+              if (err) console.error(`Failed to delete temp file ${file.path}:`, err);
+            });
+          });
+        }
+      });
+    }
     
     res.status(201).json(response.data);
   } catch (err) {
-    console.error('Error details:', err);
+    console.error('Restaurant creation error in BFF:', err.message);
+    
+    // Add more detailed error information
+    if (err.response) {
+      console.error('Response status:', err.response.status);
+      console.error('Response data:', err.response.data);
+    }
     
     // Clean up temp files on error
-    // cleanupFiles(req.files);
+    if (req.files) {
+      Object.keys(req.files).forEach(key => {
+        const files = req.files[key];
+        if (Array.isArray(files)) {
+          files.forEach(file => {
+            fs.unlink(file.path, err => {
+              if (err) console.error(`Failed to delete temp file ${file.path}:`, err);
+            });
+          });
+        }
+      });
+    }
     
-    res.status(err.response?.status || 500).json({ 
-      message: err.message,
-      details: err.response?.data || 'Unknown error'
-    });
+    // Send appropriate error response
+    if (err.response) {
+      res.status(err.response.status).json({ 
+        message: err.response.data.message || err.message,
+        details: err.response.data 
+      });
+    } else {
+      res.status(500).json({ 
+        message: 'Failed to create restaurant',
+        error: err.message 
+      });
+    }
   }
 });
+
 
 // Restaurant Admin: Update restaurant with file upload
 router.put('/:id', restaurantUpload, async (req, res) => {
@@ -258,34 +414,6 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Admin: Get all restaurants
-router.get('/admin/all', async (req, res) => {
-  try {
-    const response = await axios.get(`${RESTAURANT_API}/admin/all`, {
-      headers: {
-        Authorization: req.headers.authorization,
-      },
-    });
-    res.json(response.data);
-  } catch (err) {
-    res.status(err.response?.status || 500).json({ message: err.message });
-  }
-});
-
-// Admin: Get pending restaurants
-router.get('/admin/pending', async (req, res) => {
-  try {
-    const response = await axios.get(`${RESTAURANT_API}/admin/pending`, {
-      headers: {
-        Authorization: req.headers.authorization,
-      },
-    });
-    res.json(response.data);
-  } catch (err) {
-    res.status(err.response?.status || 500).json({ message: err.message });
-  }
-});
-
 // Admin: Approve restaurant
 router.patch('/:id/approve', async (req, res) => {
   try {
@@ -313,5 +441,8 @@ router.patch('/:id/toggle', async (req, res) => {
     res.status(err.response?.status || 500).json({ message: err.message });
   }
 });
+
+
+
 
 export default router;

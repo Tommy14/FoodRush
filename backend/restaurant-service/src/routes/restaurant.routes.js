@@ -9,7 +9,8 @@ import {
   getPendingRestaurants,
   approveRestaurant,
   toggleRestaurantOpenStatus,
-  deleteRestaurantImage
+  deleteRestaurantImage,
+  getOwnerRestaurants
 } from '../controllers/restaurant.controller.js';
 
 import authMiddleware from '../middleware/auth.js';
@@ -25,20 +26,23 @@ const restaurantUpload = upload.fields([
   { name: 'images', maxCount: 10 }
 ]);
 
-// 🔓 Public
+// Public Routes
 router.get('/', getAllRestaurants);
-router.get('/:id', getRestaurantById);
 
-// 🔐 Restaurant Owner
+// Restaurant Owner Routes - Specific routes first
+router.get('/owner', authMiddleware, requireRole('restaurant_admin'), getOwnerRestaurants);
 router.post('/', authMiddleware, requireRole('restaurant_admin'), restaurantUpload, createRestaurant);
+
+// Admin Routes
+router.get('/admin/all', authMiddleware, requireRole('admin'), getAllRestaurantsForAdmin);
+router.get('/admin/pending', authMiddleware, requireRole('admin'), getPendingRestaurants);
+
+// Parameterized routes last
+router.get('/:id', getRestaurantById);
 router.put('/:id', authMiddleware, requireRole('restaurant_admin'), restaurantUpload, updateRestaurant);
 router.delete('/:id', authMiddleware, requireRole('restaurant_admin'), deleteRestaurant);
 router.patch('/:id/toggle', authMiddleware, requireRole('restaurant_admin'), toggleRestaurantOpenStatus);
-router.delete('/:restaurantId/images/:imageId', authMiddleware, requireRole('restaurant_admin'), deleteRestaurantImage);
-
-// 🔐 Admin
-router.get('/admin/all', authMiddleware, requireRole('admin'), getAllRestaurantsForAdmin);
-router.get('/admin/pending', authMiddleware, requireRole('admin'), getPendingRestaurants);
 router.patch('/:id/approve', authMiddleware, requireRole('admin'), approveRestaurant);
+router.delete('/:restaurantId/images/:imageId', authMiddleware, requireRole('restaurant_admin'), deleteRestaurantImage);
 
 export default router;

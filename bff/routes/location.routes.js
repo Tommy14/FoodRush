@@ -20,7 +20,7 @@ const buildUrl = (path) => {
   return `${getServiceBaseUrl()}${path}`;
 };
 
-// 🟢 PUBLIC: Geocode an address to coordinates
+// PUBLIC: Geocode an address to coordinates
 router.post('/geocode', async (req, res) => {
   try {
     const url = buildUrl('/geocode');
@@ -32,7 +32,7 @@ router.post('/geocode', async (req, res) => {
   }
 });
 
-// 🟢 PUBLIC: Reverse geocode coordinates to address
+// PUBLIC: Reverse geocode coordinates to address
 router.get('/reverse-geocode', async (req, res) => {
   try {
     const url = buildUrl('/reverse-geocode');
@@ -44,7 +44,24 @@ router.get('/reverse-geocode', async (req, res) => {
   }
 });
 
-// 🟢 PUBLIC: Find nearby restaurants
+// Address autocomplete for location suggestions
+router.get('/autocomplete', async (req, res) => {
+  try {
+    const url = buildUrl('/autocomplete');
+    const response = await axios.get(url, { 
+      params: req.query
+    });
+    res.json(response.data);
+  } catch (err) {
+    console.error('Address autocomplete error:', err.message);
+    res.status(err.response?.status || 500).json({ 
+      message: err.message,
+      predictions: [] 
+    });
+  }
+});
+
+// PUBLIC: Find nearby restaurants
 router.get('/nearby', async (req, res) => {
   try {
     const url = buildUrl('/nearby');
@@ -56,7 +73,7 @@ router.get('/nearby', async (req, res) => {
   }
 });
 
-// 🔐 PROTECTED: Save location (requires authentication)
+// PROTECTED: Save location (requires authentication)
 router.post('/', authenticate, async (req, res) => {
   try {
     const url = buildUrl('');
@@ -72,7 +89,7 @@ router.post('/', authenticate, async (req, res) => {
   }
 });
 
-// 🟢 PUBLIC: Get location by entity
+// PUBLIC: Get location by entity
 router.get('/:entityType/:entityId', async (req, res) => {
   try {
     const { entityType, entityId } = req.params;
@@ -86,3 +103,5 @@ router.get('/:entityType/:entityId', async (req, res) => {
 });
 
 export default router;
+
+
