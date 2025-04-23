@@ -6,11 +6,10 @@ const orderItemSchema = new mongoose.Schema({
     ref: 'MenuItem',
     required: true
   },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 1
-  }
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  quantity: { type: Number, required: true },
+  imageUrl: { type: String } // optional for UI
 }, { _id: false });
 
 const orderSchema = new mongoose.Schema({
@@ -19,33 +18,68 @@ const orderSchema = new mongoose.Schema({
     required: true,
     ref: 'User'
   },
+  customerName: { type: String },
+  customerEmail: { type: String },
+  contactNumber: { type: String },
+
   restaurantId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'Restaurant'
   },
+  restaurantName: { type: String },
+
   items: {
     type: [orderItemSchema],
     required: true
   },
-  status: {
-    type: String,
-    enum: ['placed', 'confirmed', 'preparing', 'ready_for_delivery', 'cancelled', 'picked_up', 'delivered'],
-    default: 'placed'
-  },
+
   totalAmount: {
     type: Number,
     required: true
   },
+
   deliveryAddress: {
     type: String,
     required: true
   },
+
   paymentMethod: {
     type: String,
     enum: ['cash', 'card'],
     default: 'cash'
   },
+
+  status: {
+    type: String,
+    enum: [
+      'pending',
+      'awaiting_payment',
+      'placed',
+      'preparing',
+      'ready_for_delivery',
+      'picked_up',
+      'delivered',
+      'cancelled'
+    ],
+    default: 'pending'
+  },
+
+  paymentStatus: {
+    type: String,
+    enum: ['not_paid', 'paid', 'failed'],
+    default: 'not_paid'
+  },
+
+  editable: {
+    type: Boolean,
+    default: true
+  },
+
+  placedAt: {
+    type: Date,
+    default: Date.now
+  }
 }, { timestamps: true });
 
 const Order = mongoose.model('Order', orderSchema);
