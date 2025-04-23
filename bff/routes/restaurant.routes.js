@@ -1,12 +1,12 @@
-import express from 'express';
-import axios from 'axios';
-import dotenv from 'dotenv';
-import { once } from 'events';
-import { authenticate } from '../middleware/auth.js';
-import multer from 'multer';
-import FormData from 'form-data';
-import fs from 'fs';
-import path from 'path';
+import express from "express";
+import axios from "axios";
+import dotenv from "dotenv";
+import { once } from "events";
+import { authenticate } from "../middleware/auth.js";
+import multer from "multer";
+import FormData from "form-data";
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
 
@@ -14,7 +14,7 @@ const router = express.Router();
 const RESTAURANT_API = process.env.RESTAURANT_SERVICE;
 
 // Ensure upload directory exists
-const uploadDir = path.join(process.cwd(), 'tmp', 'uploads');
+const uploadDir = path.join(process.cwd(), "tmp", "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -22,7 +22,7 @@ if (!fs.existsSync(uploadDir)) {
 const trackedReadStream = (filePath) => {
   const stream = fs.createReadStream(filePath);
   process.nextTick(() => {
-    once(stream, 'close').then(() => {
+    once(stream, "close").then(() => {
       fs.unlink(filePath, (err) => {
         if (err) console.error(`Failed to delete ${filePath}`, err);
       });
@@ -37,24 +37,23 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`);
-  }
+    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`);
+  },
 });
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
 });
 
 // Restaurant upload middleware
 const restaurantUpload = upload.fields([
-  { name: 'logo', maxCount: 1 },
-  { name: 'coverImage', maxCount: 1 },
-  { name: 'images', maxCount: 10 }
+  { name: "logo", maxCount: 1 },
+  { name: "coverImage", maxCount: 1 },
+  { name: "images", maxCount: 10 },
 ]);
-
 
 // Utility function to safely delete file
 const safeDeleteFile = (filePath) => {
@@ -70,19 +69,53 @@ const safeDeleteFile = (filePath) => {
 // Utility function to clean up all uploaded files
 const cleanupFiles = (files) => {
   if (!files) return;
-  
-  Object.keys(files).forEach(key => {
-    files[key].forEach(file => {
+
+  Object.keys(files).forEach((key) => {
+    files[key].forEach((file) => {
       safeDeleteFile(file.path);
     });
   });
 };
 
 // Public: Get all approved restaurants
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const response = await axios.get(`${RESTAURANT_API}/`);
-    res.json(response.data);
+
+    // Enrich all restaurants with location data
+    if (response.data && Array.isArray(response.data)) {
+      const LOCATION_API = process.env.LOCATION_SERVICE;
+      const enrichedRestaurants = await Promise.all(
+        response.data.map(async (restaurant) => {
+          if (restaurant._id) {
+            try {
+              const locationResponse = await axios.get(
+                `${LOCATION_API}/restaurant/${restaurant._id}`
+              );
+
+              if (locationResponse.data) {
+                return {
+                  ...restaurant,
+                  formattedAddress:
+                    locationResponse.data.address?.formattedAddress,
+                  coordinates: locationResponse.data.location?.coordinates,
+                };
+              }
+            } catch (err) {
+              console.error(
+                `Failed to fetch location for restaurant ${restaurant._id}:`,
+                err
+              );
+            }
+          }
+          return restaurant;
+        })
+      );
+
+      res.json(enrichedRestaurants);
+    } else {
+      res.json(response.data);
+    }
   } catch (err) {
     res.status(err.response?.status || 500).json({ message: err.message });
   }
@@ -90,27 +123,28 @@ router.get('/', async (req, res) => {
 
 // router.use(authenticate);
 // Add authentication middleware for protected routes
-router.use('/owner', authenticate);
-router.use('/admin', authenticate);
+router.use("/owner", authenticate);
+router.use("/admin", authenticate);
 // Restaurant Admin: Get all restaurants for the owner
-router.get('/owner', async (req, res) => {
+router.get("/owner", async (req, res) => {
   try {
     const response = await axios.get(`${RESTAURANT_API}/owner`, {
       headers: {
-        Authorization: req.headers.authorization
-      }
+        Authorization: req.headers.authorization,
+      },
     });
     res.json(response.data);
   } catch (err) {
-    console.error('Get owner restaurants error:', err);
-    res.status(err.response?.status || 500).json({ 
-      message: err.response?.data?.message || 'Failed to fetch your restaurants'
+    console.error("Get owner restaurants error:", err);
+    res.status(err.response?.status || 500).json({
+      message:
+        err.response?.data?.message || "Failed to fetch your restaurants",
     });
   }
 });
 
 // Admin: Get all restaurants
-router.get('/admin/all', async (req, res) => {
+router.get("/admin/all", async (req, res) => {
   try {
     const response = await axios.get(`${RESTAURANT_API}/admin/all`, {
       headers: {
@@ -124,7 +158,7 @@ router.get('/admin/all', async (req, res) => {
 });
 
 // Admin: Get pending restaurants
-router.get('/admin/pending', async (req, res) => {
+router.get("/admin/pending", async (req, res) => {
   try {
     const response = await axios.get(`${RESTAURANT_API}/admin/pending`, {
       headers: {
@@ -138,49 +172,79 @@ router.get('/admin/pending', async (req, res) => {
 });
 // Modify the POST route handler for restaurant creation
 
-
 // Public: Get single restaurant by ID
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
-    console.log('BFF - Fetching restaurant details for ID:', req.params.id);
-    
+    console.log("BFF - Fetching restaurant details for ID:", req.params.id);
+
     // Prepare headers to forward any auth token if present
     const headers = {};
     if (req.headers.authorization) {
       headers.Authorization = req.headers.authorization;
     }
-    
+
     // Forward the request with any auth headers
-    const response = await axios.get(`${RESTAURANT_API}/${req.params.id}`, { headers });
-    
+    const response = await axios.get(`${RESTAURANT_API}/${req.params.id}`, {
+      headers,
+    });
+
     // Enrich response with owner details if available
     if (response.data && response.data.owner) {
       try {
         const USER_API = process.env.USER_SERVICE;
-        const ownerResponse = await axios.get(`${USER_API}/users/${response.data.owner}`, { headers });
-        
+        const ownerResponse = await axios.get(
+          `${USER_API}/users/${response.data.owner}`,
+          { headers }
+        );
+
         if (ownerResponse.data) {
           response.data.ownerName = ownerResponse.data.name;
           response.data.ownerId = ownerResponse.data._id;
         }
       } catch (ownerErr) {
-        console.error('Unable to fetch owner details:', ownerErr.message);
+        console.error("Unable to fetch owner details:", ownerErr.message);
         // Continue without owner details
       }
     }
-    
-    console.log('Restaurant details retrieved successfully');
+
+    // STEP 2: Enrich with location data
+    if (response.data && response.data._id) {
+      try {
+        const LOCATION_API = process.env.LOCATION_SERVICE;
+        const locationResponse = await axios.get(
+          `${LOCATION_API}/restaurant/${response.data._id}`,
+          { headers }
+        );
+
+        if (locationResponse.data) {
+          // Only add what's truly needed
+          response.data.coordinates =
+            locationResponse.data.location?.coordinates;
+          // Maybe add distance if user coordinates are provided in query
+          if (req.query.lat && req.query.lng) {
+            response.data.distance = calculateDistance(
+              [req.query.lng, req.query.lat],
+              locationResponse.data.location?.coordinates
+            );
+          }
+        }
+      } catch (locationErr) {
+        console.error("Unable to fetch location details:", locationErr.message);
+      }
+    }
+
+    console.log("Restaurant details retrieved successfully");
     res.json(response.data);
   } catch (err) {
     console.error(`Error fetching restaurant ${req.params.id}:`, err.message);
-    
+
     if (err.response) {
       return res.status(err.response.status).json(err.response.data);
     }
-    
-    res.status(500).json({ 
-      message: 'Failed to fetch restaurant details',
-      error: err.message 
+
+    res.status(500).json({
+      message: "Failed to fetch restaurant details",
+      error: err.message,
     });
   }
 });
@@ -188,36 +252,39 @@ router.get('/:id', async (req, res) => {
 // General authentication middleware for remaining routes
 router.use(authenticate);
 
-
 // Restaurant Admin: Create restaurant with file upload
-router.post('/', restaurantUpload, async (req, res) => {
+router.post("/", restaurantUpload, async (req, res) => {
   try {
-    console.log('BFF - Restaurant creation request received');
-    console.log('Request body:', req.body);
-    console.log('Request files:', req.files ? Object.keys(req.files) : 'No files');
-    
+    console.log("BFF - Restaurant creation request received");
+    console.log("Request body:", req.body);
+    console.log(
+      "Request files:",
+      req.files ? Object.keys(req.files) : "No files"
+    );
+
     const formData = new FormData();
-    
+
     // Add JSON data - handle fields that need to be JSON strings properly
-    Object.keys(req.body).forEach(key => {
+    Object.keys(req.body).forEach((key) => {
       // For arrays like cuisineTypes, we need special handling
-      if (key === 'cuisineTypes') {
+      if (key === "cuisineTypes") {
         if (Array.isArray(req.body[key])) {
-          req.body[key].forEach(item => {
+          req.body[key].forEach((item) => {
             formData.append(key, item);
           });
         } else {
           // If it's a single value
           formData.append(key, req.body[key]);
         }
-      } 
+      }
       // For objects that need to be sent as JSON strings
-      else if (key === 'address' || key === 'openingHours') {
+      else if (key === "address" || key === "openingHours") {
         try {
           // Check if it's already a string
-          const value = typeof req.body[key] === 'string' 
-            ? req.body[key] 
-            : JSON.stringify(req.body[key]);
+          const value =
+            typeof req.body[key] === "string"
+              ? req.body[key]
+              : JSON.stringify(req.body[key]);
           formData.append(key, value);
         } catch (e) {
           console.error(`Error processing ${key}:`, e);
@@ -229,165 +296,181 @@ router.post('/', restaurantUpload, async (req, res) => {
         formData.append(key, req.body[key]);
       }
     });
-    
+
     // Add files if they exist
     if (req.files) {
       // Handle logo file
       if (req.files.logo && req.files.logo[0]) {
-        console.log('Adding logo file:', req.files.logo[0].originalname);
-        formData.append('logo', fs.createReadStream(req.files.logo[0].path), {
+        console.log("Adding logo file:", req.files.logo[0].originalname);
+        formData.append("logo", fs.createReadStream(req.files.logo[0].path), {
           filename: req.files.logo[0].originalname,
-          contentType: req.files.logo[0].mimetype
+          contentType: req.files.logo[0].mimetype,
         });
       }
-      
+
       // Handle coverImage file
       if (req.files.coverImage && req.files.coverImage[0]) {
-        console.log('Adding cover image:', req.files.coverImage[0].originalname);
-        formData.append('coverImage', fs.createReadStream(req.files.coverImage[0].path), {
-          filename: req.files.coverImage[0].originalname,
-          contentType: req.files.coverImage[0].mimetype
-        });
+        console.log(
+          "Adding cover image:",
+          req.files.coverImage[0].originalname
+        );
+        formData.append(
+          "coverImage",
+          fs.createReadStream(req.files.coverImage[0].path),
+          {
+            filename: req.files.coverImage[0].originalname,
+            contentType: req.files.coverImage[0].mimetype,
+          }
+        );
       }
-      
+
       // Handle multiple gallery images
       if (req.files.images) {
-        console.log('Adding gallery images:', req.files.images.length);
-        req.files.images.forEach(image => {
-          formData.append('images', fs.createReadStream(image.path), {
+        console.log("Adding gallery images:", req.files.images.length);
+        req.files.images.forEach((image) => {
+          formData.append("images", fs.createReadStream(image.path), {
             filename: image.originalname,
-            contentType: image.mimetype
+            contentType: image.mimetype,
           });
         });
       }
     }
-    
-    console.log('Forwarding request to restaurant service...');
+
+    console.log("Forwarding request to restaurant service...");
     const response = await axios.post(`${RESTAURANT_API}/`, formData, {
       headers: {
         ...formData.getHeaders(),
         Authorization: req.headers.authorization,
       },
       maxContentLength: Infinity,
-      maxBodyLength: Infinity
+      maxBodyLength: Infinity,
     });
-    
-    console.log('Restaurant created successfully');
-    
+
+    console.log("Restaurant created successfully");
+
     // Clean up temp files after successful creation
     if (req.files) {
-      Object.keys(req.files).forEach(key => {
+      Object.keys(req.files).forEach((key) => {
         const files = req.files[key];
         if (Array.isArray(files)) {
-          files.forEach(file => {
-            fs.unlink(file.path, err => {
-              if (err) console.error(`Failed to delete temp file ${file.path}:`, err);
+          files.forEach((file) => {
+            fs.unlink(file.path, (err) => {
+              if (err)
+                console.error(`Failed to delete temp file ${file.path}:`, err);
             });
           });
         }
       });
     }
-    
+
     res.status(201).json(response.data);
   } catch (err) {
-    console.error('Restaurant creation error in BFF:', err.message);
-    
+    console.error("Restaurant creation error in BFF:", err.message);
+
     // Add more detailed error information
     if (err.response) {
-      console.error('Response status:', err.response.status);
-      console.error('Response data:', err.response.data);
+      console.error("Response status:", err.response.status);
+      console.error("Response data:", err.response.data);
     }
-    
+
     // Clean up temp files on error
     if (req.files) {
-      Object.keys(req.files).forEach(key => {
+      Object.keys(req.files).forEach((key) => {
         const files = req.files[key];
         if (Array.isArray(files)) {
-          files.forEach(file => {
-            fs.unlink(file.path, err => {
-              if (err) console.error(`Failed to delete temp file ${file.path}:`, err);
+          files.forEach((file) => {
+            fs.unlink(file.path, (err) => {
+              if (err)
+                console.error(`Failed to delete temp file ${file.path}:`, err);
             });
           });
         }
       });
     }
-    
+
     // Send appropriate error response
     if (err.response) {
-      res.status(err.response.status).json({ 
+      res.status(err.response.status).json({
         message: err.response.data.message || err.message,
-        details: err.response.data 
+        details: err.response.data,
       });
     } else {
-      res.status(500).json({ 
-        message: 'Failed to create restaurant',
-        error: err.message 
+      res.status(500).json({
+        message: "Failed to create restaurant",
+        error: err.message,
       });
     }
   }
 });
 
-
 // Restaurant Admin: Update restaurant with file upload
-router.put('/:id', restaurantUpload, async (req, res) => {
+router.put("/:id", restaurantUpload, async (req, res) => {
   try {
     const formData = new FormData();
-    
+
     // Add JSON data
-    Object.keys(req.body).forEach(key => {
+    Object.keys(req.body).forEach((key) => {
       formData.append(key, req.body[key]);
     });
-    
+
     // Add files if they exist
     if (req.files) {
       if (req.files.logo && req.files.logo[0]) {
-        formData.append('logo', trackedReadStream(req.files.logo[0].path), {
+        formData.append("logo", trackedReadStream(req.files.logo[0].path), {
           filename: req.files.logo[0].originalname,
-          contentType: req.files.logo[0].mimetype
+          contentType: req.files.logo[0].mimetype,
         });
       }
-      
+
       if (req.files.coverImage && req.files.coverImage[0]) {
-        formData.append('coverImage', trackedReadStream(req.files.coverImage[0].path), {
-          filename: req.files.coverImage[0].originalname,
-          contentType: req.files.coverImage[0].mimetype
-        });
+        formData.append(
+          "coverImage",
+          trackedReadStream(req.files.coverImage[0].path),
+          {
+            filename: req.files.coverImage[0].originalname,
+            contentType: req.files.coverImage[0].mimetype,
+          }
+        );
       }
-      
+
       if (req.files.images) {
-        req.files.images.forEach(image => {
-          formData.append('images', trackedReadStream(image.path), {
+        req.files.images.forEach((image) => {
+          formData.append("images", trackedReadStream(image.path), {
             filename: image.originalname,
-            contentType: image.mimetype
+            contentType: image.mimetype,
           });
         });
       }
     }
-    
-    const response = await axios.put(`${RESTAURANT_API}/${req.params.id}`, formData, {
-      headers: {
-        ...formData.getHeaders(),
-        Authorization: req.headers.authorization,
-      },
-    });
-    
+
+    const response = await axios.put(
+      `${RESTAURANT_API}/${req.params.id}`,
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+          Authorization: req.headers.authorization,
+        },
+      }
+    );
+
     // Clean up temp files
     // cleanupFiles(req.files);
-    
+
     res.json(response.data);
   } catch (err) {
     // Clean up temp files on error
     // cleanupFiles(req.files);
-    
+
     res.status(err.response?.status || 500).json({ message: err.message });
   }
 });
 
 // Restaurant Admin: Delete restaurant image
-router.delete('/:restaurantId/images/:imageId', async (req, res) => {
+router.delete("/:restaurantId/images/:imageId", async (req, res) => {
   try {
     const response = await axios.delete(
-      `${RESTAURANT_API}/${req.params.restaurantId}/images/${req.params.imageId}`, 
+      `${RESTAURANT_API}/${req.params.restaurantId}/images/${req.params.imageId}`,
       {
         headers: {
           Authorization: req.headers.authorization,
@@ -401,7 +484,7 @@ router.delete('/:restaurantId/images/:imageId', async (req, res) => {
 });
 
 // Restaurant Admin: Delete restaurant
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const response = await axios.delete(`${RESTAURANT_API}/${req.params.id}`, {
       headers: {
@@ -415,13 +498,17 @@ router.delete('/:id', async (req, res) => {
 });
 
 // Admin: Approve restaurant
-router.patch('/:id/approve', async (req, res) => {
+router.patch("/:id/approve", async (req, res) => {
   try {
-    const response = await axios.patch(`${RESTAURANT_API}/${req.params.id}/approve`, {}, {
-      headers: {
-        Authorization: req.headers.authorization,
-      },
-    });
+    const response = await axios.patch(
+      `${RESTAURANT_API}/${req.params.id}/approve`,
+      {},
+      {
+        headers: {
+          Authorization: req.headers.authorization,
+        },
+      }
+    );
     res.json(response.data);
   } catch (err) {
     res.status(err.response?.status || 500).json({ message: err.message });
@@ -429,20 +516,21 @@ router.patch('/:id/approve', async (req, res) => {
 });
 
 // Restaurant Admin: Toggle open status
-router.patch('/:id/toggle', async (req, res) => {
+router.patch("/:id/toggle", async (req, res) => {
   try {
-    const response = await axios.patch(`${RESTAURANT_API}/${req.params.id}/toggle`, {}, {
-      headers: {
-        Authorization: req.headers.authorization,
-      },
-    });
+    const response = await axios.patch(
+      `${RESTAURANT_API}/${req.params.id}/toggle`,
+      {},
+      {
+        headers: {
+          Authorization: req.headers.authorization,
+        },
+      }
+    );
     res.json(response.data);
   } catch (err) {
     res.status(err.response?.status || 500).json({ message: err.message });
   }
 });
-
-
-
 
 export default router;

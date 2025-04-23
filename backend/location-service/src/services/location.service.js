@@ -31,19 +31,28 @@ export const getLocationByEntity = async (entityId, entityType) => {
 // Find nearby restaurants
 export const findNearbyRestaurants = async (latitude, longitude, maxDistance = 10000) => {
   try {
-    // maxDistance is in meters
-    return await Location.find({
-      entityType: 'restaurant',
-      location: {
-        $near: {
-          $geometry: {
-            type: 'Point',
-            coordinates: [longitude, latitude] // GeoJSON format: [longitude, latitude]
-          },
-          $maxDistance: maxDistance
+    // Use MongoDB aggregation for richer results with distance calculation
+    return await Location.aggregate([
+      {
+        $geoNear: {
+          near: { type: "Point", coordinates: [longitude, latitude] },
+          distanceField: "distance", 
+          maxDistance: maxDistance,
+          query: { entityType: "restaurant" },
+          spherical: true
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          entityId: 1, 
+          address: 1,
+          location: 1,
+          distance: 1,
+          formattedAddress: "$address.formattedAddress"
         }
       }
-    }).select('entityId address location -_id');
+    ]);
   } catch (error) {
     console.error('Error finding nearby restaurants:', error);
     throw error;
