@@ -12,7 +12,7 @@ export default function CartSidebar({ isOpen, onClose }) {
       ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
       <div className="flex justify-between items-center p-4 border-b">
         <h2 className="text-lg font-bold">🛒 Your Cart</h2>
-        <button onClick={onClose} className="text-gray-600 hover:text-gray-800">&times;</button>
+        <button onClick={() => onClose(false)} className="text-gray-600 hover:text-gray-800 text-4xl">&times;</button>
       </div>
 
       {cartItems.length === 0 ? (
