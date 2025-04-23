@@ -10,10 +10,10 @@ import {
   FaSearch,
 } from "react-icons/fa";
 import { MdDeliveryDining, MdLocationOn } from "react-icons/md";
-import LocationSearchBar from "../components/LocationSearchBar";
-import FoodCategories from "../components/FoodCategories";
-import RestaurantCard from "../components/RestaurantCard";
-import { getAllRestaurants } from "../services/restaurantService";
+import LocationSearchBar from "../../components/restaurants/LocationSearchBar";
+import FoodCategories from "../../components/restaurants/FoodCategories";
+import RestaurantCard from "../../components/restaurants/RestaurantCard";
+import { getAllRestaurants } from "../../services/restaurantService";
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -55,6 +55,8 @@ const RestaurantList = () => {
               );
               restaurantsData = await getAllRestaurants();
             }
+
+            
           } catch (err) {
             console.error("Error fetching nearby restaurants:", err);
             // Fall back to getting all restaurants
@@ -127,7 +129,16 @@ const RestaurantList = () => {
     const matchesCategory =
       category === "all" ||
       (restaurant.cuisineType &&
-        restaurant.cuisineType.toLowerCase().includes(category.toLowerCase()));
+        (Array.isArray(restaurant.cuisineType)
+          ? restaurant.cuisineType.some(
+              (cuisine) =>
+                cuisine.toLowerCase() === category.toLowerCase() ||
+                cuisine.toLowerCase().includes(category.toLowerCase())
+            )
+          : restaurant.cuisineType.toLowerCase() === category.toLowerCase() ||
+            restaurant.cuisineType
+              .toLowerCase()
+              .includes(category.toLowerCase())));
 
     // Filter by search query (case insensitive)
     const matchesSearch =
@@ -168,6 +179,20 @@ const RestaurantList = () => {
       return aDist - bDist;
     }
   });
+
+  console.log(
+    "Restaurant cuisine types:",
+    restaurants.map((r) => r.cuisineType)
+  );
+  console.log("Selected category:", category);
+  console.log(
+    "Matching restaurants:",
+    restaurants.filter(
+      (r) =>
+        r.cuisineType &&
+        r.cuisineType.toLowerCase().includes(category.toLowerCase())
+    )
+  );
 
   // Toggle filter
   const toggleFilter = (filterType) => {

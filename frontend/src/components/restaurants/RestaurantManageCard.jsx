@@ -1,48 +1,59 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
+  FaEdit,
+  FaTrashAlt,
+  FaEye,
+  FaToggleOn,
+  FaToggleOff,
   FaStar,
   FaRegStar,
   FaStarHalfAlt,
-  FaMotorcycle,
-  FaHeart,
-  FaRegHeart,
 } from "react-icons/fa";
 import { MdAccessTime, MdLocationOn, MdRateReview } from "react-icons/md";
 import { useSelector } from "react-redux";
-import { getRestaurantReviewSummary } from "../services/restaurantService";
+import { getRestaurantReviewSummary } from "../../services/restaurantService";
 
-const RestaurantCard = ({ restaurant }) => {
+const RestaurantManageCard = ({ restaurant, onToggle, onDelete }) => {
   const [ratingSummary, setRatingSummary] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isFavorite, setIsFavorite] = useState(false);
   const auth = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchRatingSummary = async () => {
       try {
-        // Only fetch if restaurant ID exists
-        if (restaurant && restaurant._id) {
-          setLoading(true);
-          const data = await getRestaurantReviewSummary(
-            restaurant._id,
-            auth?.token || null
-          );
-          setRatingSummary(data);
-        } else {
-          setRatingSummary(null);
-        }
+        const data = await getRestaurantReviewSummary(
+          restaurant._id,
+          auth.token
+        );
+        setRatingSummary(data);
       } catch (err) {
         console.error("Error fetching rating summary:", err);
-        // Return default data to avoid error display
-        setRatingSummary({ averageRating: 0, totalReviews: 0 });
       } finally {
         setLoading(false);
       }
     };
 
     fetchRatingSummary();
-  }, [restaurant, restaurant?._id, auth?.token]);
+  }, [restaurant._id, auth.token]);
+
+  const getStatusBadge = (status) => {
+    const badgeClasses = {
+      PENDING: "bg-yellow-100 text-yellow-800 border-yellow-300",
+      APPROVED: "bg-green-100 text-green-800 border-green-300",
+      REJECTED: "bg-red-100 text-red-800 border-red-300",
+    };
+
+    return (
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium border ${
+          badgeClasses[status] || "bg-gray-100 text-gray-800 border-gray-300"
+        }`}
+      >
+        {status}
+      </span>
+    );
+  };
 
   // Generate rating stars display
   const renderRatingStars = (rating) => {
@@ -54,7 +65,7 @@ const RestaurantCard = ({ restaurant }) => {
       if (i < fullStars) {
         stars.push(<FaStar key={i} className="text-yellow-500" />);
       } else if (i === fullStars && hasHalfStar) {
-        stars.push(<FaStarHalfAlt key={i} className="text-yellow-500" />);
+        stars.push(<FaStarHalfAlt key={i} className="text-yellow-500" />); // Use half star icon
       } else {
         stars.push(<FaRegStar key={i} className="text-gray-300" />);
       }
@@ -63,37 +74,8 @@ const RestaurantCard = ({ restaurant }) => {
     return <div className="flex">{stars}</div>;
   };
 
-  // Toggle favorite (could be connected to a real service in the future)
-  const toggleFavorite = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsFavorite(!isFavorite);
-  };
-
-  // Get cuisine tags
-  const renderCuisineTags = () => {
-    if (!restaurant || !restaurant._id) {
-      return (
-        <div className="bg-gray-100 rounded-lg h-full p-4">
-          Loading restaurant data...
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-wrap gap-1 mt-1">
-        <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-800">
-          {restaurant.cuisineType}
-        </span>
-      </div>
-    );
-  };
-
   return (
-    <Link
-      to={`/restaurants/${restaurant._id}`}
-      className="block h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
-    >
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 w-full max-w-md mx-auto">
       <div className="relative">
         {/* Cover Image */}
         <div className="h-48 overflow-hidden">
@@ -107,18 +89,6 @@ const RestaurantCard = ({ restaurant }) => {
           />
         </div>
 
-        {/* Favorite Button */}
-        <button
-          onClick={toggleFavorite}
-          className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-colors"
-        >
-          {isFavorite ? (
-            <FaHeart className="text-red-500" />
-          ) : (
-            <FaRegHeart className="text-gray-500" />
-          )}
-        </button>
-
         {/* Logo Overlay */}
         <div className="absolute bottom-0 left-4 transform translate-y-1/2">
           <div className="p-1 bg-white rounded-full shadow-lg">
@@ -128,6 +98,11 @@ const RestaurantCard = ({ restaurant }) => {
               className="h-16 w-16 object-cover rounded-full"
             />
           </div>
+        </div>
+
+        {/* Status Badge */}
+        <div className="absolute top-3 right-3">
+          {getStatusBadge(restaurant.status)}
         </div>
 
         {/* Open/Closed Status */}
@@ -145,12 +120,24 @@ const RestaurantCard = ({ restaurant }) => {
       </div>
 
       <div className="p-4 pt-10">
-        <h2 className="text-xl font-semibold line-clamp-1">
-          {restaurant.name}
-        </h2>
-
-        {/* Cuisine Tags */}
-        {renderCuisineTags()}
+        <div className="flex justify-between items-start">
+          <h2 className="text-xl font-semibold line-clamp-1">
+            {restaurant.name}
+          </h2>
+          <button
+            onClick={() => onToggle(restaurant._id, restaurant.isOpen)}
+            className={`text-xl ${
+              restaurant.isOpen ? "text-green-500" : "text-gray-400"
+            } hover:opacity-80 transition-opacity`}
+            title={
+              restaurant.isOpen
+                ? "Currently Open - Click to Close"
+                : "Currently Closed - Click to Open"
+            }
+          >
+            {restaurant.isOpen ? <FaToggleOn /> : <FaToggleOff />}
+          </button>
+        </div>
 
         {/* Rating Summary Section */}
         <div className="mt-3 border border-gray-100 rounded-md p-3 bg-gray-50">
@@ -179,47 +166,51 @@ const RestaurantCard = ({ restaurant }) => {
               No reviews yet
             </div>
           )}
-          {ratingSummary === null && !loading && (
-            <div className="text-center text-sm text-red-500 py-1">
-              Could not load reviews
-            </div>
-          )}
         </div>
 
         <div className="mt-3 text-sm text-gray-600">
           <div className="flex items-start mb-1">
             <MdLocationOn className="mr-1 mt-0.5 flex-shrink-0" />
-            <span className="line-clamp-1 flex items-center">
-              {/* Use original address instead of geocoded address */}
-              {restaurant.originalAddress
-                ? `${restaurant.originalAddress.street}, ${restaurant.originalAddress.city}, ${restaurant.originalAddress.postalCode}`
-                : restaurant.geocodedAddress}
+            <span className="line-clamp-1">
+              {restaurant.address?.formattedAddress ||
+                `${restaurant.address?.street || ""}, ${
+                  restaurant.address?.city || ""
+                }`}
             </span>
           </div>
-
-          <div className="flex flex-wrap gap-3 mt-2">
-            <div className="flex items-center">
-              <MdAccessTime className="mr-1 flex-shrink-0" />
-              <span>{restaurant.estimatedDeliveryTime || "30-45"} min</span>
-            </div>
-
-            {restaurant.distance && (
-              <div className="flex items-center">
-                <FaMotorcycle className="mr-1 flex-shrink-0" />
-                <span>{(restaurant.distance / 1000).toFixed(1)} km</span>
-              </div>
-            )}
+          <div className="flex items-center">
+            <MdAccessTime className="mr-1 flex-shrink-0" />
+            <span>
+              {restaurant.estimatedDeliveryTime || "30-45"} min delivery
+            </span>
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t">
-          <button className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded transition-colors">
-            View Menu
+        <div className="mt-4 pt-3 border-t flex justify-between items-center">
+          <Link
+            to={`/restaurants/${restaurant._id}`}
+            className="inline-flex items-center px-3 py-1.5 rounded text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors"
+          >
+            <FaEye className="mr-1" /> View
+          </Link>
+
+          <Link
+            to={`/edit-restaurant/${restaurant._id}`}
+            className="inline-flex items-center px-3 py-1.5 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
+          >
+            <FaEdit className="mr-1" /> Edit
+          </Link>
+
+          <button
+            onClick={() => onDelete(restaurant._id)}
+            className="inline-flex items-center px-3 py-1.5 rounded text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
+          >
+            <FaTrashAlt className="mr-1" /> Delete
           </button>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
-export default RestaurantCard;
+export default RestaurantManageCard;
