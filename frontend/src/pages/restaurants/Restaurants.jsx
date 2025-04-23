@@ -180,19 +180,6 @@ const RestaurantList = () => {
     }
   });
 
-  console.log(
-    "Restaurant cuisine types:",
-    restaurants.map((r) => r.cuisineType)
-  );
-  console.log("Selected category:", category);
-  console.log(
-    "Matching restaurants:",
-    restaurants.filter(
-      (r) =>
-        r.cuisineType &&
-        r.cuisineType.toLowerCase().includes(category.toLowerCase())
-    )
-  );
 
   // Toggle filter
   const toggleFilter = (filterType) => {

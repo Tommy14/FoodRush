@@ -72,6 +72,16 @@ const RestaurantCard = ({ restaurant }) => {
 
   // Get cuisine tags
   const renderCuisineTags = () => {
+    if (!restaurant.cuisineType) {
+      return (
+        <div className="flex flex-wrap gap-1 mt-1">
+          <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-800">
+            Other
+          </span>
+        </div>
+      );
+    }
+
     if (!restaurant || !restaurant._id) {
       return (
         <div className="bg-gray-100 rounded-lg h-full p-4">
