@@ -165,3 +165,63 @@ async function sendDeliveryUpdateEmail(delivery) {
     console.error('Delivery updated, but failed to send email:', err.message);
   }
 }
+
+
+// async function sendDeliveryUpdateEmail(delivery) {
+//   const order = await axios.get(`${ORDER_SERVICE_URL}/api/orders/${delivery.orderId.toString()}`, {
+//     headers: {
+//       Authorization: `Bearer ${SYSTEM_JWT}`
+//     }
+//   });
+ 
+//   const customer = await axios.get(`${USER_SERVICE_URL}/api/users/by/${order.data.order.customerId}`, {
+//     headers: {
+//       Authorization: `Bearer ${SYSTEM_JWT}`
+//     }
+//   });
+//   console.log('Customer data:', customer.data);
+//   const deliveryPerson = await axios.get(`${USER_SERVICE_URL}/api/users/by/${delivery.deliveryPersonId}`, {
+//     headers: {
+//       Authorization: `Bearer ${SYSTEM_JWT}`
+//     }
+//   });
+//   const emailPayload = {
+//     recipient: {
+//       email: order.data.order.customerEmail,
+//     },
+//     subject: 'Your order has been delivered! 🎉',
+//     type: 'orderDelivered',
+//     data: {
+//       customerName: customer.data.name,
+//       restaurantName: order.data.order.restaurantName,
+//       orderId: delivery.orderId.toString(),
+//       total: order.data.order.totalAmount,
+//       paymentMethod: order.data.order.paymentMethod,
+//       orderDateTime: new Date(order.data.order.createdAt).toLocaleString('en-US', {
+//         timeZone: 'Asia/Colombo',
+//         dateStyle: 'long',
+//         timeStyle: 'short'
+//       }),
+//       deliveryAddress: order.data.order.deliveryAddress,
+//       deliveryPerson: deliveryPerson.data.name, // ✅ FIXED from array
+//       updatedAt: new Date().toLocaleString('en-US', {
+//         timeZone: 'Asia/Colombo',
+//         dateStyle: 'long',
+//         timeStyle: 'short'
+//       })
+//     }
+//   };
+  
+//   console.log('📨 Final email payload:\n', JSON.stringify(emailPayload, null, 2));
+  
+//   try {
+//     await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/email`, emailPayload, {
+//       headers: {
+//         'X-Internal-API-Key': INTERNAL_SERVICE_API_KEY
+//       }
+//     });
+//   } catch (err) {
+//     console.error('❌ Email send failed:', err.response?.data || err.message);
+//   }
+  
+// }
