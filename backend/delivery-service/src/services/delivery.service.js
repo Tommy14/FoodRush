@@ -2,7 +2,52 @@ import Delivery from '../models/Delivery.js';
 import axios from 'axios';
 import { NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY, ORDER_SERVICE_URL, SYSTEM_JWT, USER_SERVICE_URL, RESTAURANT_SERVICE_URL} from '../config/index.js';
 
+
+export const autoAssignDeliveryService = async (orderId) => {
+  try {
+    // 1. Fetch delivery personnel from User Service
+    const res = await axios.get(`${USER_SERVICE_URL}/api/users/role/delivery_person`, {
+      headers: {
+        Authorization: `Bearer ${SYSTEM_JWT}`
+      }
+    });
+    console.log('Fetched delivery personnel:', res.data);
+    const availableDrivers = res.data.filter(user => user.isAvailable);
+
+    if (availableDrivers.length === 0) {
+      throw new Error('No available delivery personnel at the moment');
+    }
+    console.log('Available delivery personnel:', availableDrivers);
+
+    // 2. Pick one (you can randomize or use logic like load balancing)
+    const selectedDriver = availableDrivers[0];
+    console.log('Selected driver:', selectedDriver);
+
+    // Update the selected driver to not available
+    // await axios.put(`${USER_SERVICE_URL}/api/users/${selectedDriver.id}`, {
+    //   isAvailable: false
+    // }, {
+    //   headers: {
+    //     Authorization: `Bearer ${SYSTEM_JWT}`
+    //   }
+    // });
+
+    // 3. Assign delivery
+    const assignedDelivery = await assignDeliveryService({
+      orderId,
+      deliveryPersonId: selectedDriver.id
+    });
+
+    return assignedDelivery;
+
+  } catch (error) {
+    console.error('Failed to auto-assign delivery:', error.message);
+    throw error;
+  }
+};
+
 export const assignDeliveryService = async ({ orderId, deliveryPersonId }) => {
+  console.log('Assigning delivery:', orderId, deliveryPersonId);
   const delivery = new Delivery({
     orderId,
     deliveryPersonId,
