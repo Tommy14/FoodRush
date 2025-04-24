@@ -15,6 +15,8 @@ import FoodCategories from "../../components/restaurants/FoodCategories";
 import RestaurantCard from "../../components/restaurants/RestaurantCard";
 import { getAllRestaurants } from "../../services/restaurantService";
 
+const MAX_LOCATION_AGE = 4 * 60 * 60 * 1000; // 4 hours
+
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [error, setError] = useState("");
@@ -56,7 +58,7 @@ const RestaurantList = () => {
               restaurantsData = await getAllRestaurants();
             }
 
-            
+
           } catch (err) {
             console.error("Error fetching nearby restaurants:", err);
             // Fall back to getting all restaurants
@@ -81,7 +83,6 @@ const RestaurantList = () => {
     fetchRestaurants();
   }, [location]);
 
-  // Rest of your component remains the same...
   // Handle location change
   const handleLocationChange = (newLocation) => {
     if (
@@ -93,7 +94,13 @@ const RestaurantList = () => {
     } else {
       console.error("Invalid location format:", newLocation);
     }
-    localStorage.setItem("userLocation", JSON.stringify(newLocation));
+    localStorage.setItem(
+      "userLocation",
+      JSON.stringify({
+        ...newLocation,
+        timestamp: Date.now(),
+      })
+    );
   };
 
   // Check for saved location on component mount
@@ -101,7 +108,16 @@ const RestaurantList = () => {
     const savedLocation = localStorage.getItem("userLocation");
     if (savedLocation) {
       try {
-        setLocation(JSON.parse(savedLocation));
+        const parsedLocation = JSON.parse(savedLocation);
+        if (
+          parsedLocation.timestamp &&
+          Date.now() - parsedLocation.timestamp > MAX_LOCATION_AGE
+        ) {
+          // Prompt user to refresh location or do it silently
+          console.log("Location data is outdated. Please refresh.");
+        } else {
+          setLocation(parsedLocation);
+        }
       } catch (e) {
         localStorage.removeItem("userLocation");
       }
