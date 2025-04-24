@@ -172,13 +172,13 @@ const RestaurantDetails = ({ restaurant, isOwner = false }) => {
               </div>
             </div>
             
-            <div className="flex items-center bg-gray-50 p-3 rounded-lg">
+            {/* <div className="flex items-center bg-gray-50 p-3 rounded-lg">
               <MdRestaurantMenu className="text-xl text-amber-600 mr-2" />
               <div>
                 <p className="text-sm text-gray-500">Minimum Order</p>
                 <p className="font-medium">${restaurant.minimumOrder || '0'}</p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 

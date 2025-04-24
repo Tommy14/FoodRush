@@ -1,7 +1,7 @@
 // src/components/LocationSearchBar.jsx
 import { useState, useRef } from "react";
 import { MdLocationOn, MdMyLocation } from "react-icons/md";
-import axios from "axios";
+import LocationService from "../../services/locationService";
 
 export default function LocationSearchBar({ onLocationChange }) {
   const [address, setAddress] = useState("");
@@ -26,10 +26,10 @@ export default function LocationSearchBar({ onLocationChange }) {
       // Set a new timeout to fetch predictions after user stops typing
       timeoutRef.current = setTimeout(async () => {
         try {
-          const response = await axios.get(
-            `/bff/location/autocomplete?input=${encodeURIComponent(value)}`
+          const predictions = await LocationService.getAutocompletePredictions(
+            value
           );
-          setPredictions(response.data.predictions || []);
+          setPredictions(predictions);
         } catch (error) {
           console.error("Error fetching address suggestions:", error);
         } finally {
@@ -47,56 +47,32 @@ export default function LocationSearchBar({ onLocationChange }) {
     setPredictions([]);
 
     try {
-      // Get the detailed place information including coordinates
-      const response = await axios.post("/bff/location/geocode", {
+      const locationData = await LocationService.geocodeAddress({
         address: prediction.description,
         placeId: prediction.place_id,
       });
 
-      onLocationChange({
-        address: prediction.description,
-        coordinates: response.data.coordinates,
-        placeId: prediction.place_id,
-      });
+      onLocationChange(locationData);
     } catch (error) {
       console.error("Error getting location details:", error);
     }
   };
 
   // Get current location
-  const handleGetCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
+  const handleGetCurrentLocation = async () => {
+    setLoading(true);
+    try {
+      const locationData = await LocationService.getCurrentLocation();
 
-          try {
-            // Reverse geocode to get address from coordinates
-            const response = await axios.get(
-              `/bff/location/reverse-geocode?lat=${latitude}&lng=${longitude}`
-            );
-            setAddress(response.data.formattedAddress);
-
-            onLocationChange({
-              coordinates: [longitude, latitude], // Order matters: [lng, lat]
-              formattedAddress: response.data.formattedAddress,
-            });
-          } catch (error) {
-            console.error("Error getting address from location:", error);
-          }
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-          setLoading(false);
-          // Add user feedback
-          alert(
-            "Could not access your location. Please check your device permissions."
-          );
-        },
-        { timeout: 10000, maximumAge: 60000 }
+      setAddress(locationData.address);
+      onLocationChange(locationData);
+    } catch (error) {
+      console.error("Geolocation error:", error);
+      alert(
+        "Could not access your location. Please check your device permissions."
       );
-    } else {
-      alert("Geolocation is not supported by your browser");
+    } finally {
+      setLoading(false);
     }
   };
 

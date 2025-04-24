@@ -200,10 +200,38 @@ const RestaurantCard = ({ restaurant }) => {
           <div className="flex items-start mb-1">
             <MdLocationOn className="mr-1 mt-0.5 flex-shrink-0" />
             <span className="line-clamp-1 flex items-center">
-              {/* Use original address instead of geocoded address */}
-              {restaurant.originalAddress
-                ? `${restaurant.originalAddress.street}, ${restaurant.originalAddress.city}, ${restaurant.originalAddress.postalCode}`
-                : restaurant.geocodedAddress}
+              <div className="text-gray-500 text-sm flex items-start mt-1">
+                <MdLocationOn className="text-gray-400 mt-0.5 mr-1 flex-shrink-0" />
+                <span>
+                  {/* Prefer original address when available */}
+                  {(() => {
+                    // First check for original address
+                    if (restaurant.originalAddress) {
+                      if (typeof restaurant.originalAddress === "object") {
+                        return `${restaurant.originalAddress.street || ""}, ${
+                          restaurant.originalAddress.city || ""
+                        }`;
+                      }
+                      return restaurant.originalAddress;
+                    }
+                    // Fall back to geocoded address
+                    if (restaurant.geocodedAddress) {
+                      return restaurant.geocodedAddress;
+                    }
+                    // Handle standard address field
+                    if (restaurant.address) {
+                      if (typeof restaurant.address === "object") {
+                        return `${restaurant.address.street || ""}, ${
+                          restaurant.address.city || ""
+                        }`;
+                      }
+                      return restaurant.address;
+                    }
+                    // Last resort
+                    return "Address unavailable";
+                  })()}
+                </span>
+              </div>
             </span>
           </div>
 
