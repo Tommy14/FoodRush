@@ -64,6 +64,8 @@ const DashSidebar = () => {
       { label: 'My Deliveries', path: '/delivery-panel', icon: <FaClipboardList className="mr-2" /> },
       { label: 'Completed', path: '/delivery/completed', icon: <FaClipboardList className="mr-2" /> }
     ],
+    admin: [
+      { label: 'Manage Restaurant Status', path: '/restaurant-status', icon: <FaClipboardList className="mr-2" /> }    ],
     guest: guestLinks
   };
 

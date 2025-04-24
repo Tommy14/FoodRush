@@ -496,7 +496,25 @@ router.delete("/:id", async (req, res) => {
     res.status(err.response?.status || 500).json({ message: err.message });
   }
 });
-
+// Admin: Get pending restaurants
+router.patch("/:id/status", async (req, res) => {
+  try {
+    const response = await axios.patch(
+      `${RESTAURANT_API}/${req.params.id}/status`,
+      { status: req.body.status },
+      {
+        headers: {
+          Authorization: req.headers.authorization,
+        },
+      }
+    );
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ 
+      message: err.response?.data?.message || err.message 
+    });
+  }
+});
 // Admin: Approve restaurant
 router.patch("/:id/approve", async (req, res) => {
   try {
