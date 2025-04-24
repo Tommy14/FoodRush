@@ -29,6 +29,13 @@ CLOUDINARY_CLOUD_NAME=dmrybsytq
 CLOUDINARY_API_KEY=639529596749839
 CLOUDINARY_API_SECRET=LLv92igpMuVVJK4BVxoGNvMngTY
 
+location service
+MONGO_URI_LOCATION_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/location-db?retryWrites=true&w=majority&appName=Cluster
+LOCATION_PORT=9500
+LOCATION_SERVICE_URL=http://localhost:9500
+GOOGLE_MAPS_API_KEY=<Enter the key here>
+INTERNAL_SERVICE_API_KEY=foodrush@internalKey
+
 userservice
 MONGO_URI_USER_SERVICE=mongodb+srv://foodrush:foodrush@cluster.kohvd0u.mongodb.net/user-auth-db?retryWrites=true&w=majority&appName=Cluster
 USER_PORT=9000
