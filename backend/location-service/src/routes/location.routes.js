@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/autocomplete', locationController.getPlaceSuggestions);
 router.post('/geocode', locationController.geocodeAddress);
 router.get('/reverse-geocode', locationController.reverseGeocode);
-router.get('/nearby', locationController.findNearbyRestaurants);
+router.get('/nearby', locationController.getNearbyRestaurants);
 router.get('/:entityType/:entityId', locationController.getLocation);
 
 // Protected routes

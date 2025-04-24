@@ -25,7 +25,7 @@ const ProfileRedirect = () => {
           navigate('/delivery-panel');
           break;
         case 'restaurant_admin':
-          navigate('/restaurant-dashboard');
+          navigate('/manage-restaurants');
           break;
         default:
           navigate('/');

@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import DashSidebar from '../components/DashSidebar';
+import DashSidebar from '../../components/DashSidebar';
 import { FaCamera, FaUpload, FaSpinner, FaPlusCircle, FaTimes } from 'react-icons/fa';
-import { v4 as uuidv4 } from 'uuid'; // Add this import
+import { v4 as uuidv4 } from 'uuid';
 
 const CreateRestaurant = () => {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ const CreateRestaurant = () => {
   const [cuisineInput, setCuisineInput] = useState('');
   
   const [formData, setFormData] = useState({
-    restaurantId: uuidv4(), // Set a unique ID by default
+    restaurantId: uuidv4(),
     name: '',
     description: '',
     cuisineTypes: [],

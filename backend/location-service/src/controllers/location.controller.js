@@ -98,31 +98,6 @@ export const getLocation = async (req, res) => {
   }
 };
 
-// Find nearby restaurants
-export const findNearbyRestaurants = async (req, res) => {
-  try {
-    const { lat, lng, distance } = req.query;
-
-    if (!lat || !lng) {
-      return res
-        .status(400)
-        .json({ message: "Latitude and longitude are required" });
-    }
-
-    const maxDistance = distance ? parseInt(distance) : 10000; // Default 10km
-    const nearbyLocations = await locationService.findNearbyRestaurants(
-      lat,
-      lng,
-      maxDistance
-    );
-
-    res.json(nearbyLocations);
-  } catch (error) {
-    console.error("Find nearby restaurants error:", error);
-    res.status(500).json({ message: error.message });
-  }
-};
-
 // Get place suggestions
 export const getPlaceSuggestions = async (req, res) => {
   try {
@@ -146,5 +121,29 @@ export const getPlaceSuggestions = async (req, res) => {
       message: "Failed to fetch address suggestions. Please try again later.",
       predictions: [],
     });
+  }
+};
+
+// Get nearby restaurants
+export const getNearbyRestaurants = async (req, res) => {
+  try {
+    const { lat, lng, distance } = req.query;
+    
+    if (!lat || !lng) {
+      return res.status(400).json({ message: "Latitude and longitude are required" });
+    }
+    
+    // Use the service function to perform the search
+    const locations = await locationService.findNearbyRestaurants(
+      parseFloat(lat), 
+      parseFloat(lng),
+      distance ? parseInt(distance) : 10000
+    );
+    
+    // Return the locations along with entityIds to the client
+    res.json(locations);
+  } catch (error) {
+    console.error("Nearby restaurants error:", error);
+    res.status(500).json({ message: error.message });
   }
 };
