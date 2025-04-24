@@ -15,6 +15,7 @@ import CreateRestaurant from '../pages/restaurants/CreateRestaurant';
 import ManageRestaurants from '../pages/restaurants/ManageRestaurants';
 import RestaurantDetailsPage from '../pages/restaurants/RestaurantDetailsPage';
 import RestaurantOrdersPage from '../pages/RestaurantOrdersPage';
+import ContactUs from '../pages/ContactUs';
 
 
 
@@ -25,6 +26,7 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<Home />}/>
         <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<ContactUs />} />
         <Route path="/delivery-panel" element={<DeliveryDashboard />} />
         <Route path="/delivery/completed" element={<CompletedDeliveries />} />
         <Route path="/restaurants" element={<RestaurantList />} />
