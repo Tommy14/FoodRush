@@ -132,3 +132,19 @@ router.post("/reject-user", async (req, res) => {
   }
 });
 export default router;
+
+router.get("/all-users", async (req, res) => {
+  try {
+    const response = await axios.get(`${AUTH_API}/all-users`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    });
+    res.json(response.data);
+  } catch (err) {
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.message || "Server error";
+    console.error("BFF All Users Error:", message);
+    res.status(status).json({ message });
+  }
+});

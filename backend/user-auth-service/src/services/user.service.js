@@ -310,3 +310,20 @@ export const rejectUserService = async (userId, reason) => {
     rejectionReason: user.rejectionReason,
   };
 };
+
+// Get all users (for admin management)
+export const getAllUsersService = async () => {
+  const users = await User.find({});
+  
+  return users.map((user) => ({
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    phone: user.phone,
+    createdAt: user.createdAt,
+    isActive: user.isActive,
+    status: user.isActive ? 'active' : (user.rejectionReason ? 'rejected' : 'pending'),
+    rejectionReason: user.rejectionReason || null
+  }));
+};

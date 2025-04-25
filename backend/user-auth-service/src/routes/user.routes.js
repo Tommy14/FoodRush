@@ -8,7 +8,8 @@ import {
   getUsersByRoleController,
   getPendingActivationsController,
   updateUserActivationController,
-  rejectUserController
+  rejectUserController,
+  getAllUsersController
 } from "../controllers/user.controller.js";
 import { verifyToken } from "../middleware/auth.js";
 
@@ -23,5 +24,6 @@ router.get('/availability', verifyToken, getAvailabilityController);
 router.get("/pending-activations", verifyToken, getPendingActivationsController);
 router.post("/activate-user", verifyToken, updateUserActivationController);
 router.post("/reject-user", verifyToken, rejectUserController);
+router.get("/all-users", verifyToken, getAllUsersController);
 
 export default router;

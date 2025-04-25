@@ -8,6 +8,7 @@ import {
   getPendingActivationsService,
   updateUserActivationService,
   rejectUserService,
+  getAllUsersService
 } from '../services/user.service.js';
 
 // @desc Register a new user
@@ -183,5 +184,24 @@ export const rejectUserController = async (req, res) => {
     res
       .status(status)
       .json({ message: err.message || "Server error during user rejection" });
+  }
+};
+
+export const getAllUsersController = async (req, res) => {
+  try {
+    // Only admins should access this endpoint
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized. Admin access required." });
+    }
+
+    const users = await getAllUsersService();
+    res.json(users);
+  } catch (err) {
+    console.error("Error fetching all users:", err.message);
+    res
+      .status(500)
+      .json({ message: "Server error while fetching users" });
   }
 };
