@@ -4,8 +4,8 @@ import Home from '../pages/Home';
 
 import Navbar from '../components/Navbar';
 import About from '../pages/About';
-import DeliveryDashboard from '../pages/DeliveryDashboard';
-import CompletedDeliveries from '../pages/CompletedDeliveries';
+import DeliveryDashboard from '../pages/delivery/DeliveryDashboard';
+import CompletedDeliveries from '../pages/delivery/CompletedDeliveries';
 import RestaurantList from '../pages/restaurants/Restaurants';
 import MenuPage from '../pages/MenuPage';
 import AuthPage from '../pages/Auth/AuthPage';

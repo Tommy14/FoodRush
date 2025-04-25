@@ -1,8 +1,8 @@
 // src/pages/CompletedDeliveries.jsx
 
 import { useEffect, useState } from 'react';
-import { fetchCompletedDeliveries } from '../services/deliveryService'; 
-import DashSidebar from '../components/DashSidebar';
+import { fetchCompletedDeliveries } from '../../services/deliveryService'; 
+import DashSidebar from '../../components/DashSidebar';
 
 const CompletedDeliveries = () => {
   const [deliveries, setDeliveries] = useState([]);

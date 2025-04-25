@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { fetchAssignedOrders, updateDeliveryStatus, fetchAvailability, toggleAvailability} from '../services/deliveryService';
-import { apiPrivate } from '../config/api';
-import DashSidebar from '../components/DashSidebar';
+import { fetchAssignedOrders, updateDeliveryStatus, fetchAvailability, toggleAvailability} from '../../services/deliveryService';
+import { apiPrivate } from '../../config/api';
+import DashSidebar from '../../components/DashSidebar';
 
 const DeliveryDashboard = () => {
   const [deliveries, setDeliveries] = useState([]);
