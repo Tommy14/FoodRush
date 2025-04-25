@@ -14,6 +14,9 @@ import LocationSearchBar from "../../components/restaurants/LocationSearchBar";
 import FoodCategories from "../../components/restaurants/FoodCategories";
 import RestaurantCard from "../../components/restaurants/RestaurantCard";
 import { getAllRestaurants } from "../../services/restaurantService";
+import LocationService from "../../services/locationService";
+import Footer from "../../components/Footer";
+
 
 const MAX_LOCATION_AGE = 4 * 60 * 60 * 1000; // 4 hours
 
@@ -30,6 +33,7 @@ const RestaurantList = () => {
     maxDeliveryTime: null,
     sort: "nearest",
   });
+
   useEffect(() => {
     const fetchRestaurants = async () => {
       setLoading(true);
@@ -39,16 +43,13 @@ const RestaurantList = () => {
         // If location is available, fetch nearby restaurants
         if (location && location.coordinates) {
           try {
-            const endpoint = `/bff/location/nearby?lat=${location.coordinates[1]}&lng=${location.coordinates[0]}&distance=10000`;
-            const response = await axios.get(endpoint);
+            // Use the location service
+            restaurantsData = await LocationService.findNearbyRestaurants(
+              location.coordinates,
+              10000
+            );
 
-            // Check if we got back valid restaurant data
-            if (
-              response.data &&
-              Array.isArray(response.data) &&
-              response.data.length > 0
-            ) {
-              restaurantsData = response.data;
+            if (Array.isArray(restaurantsData) && restaurantsData.length > 0) {
               console.log("Found nearby restaurants:", restaurantsData.length);
             } else {
               // Fall back to getting all restaurants if nearby search returned no results
@@ -57,8 +58,6 @@ const RestaurantList = () => {
               );
               restaurantsData = await getAllRestaurants();
             }
-
-
           } catch (err) {
             console.error("Error fetching nearby restaurants:", err);
             // Fall back to getting all restaurants
@@ -69,6 +68,37 @@ const RestaurantList = () => {
           restaurantsData = await getAllRestaurants();
           console.log("No location provided, fetching all restaurants");
         }
+
+        // Validate restaurant data
+        restaurantsData = restaurantsData
+          .filter(
+            (restaurant) =>
+              restaurant && typeof restaurant === "object" && restaurant._id
+          )
+          .map((restaurant) => {
+            // Store the original restaurant address
+            const originalAddress = restaurant.address;
+
+            // Format address if it's an object (for display purposes)
+            const formattedAddress =
+              typeof originalAddress === "object"
+                ? `${originalAddress.street || ""}, ${
+                    originalAddress.city || ""
+                  }`
+                : originalAddress;
+
+            return {
+              ...restaurant,
+              distance: restaurant.distance || null,
+              estimatedDeliveryTime: restaurant.estimatedDeliveryTime || 30,
+              geocodedAddress:
+                restaurant.geocodedAddress ||
+                formattedAddress ||
+                "Location unavailable",
+              // Add the original address explicitly
+              originalAddress: originalAddress,
+            };
+          });
 
         setRestaurants(restaurantsData);
         setError("");
@@ -90,17 +120,28 @@ const RestaurantList = () => {
       Array.isArray(newLocation.coordinates) &&
       newLocation.coordinates.length === 2
     ) {
-      setLocation(newLocation);
+      // Ensure that the location always has an address field
+      const updatedLocation = {
+        ...newLocation,
+        address:
+          newLocation.address ||
+          newLocation.formattedAddress ||
+          "Location selected",
+      };
+
+      setLocation(updatedLocation);
+
+      // Store in localStorage
+      localStorage.setItem(
+        "userLocation",
+        JSON.stringify({
+          ...updatedLocation,
+          timestamp: Date.now(),
+        })
+      );
     } else {
       console.error("Invalid location format:", newLocation);
     }
-    localStorage.setItem(
-      "userLocation",
-      JSON.stringify({
-        ...newLocation,
-        timestamp: Date.now(),
-      })
-    );
   };
 
   // Check for saved location on component mount
@@ -109,6 +150,11 @@ const RestaurantList = () => {
     if (savedLocation) {
       try {
         const parsedLocation = JSON.parse(savedLocation);
+        // Ensure the address property exists
+        if (!parsedLocation.address && parsedLocation.formattedAddress) {
+          parsedLocation.address = parsedLocation.formattedAddress;
+        }
+
         if (
           parsedLocation.timestamp &&
           Date.now() - parsedLocation.timestamp > MAX_LOCATION_AGE
@@ -119,6 +165,7 @@ const RestaurantList = () => {
           setLocation(parsedLocation);
         }
       } catch (e) {
+        console.error("Error parsing saved location:", e);
         localStorage.removeItem("userLocation");
       }
     }
@@ -195,7 +242,6 @@ const RestaurantList = () => {
       return aDist - bDist;
     }
   });
-
 
   // Toggle filter
   const toggleFilter = (filterType) => {
@@ -505,6 +551,7 @@ const RestaurantList = () => {
             </div>
           )}
         </main>
+        <Footer />
       </div>
     </div>
   );

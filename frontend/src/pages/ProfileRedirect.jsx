@@ -27,6 +27,9 @@ const ProfileRedirect = () => {
         case 'restaurant_admin':
           navigate('/manage-restaurants');
           break;
+        case 'admin':
+          navigate('/restaurant-status');
+          break;
         default:
           navigate('/');
       }

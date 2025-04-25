@@ -33,17 +33,29 @@ export const getPendingRestaurants = async () => {
   return await Restaurant.find({ status: 'PENDING' });
 };
 
-export const approveRestaurant = async (id) => {
-  return await Restaurant.findByIdAndUpdate(id, { status: 'APPROVED' }, { new: true });
+
+export const updateRestaurantStatus = async (id, newStatus) => {
+  if (!["PENDING", "APPROVED", "REJECTED"].includes(newStatus)) {
+    throw new Error("Invalid status value");
+  }
+
+  return await Restaurant.findByIdAndUpdate(
+    id,
+    { status: newStatus },
+    { new: true }
+  );
 };
 
 export const toggleRestaurantStatus = async (id, ownerId) => {
-  const restaurant = await Restaurant.findOne({ _id: id, owner: ownerId, status: 'APPROVED' });
-  if (!restaurant) throw new Error('Unauthorized or restaurant not approved');
+  const restaurant = await Restaurant.findOne({
+    _id: id,
+    owner: ownerId,
+    status: "APPROVED",
+  });
+  if (!restaurant) throw new Error("Unauthorized or restaurant not approved");
   restaurant.isOpen = !restaurant.isOpen;
   return await restaurant.save();
 };
-
 
 export const updateRestaurantLocation = async (restaurantId, locationId, coordinates) => {
   try {
@@ -62,7 +74,7 @@ export const updateRestaurantLocation = async (restaurantId, locationId, coordin
   }
 };
 
-// Add to restaurant.service.js
+// get all restaurants for a specific owner
 export const getRestaurantsByOwnerId = async (ownerId) => {
   return await Restaurant.find({ owner: ownerId })
     .sort({ createdAt: -1 });

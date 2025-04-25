@@ -376,10 +376,28 @@ export const getAllRestaurantsForAdmin = async (req, res) => {
   }
 };
 
-export const approveRestaurant = async (req, res) => {
-  const approved = await restaurantService.approveRestaurant(req.params.id);
-  if (!approved) return res.status(404).json({ message: 'Restaurant not found' });
-  res.json(approved);
+export const updateRestaurantStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    // Validate status
+    if (!status || !['PENDING', 'APPROVED', 'REJECTED'].includes(status)) {
+      return res.status(400).json({ 
+        message: 'Invalid status. Must be PENDING, APPROVED, or REJECTED' 
+      });
+    }
+    
+    const updated = await restaurantService.updateRestaurantStatus(req.params.id, status);
+    
+    if (!updated) {
+      return res.status(404).json({ message: 'Restaurant not found' });
+    }
+    
+    res.json(updated);
+  } catch (err) {
+    console.error('Error updating restaurant status:', err);
+    res.status(500).json({ message: err.message });
+  }
 };
 
 export const toggleRestaurantOpenStatus = async (req, res) => {

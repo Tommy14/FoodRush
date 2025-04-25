@@ -7,7 +7,7 @@ import {
   updateRestaurant,
   deleteRestaurant,
   getPendingRestaurants,
-  approveRestaurant,
+  updateRestaurantStatus,
   toggleRestaurantOpenStatus,
   deleteRestaurantImage,
   getOwnerRestaurants
@@ -42,7 +42,8 @@ router.get('/:id', getRestaurantById);
 router.put('/:id', authMiddleware, requireRole('restaurant_admin'), restaurantUpload, updateRestaurant);
 router.delete('/:id', authMiddleware, requireRole('restaurant_admin'), deleteRestaurant);
 router.patch('/:id/toggle', authMiddleware, requireRole('restaurant_admin'), toggleRestaurantOpenStatus);
-router.patch('/:id/approve', authMiddleware, requireRole('admin'), approveRestaurant);
+router.patch('/:id/approve', authMiddleware, requireRole('admin'), (req, res) => {req.body.status = 'APPROVED';updateRestaurantStatus(req, res)});
+router.patch('/:id/status', authMiddleware, requireRole('admin'), updateRestaurantStatus);
 router.delete('/:restaurantId/images/:imageId', authMiddleware, requireRole('restaurant_admin'), deleteRestaurantImage);
 
 export default router;

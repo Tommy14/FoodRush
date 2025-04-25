@@ -64,3 +64,66 @@ export const getRestaurantsByOwnerId = async (token) => {
     throw new Error(err.response?.data?.message || 'Failed to fetch your restaurants');
   }
 };
+
+/**
+ * Get all restaurants for admin dashboard
+ * @param {string} token - Auth token
+ * @returns {Promise<Array>} List of all restaurants
+ */
+export const getAllRestaurantsForAdmin = async (token) => {
+  try {
+    const headers = {
+      Authorization: `Bearer ${token}`
+    };
+    
+    const response = await axios.get(`${API_BASE}/admin/all`, { headers });
+    return response.data;
+  } catch (err) {
+    console.error('Error fetching all restaurants for admin:', err);
+    throw new Error(err.response?.data?.message || 'Failed to fetch restaurants');
+  }
+};
+
+/**
+ * Get pending restaurants
+ * @param {string} token - Auth token
+ * @returns {Promise<Array>} List of pending restaurants
+ */
+export const getPendingRestaurants = async (token) => {
+  try {
+    const headers = {
+      Authorization: `Bearer ${token}`
+    };
+    
+    const response = await axios.get(`${API_BASE}/admin/pending`, { headers });
+    return response.data;
+  } catch (err) {
+    console.error('Error fetching pending restaurants:', err);
+    throw new Error(err.response?.data?.message || 'Failed to fetch pending restaurants');
+  }
+};
+
+/**
+ * Update restaurant status
+ * @param {string} id - Restaurant ID
+ * @param {string} status - New status (PENDING, APPROVED, or REJECTED)
+ * @param {string} token - Auth token
+ * @returns {Promise<Object>} Updated restaurant
+ */
+export const updateRestaurantStatus = async (id, status, token) => {
+  try {
+    const headers = {
+      Authorization: `Bearer ${token}`
+    };
+    
+    const response = await axios.patch(
+      `${API_BASE}/${id}/status`, 
+      { status }, 
+      { headers }
+    );
+    return response.data;
+  } catch (err) {
+    console.error('Error updating restaurant status:', err);
+    throw new Error(err.response?.data?.message || 'Failed to update restaurant status');
+  }
+};
