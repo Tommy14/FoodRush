@@ -40,14 +40,14 @@ const DashSidebar = () => {
     { label: 'Sign Up', path: '/auth', icon: <FaUserCircle className="mr-2" /> }
   ];
 
-//   const baseLinks = [{ label: 'Logout', path: '/logout', icon: <FaSignOutAlt className="mr-2" /> }];
   const baseLinks = [
     {
       label: "Logout",
       action: () => {
         dispatch(logout());
         navigate("/auth");
-      }
+      },
+      icon: <FaSignOutAlt className="mr-2" />
     }
   ];
   
@@ -79,31 +79,31 @@ const DashSidebar = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-700 text-white w-64 p-6 pt-24 shadow-lg flex flex-col">
       <nav className="flex flex-col space-y-3">
-      {navLinks.map((link) =>
-        link.action ? (
-          <button
-            key={link.label}
-            onClick={link.action}
-            className="px-4 py-2 text-left rounded-lg w-full transition-all duration-300 hover:bg-gray-600 text-gray-300"
-          >
-            {link.label}
-          </button>
-        ) : (
-          <Link
-            key={link.path}
-            to={link.path}
-            className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center ${
-              pathname === link.path
-                ? 'bg-blue-500 text-white shadow-md font-semibold'
-                : 'hover:bg-gray-600 text-gray-300'
-            }`}
-          >
-            {link.icon}
-            {link.label}
-          </Link>
-        )
-      )}
-
+        {navLinks.map((link) =>
+          link.action ? (
+            <button
+              key={link.label}
+              onClick={link.action}
+              className="px-4 py-2 text-left rounded-lg w-full transition-all duration-300 hover:bg-gray-600 text-gray-300 flex items-center"
+            >
+              {link.icon}
+              {link.label}
+            </button>
+          ) : (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center ${
+                pathname === link.path
+                  ? "bg-blue-500 text-white shadow-md font-semibold"
+                  : "hover:bg-gray-600 text-gray-300"
+              }`}
+            >
+              {link.icon}
+              {link.label}
+            </Link>
+          )
+        )}
       </nav>
 
       <div className="mt-auto pt-6 border-t border-gray-600 text-sm text-center text-gray-400">
