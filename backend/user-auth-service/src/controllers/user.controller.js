@@ -48,7 +48,7 @@ export const getUserByIdController = async (req, res) => {
 
     res.json(user);
   } catch (err) {
-    console.error('❌ Error fetching user by ID:', err.message);
+    console.error('Error fetching user by ID:', err.message);
     res.status(500).json({ message: 'Server error while fetching user' });
   }
 };
@@ -64,7 +64,7 @@ export const getUsersByRoleController = async (req, res) => {
 
     res.json(users);
   } catch (err) {
-    console.error('❌ Error fetching users by role:', err.message);
+    console.error('Error fetching users by role:', err.message);
     res.status(500).json({ message: 'Server error while fetching users' });
   }
 }
