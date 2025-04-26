@@ -8,7 +8,8 @@ import {
   getPendingActivationsService,
   updateUserActivationService,
   rejectUserService,
-  getAllUsersService
+  getAllUsersService,
+  updateUserAvailabilityService
 } from '../services/user.service.js';
 
 // @desc Register a new user
@@ -203,5 +204,27 @@ export const getAllUsersController = async (req, res) => {
     res
       .status(500)
       .json({ message: "Server error while fetching users" });
+  }
+};
+
+// update user availabibility
+export const updateUserAvailabilityController = async (req, res) => {
+  try {
+    console.log('userId :', req.params.id);
+    const userId = req.params.id;
+    const { isAvailable } = req.body;
+
+    if (typeof isAvailable !== 'boolean') {
+      return res.status(400).json({ message: 'isAvailable must be a boolean' });
+    }
+
+    const updatedStatus = await updateUserAvailabilityService(userId, isAvailable);
+    res.json({
+      message: 'User availability updated',
+      isAvailable: updatedStatus
+    });
+  } catch (err) {
+    const status = err.message === 'Unauthorized' ? 403 : 500;
+    res.status(status).json({ message: err.message });
   }
 };
