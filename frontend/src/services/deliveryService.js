@@ -77,14 +77,17 @@ export const fetchCompletedDeliveries = async () => {
       deliveries.map(async (delivery) => {
         let deliveryAddress = 'N/A';
         let customerName = 'N/A';
-        
+        let totalPrice = 0;
+        let paymentMethod = 'N/A';
 
         try {
           const orderRes = await apiPrivate.get(`/orders/${delivery.orderId}`);
           const order = orderRes.data;
-          console.log('Order:', order);
-          deliveryAddress = order.data.deliveryAddress;
-          const customerId = order.data.customerId;
+
+          deliveryAddress = order.order.deliveryAddress;
+          totalPrice = order.order.totalAmount;
+          paymentMethod = order.order.paymentMethod;
+          const customerId = order.order.customerId;
 
           const customerRes = await apiPrivate.get(`/auth/by/${customerId}`);
           const customer = customerRes.data;
@@ -96,7 +99,9 @@ export const fetchCompletedDeliveries = async () => {
         return {
           ...delivery,
           deliveryAddress,
-          customerName
+          customerName,
+          totalPrice,
+          paymentMethod
         };
       })
     );
