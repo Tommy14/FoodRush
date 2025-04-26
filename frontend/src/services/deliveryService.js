@@ -12,12 +12,20 @@ export const fetchAssignedOrders = async () => {
     deliveries.map(async (delivery) => {
       let deliveryAddress = 'N/A';
       let customerName = 'N/A';
+      let totalPrice = 0;
+      let paymentMethod = 'N/A';
+      let items = [];
 
       try {
         const orderRes = await apiPrivate.get(`/orders/${delivery.orderId}`);
         const order = orderRes.data;
-        deliveryAddress = order.data.deliveryAddress;
-        const customerId = order.data.customerId;
+        console.log('Order:', order);
+        deliveryAddress = order.order.deliveryAddress;
+        totalPrice = order.order.totalAmount;
+        paymentMethod = order.order.paymentMethod;
+        items = order.order.items;
+        const customerId = order.order.customerId;
+
         const customerRes = await apiPrivate.get(`/auth/by/${customerId}`);
         const customer = customerRes.data;
         customerName = customer.name;
@@ -28,7 +36,10 @@ export const fetchAssignedOrders = async () => {
       return {
         ...delivery,
         deliveryAddress,
-        customerName
+        customerName,
+        totalPrice,
+        paymentMethod,
+        items
       };
     })
   );
@@ -66,10 +77,12 @@ export const fetchCompletedDeliveries = async () => {
       deliveries.map(async (delivery) => {
         let deliveryAddress = 'N/A';
         let customerName = 'N/A';
+        
 
         try {
           const orderRes = await apiPrivate.get(`/orders/${delivery.orderId}`);
           const order = orderRes.data;
+          console.log('Order:', order);
           deliveryAddress = order.data.deliveryAddress;
           const customerId = order.data.customerId;
 
@@ -117,6 +130,37 @@ export const toggleAvailability = async () => {
     const response = await apiPrivate.patch("/auth/toggle-availability");
     return response;
   } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Fetch the coordinates of a restaurant using the Location Service endpoint.
+ * @param {string} restaurantId - The ID of the restaurant
+ * @returns {Promise<[number, number]>} Coordinates in [lng, lat] format
+ */
+export const getRestaurantCoordinates = async (orderId) => {
+  try {
+    const orderResponse = await apiPrivate.get(`/orders/${orderId}`);
+    const restaurantId = orderResponse.data?.order.restaurantId;
+    const response = await apiPrivate.get(`/location/restaurant/${restaurantId}`);
+    return response.data?.location?.coordinates || null;
+  } catch (error) {
+    console.error("Failed to fetch restaurant coordinates:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch the customer's delivery coordinates from an order.
+ * @param {string} orderId - The ID of the order
+ * @returns {Promise<[number, number]>} Coordinates in [lng, lat] format
+ */
+export const getCustomerCoordinates = async (orderId) => {
+  try {
+    const response = await apiPrivate.get(`/orders/${orderId}`);    return response.data?.order.deliveryCoordinates?.coordinates || null;
+  } catch (error) {
+    console.error("Failed to fetch customer coordinates:", error);
     throw error;
   }
 };

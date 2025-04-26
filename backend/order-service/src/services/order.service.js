@@ -75,6 +75,7 @@ const createOrder = async (orderData, user) => {
     items,
     totalAmount,
     deliveryAddress,
+    deliveryCoordinates,
     paymentMethod
   } = orderData;
 
@@ -88,6 +89,7 @@ const createOrder = async (orderData, user) => {
     items,
     totalAmount,
     deliveryAddress,
+    deliveryCoordinates,
     paymentMethod,
     status: 'pending',
     paymentStatus: 'not_paid',
