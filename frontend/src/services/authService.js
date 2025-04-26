@@ -31,6 +31,94 @@ export const LoginService = async (credentials) => {
     }
 }
 
+
+/**
+ * Get all users pending activation
+ * @returns {Promise} Axios response
+ */
+export const getPendingActivations = async () => {
+  try {
+    console.log('Making API call to fetch pending activations');
+    const response = await apiPrivate.get("/auth/pending-activations");
+    console.log('Response received:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error in getPendingActivations:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+/**
+ * Activate a user account
+ * @param {string} userId - The ID of the user to activate
+ * @returns {Promise} Axios response
+ */
+export const activateUser = async (userId) => {
+  try {
+    const response = await apiPrivate.post(
+      "/auth/activate-user", { 
+      userId, 
+      activate: true 
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/**
+ * Get all users (for admin management)
+ * @returns {Promise} Axios response
+ */
+export const getAllUsers = async () => {
+  try {
+    console.log('Making API call to fetch all users');
+    const response = await apiPrivate.get("/auth/all-users");
+    console.log('Response received:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error in getAllUsers:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+/**
+ * Deactivate a user account
+ * @param {string} userId - The ID of the user to deactivate
+ * @returns {Promise} Axios response
+ */
+export const deactivateUser = async (userId) => {
+  try {
+    const response = await apiPrivate.post("/auth/activate-user", { 
+      userId, 
+      activate: false 
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Reject a user account
+ * @param {string} userId - The ID of the user to reject
+ * @param {string} reason - Reason for rejection
+ * @returns {Promise} Axios response
+ */
+export const rejectUser = async (userId, reason) => {
+  try {
+    const response = await apiPrivate.post("/auth/reject-user", { 
+      userId, 
+      reason 
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 //example for apiPrivate
 // export const getUserProfile = async () => {
 //     try {

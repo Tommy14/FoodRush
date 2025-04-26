@@ -17,6 +17,7 @@ import RestaurantDetailsPage from '../pages/restaurants/RestaurantDetailsPage';
 import RestaurantOrdersPage from '../pages/RestaurantOrdersPage';
 import ContactUs from '../pages/ContactUs';
 import RestaurantStatusPage from '../pages/restaurants/RestaurantStatusPage';
+import UserManagement from '../pages/Auth/UserManagementPage';
 
 
 
@@ -31,17 +32,18 @@ export default function AppRoutes() {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/delivery-panel" element={<DeliveryDashboard />} />
         <Route path="/delivery/completed" element={<CompletedDeliveries />} />
-        <Route path="/restaurants" element={<RestaurantList />} />
-        <Route path="/restaurants/:restaurantId" element={<RestaurantDetailsPage />} />
-        <Route path="/restaurants/:restaurantId/menu" element={<MenuPage />} />
         <Route path="/auth" element={<AuthPage />} /> 
         <Route path="/my-orders" element={<OrderStatus />} />
         <Route path="/profile" element={<ProfileRedirect />} />
 
+        <Route path="/restaurants" element={<RestaurantList />} />
+        <Route path="/restaurants/:restaurantId" element={<RestaurantDetailsPage />} />
+        <Route path="/restaurants/:restaurantId/menu" element={<MenuPage />} />
         <Route path="/create-restaurant" element={<CreateRestaurant />} />
         <Route path="/manage-restaurants" element={<ManageRestaurants />} />
         <Route path="/restaurant-orders" element={<RestaurantOrdersPage />} />
         <Route path="/restaurant-status" element={<RestaurantStatusPage />} />
+        <Route path="/user-management" element={<UserManagement />} />
 
         {/* <Route path="/edit-restaurant/:restaurantId" element={<EditRestaurant />} /> */}
       </Routes>

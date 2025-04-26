@@ -4,7 +4,11 @@ import {
   toggleAvailabilityService,
   getAvailabilityService,
   getUserByIdService,
-  getUsersByRoleService
+  getUsersByRoleService,
+  getPendingActivationsService,
+  updateUserActivationService,
+  rejectUserService,
+  getAllUsersService
 } from '../services/user.service.js';
 
 // @desc Register a new user
@@ -45,7 +49,7 @@ export const getUserByIdController = async (req, res) => {
 
     res.json(user);
   } catch (err) {
-    console.error('❌ Error fetching user by ID:', err.message);
+    console.error('Error fetching user by ID:', err.message);
     res.status(500).json({ message: 'Server error while fetching user' });
   }
 };
@@ -61,7 +65,7 @@ export const getUsersByRoleController = async (req, res) => {
 
     res.json(users);
   } catch (err) {
-    console.error('❌ Error fetching users by role:', err.message);
+    console.error('Error fetching users by role:', err.message);
     res.status(500).json({ message: 'Server error while fetching users' });
   }
 }
@@ -93,5 +97,111 @@ export const toggleAvailabilityController = async (req, res) => {
   } catch (err) {
     const status = err.message === 'Unauthorized' ? 403 : 500;
     res.status(status).json({ message: err.message });
+  }
+};
+
+
+// Get all users waiting for activation
+export const getPendingActivationsController = async (req, res) => {
+  try {
+    // Only admins should access this endpoint
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized. Admin access required." });
+    }
+
+    const pendingUsers = await getPendingActivationsService();
+    res.json(pendingUsers);
+  } catch (err) {
+    console.error("Error fetching pending activations:", err.message);
+    res
+      .status(500)
+      .json({ message: "Server error while fetching pending activations" });
+  }
+};
+
+// Approve or reject a user
+export const updateUserActivationController = async (req, res) => {
+  try {
+    // Only admins should access this endpoint
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized. Admin access required." });
+    }
+
+    const { userId, activate } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    if (typeof activate !== "boolean") {
+      return res
+        .status(400)
+        .json({ message: "Activate parameter must be a boolean" });
+    }
+
+    const updatedUser = await updateUserActivationService(userId, activate);
+    res.json({
+      message: activate
+        ? "User activated successfully"
+        : "User deactivated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    const status = err.statusCode || 500;
+    res
+      .status(status)
+      .json({ message: err.message || "Server error during user activation" });
+  }
+};
+
+// Reject a user application
+export const rejectUserController = async (req, res) => {
+  try {
+    // Only admins should access this endpoint
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized. Admin access required." });
+    }
+
+    const { userId, reason } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const rejectedUser = await rejectUserService(userId, reason);
+    res.json({
+      message: "User application rejected",
+      user: rejectedUser,
+    });
+  } catch (err) {
+    const status = err.statusCode || 500;
+    res
+      .status(status)
+      .json({ message: err.message || "Server error during user rejection" });
+  }
+};
+
+export const getAllUsersController = async (req, res) => {
+  try {
+    // Only admins should access this endpoint
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized. Admin access required." });
+    }
+
+    const users = await getAllUsersService();
+    res.json(users);
+  } catch (err) {
+    console.error("Error fetching all users:", err.message);
+    res
+      .status(500)
+      .json({ message: "Server error while fetching users" });
   }
 };

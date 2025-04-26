@@ -51,7 +51,8 @@ const DashSidebar = () => {
       action: () => {
         dispatch(logout());
         navigate("/auth");
-      }
+      },
+      icon: <FaSignOutAlt className="mr-2" />
     }
   ];
 
@@ -67,8 +68,10 @@ const DashSidebar = () => {
       { label: 'Completed', path: '/delivery/completed', icon: <FaClipboardList className="mr-2" /> }
     ],
     admin: [
-      { label: 'Manage Restaurant Status', path: '/restaurant-status', icon: <FaClipboardList className="mr-2" /> }
-    ],
+      { label: 'Manage Restaurant Status', path: '/restaurant-status', icon: <FaClipboardList className="mr-2" /> },   
+      { label: 'Manage Users', path: '/user-management', icon: <FaUserCircle className="mr-2" /> }   
+     ],
+
     guest: guestLinks
   };
 

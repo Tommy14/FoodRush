@@ -1,7 +1,8 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
-import axios from 'axios';
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import axios from "axios";
+
 
 import {NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY} from '../config/index.js'
 
@@ -191,3 +192,138 @@ async function sendWhatsAppMessage(user) {
     }
   });
 }
+
+
+// Get all users pending activation
+export const getPendingActivationsService = async () => {
+  const pendingUsers = await User.find({ isActive: false });
+
+  return pendingUsers.map((user) => ({
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    phone: user.phone,
+    createdAt: user.createdAt,
+    status: user.rejectionReason ? 'rejected' : 'pending',
+    rejectionReason: user.rejectionReason || null
+  }));
+};
+
+// Approve or reject a user
+export const updateUserActivationService = async (userId, activate) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  user.isActive = activate;
+  await user.save();
+
+  // Send notification to user about account activation
+  if (activate) {
+    try {
+      await axios.post(
+        `${NOTIFICATION_SERVICE_URL}/api/notify/email`,
+        {
+          recipient: {
+            email: user.email,
+          },
+          subject: "Your FoodRush Account has been Activated",
+          type: "accountActivated",
+          data: {
+            name: user.name,
+            role: user.role,
+          },
+        },
+        {
+          headers: {
+            "X-Internal-API-Key": INTERNAL_SERVICE_API_KEY,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Failed to send activation email:", error.message);
+    }
+  }
+
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isActive: user.isActive,
+  };
+};
+
+// Reject a user
+export const rejectUserService = async (userId, reason) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  user.isActive = false;
+  user.rejectionReason = reason || "Application rejected by administrator"; // You'll need to add this field to User model
+  await user.save();
+
+  // Send rejection notification to user
+  try {
+    await axios.post(
+      `${NOTIFICATION_SERVICE_URL}/api/notify/email`,
+      {
+        recipient: {
+          email: user.email,
+        },
+        subject: "Your FoodRush Account Request was Declined",
+        type: "accountRejected",
+        data: {
+          name: user.name,
+          role: user.role,
+          reason:
+            reason ||
+            "Your application does not meet our current requirements.",
+        },
+      },
+      {
+        headers: {
+          "X-Internal-API-Key": INTERNAL_SERVICE_API_KEY,
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Failed to send rejection email:", error.message);
+  }
+
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isActive: user.isActive,
+    rejectionReason: user.rejectionReason,
+  };
+};
+
+// Get all users (for admin management)
+export const getAllUsersService = async () => {
+  const users = await User.find({});
+  
+  return users.map((user) => ({
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    phone: user.phone,
+    createdAt: user.createdAt,
+    isActive: user.isActive,
+    status: user.isActive ? 'active' : (user.rejectionReason ? 'rejected' : 'pending'),
+    rejectionReason: user.rejectionReason || null
+  }));
+};
