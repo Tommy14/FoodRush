@@ -1,14 +1,14 @@
 import * as restaurantService from '../services/restaurant.service.js';
 import * as imageService from '../services/image.service.js';
+import * as menuService from '../services/menu.service.js'; 
 import Restaurant from '../models/Restaurant.js';
 import axios from 'axios';
 import mongoose from 'mongoose';
 
-// Update the createRestaurant function
 
 export const createRestaurant = async (req, res) => {
   console.log('Auth User Object:', req.user);
-  const userId = req.user.id || req.user.userId; // Handle both formats  
+  const userId = req.user.id || req.user.userId; 
   try {
     console.log('Restaurant Service - Create Restaurant Request');
     
@@ -117,7 +117,7 @@ export const createRestaurant = async (req, res) => {
           city: restaurant.address.city || "",
           state: restaurant.address.state || "",
           postalCode: restaurant.address.postalCode || "",
-          country: restaurant.address.country || "US", // Default country if missing
+          country: restaurant.address.country || "Sri Lanka", // Default country if missing
           formattedAddress:
             restaurant.address.formattedAddress ||
             `${restaurant.address.street || ""}, ${
@@ -139,9 +139,6 @@ export const createRestaurant = async (req, res) => {
             console.error("Response data:", geocodeErr.response.data);
           }
         }
-
-        // If geocoding succeeded, save the location
-        // In createRestaurant function, update how you handle the location response:
 
         // If geocoding succeeded, save the location
         if (geocodeResponse.data && geocodeResponse.data.coordinates) {
@@ -294,11 +291,14 @@ export const deleteRestaurant = async (req, res) => {
         const publicIds = restaurant.images.map(img => img.publicId);
         await imageService.deleteMultipleImages(publicIds);
       }
+      
+      // Delete all menu items associated with this restaurant
+      await menuService.deleteMenuItemsByRestaurantId(req.params.id);
     }
     
     const deleted = await restaurantService.deleteRestaurant(req.params.id, req.user.userId);
     if (!deleted) return res.status(403).json({ message: 'Delete not allowed' });
-    res.json({ message: 'Restaurant deleted' });
+    res.json({ message: 'Restaurant and all associated menu items deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

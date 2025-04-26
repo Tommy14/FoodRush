@@ -145,9 +145,7 @@ router.put("/:id/menu/:itemId", menuItemUpload, async (req, res) => {
 
     // Add JSON data
     Object.keys(req.body).forEach((key) => {
-      Object.keys(req.body).forEach((key) => {
-        formData.append(key, String(req.body[key]));
-      });
+      formData.append(key, String(req.body[key]));
     });
 
     // Add image file if it exists
@@ -175,7 +173,12 @@ router.put("/:id/menu/:itemId", menuItemUpload, async (req, res) => {
     res.json(response.data);
   } catch (err) {
     console.error("Error in updating menu item:", err);
-    res.status(err.response?.status || 500).json({ message: err.message });
+    console.error("Response status:", err.response?.status);
+    console.error("Response data:", err.response?.data);
+    res.status(err.response?.status || 500).json({ 
+      message: err.message,
+      details: err.response?.data || "Unknown error" 
+    });
   }
 });
 
