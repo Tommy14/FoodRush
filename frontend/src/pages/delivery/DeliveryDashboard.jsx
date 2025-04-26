@@ -9,6 +9,8 @@ const DeliveryDashboard = () => {
   const [isAvailable, setIsAvailable] = useState(true);
   const [mapCoords, setMapCoords] = useState({});
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [showDeliveredPopup, setShowDeliveredPopup] = useState(false);
 
 
   const fetchOrders = async () => {
@@ -52,10 +54,25 @@ const DeliveryDashboard = () => {
 
   const handleStatusUpdate = async (deliveryId, newStatus) => {
     try {
+      setUpdatingStatus(true);
       await updateDeliveryStatus(deliveryId, newStatus);
-      fetchOrders();
+  
+      if (newStatus === 'delivered') {
+        setShowDeliveredPopup(true); // 🎯 Show popup
+  
+        // Wait 5 seconds (5000ms) before refreshing orders
+        setTimeout(async () => {
+          setShowDeliveredPopup(false);
+          await fetchOrders(); // ⏰ After 5s, fetch updated orders
+        }, 5000);
+      } else {
+        // If not "delivered", just refresh immediately
+        await fetchOrders();
+      }
     } catch (error) {
       alert('Failed to update status');
+    } finally {
+      setUpdatingStatus(false);
     }
   };
 
@@ -68,6 +85,21 @@ const DeliveryDashboard = () => {
       }));
     }
   };
+
+  const formatStatus = (status) => {
+    if (!status) return '';
+    return status
+      .split('_')          // split by underscore
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // capitalize each part
+      .join(' ');           // join back with spaces
+  };
+
+  const hasActiveOrder = deliveries.some(
+    (delivery) => delivery.status === 'assigned' || delivery.status === 'picked_up'
+  );
+
+  const actualAvailability = hasActiveOrder ? false : isAvailable;
+  
   
   useEffect(() => {
     const loadInitialData = async () => {
@@ -89,85 +121,124 @@ const DeliveryDashboard = () => {
     <div className="flex min-h-screen bg-gray-100">
       <DashSidebar />
   
-      <main className="flex-1 px-8 py-10 overflow-hidden mt-16">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Delivery Dashboard</h1>
-          <div className="flex items-center gap-3">
-            <span
-              className={`text-sm px-3 py-1 rounded-full ${
-                isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-              }`}
-            >
-              {isAvailable ? 'Available' : 'Not Available'}
-            </span>
-            <button
-              onClick={handleToggleAvailability}
-              className={`px-4 py-2 text-sm font-semibold rounded-md shadow ${
-                isAvailable ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-              } text-white`}
-            >
-              Toggle
-            </button>
+      <main className="flex-1 overflow-auto mt-16 p-8">
+        {/* ✅ Popup for Order Delivered */}
+        {showDeliveredPopup && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-green-500/80 rounded-full w-80 h-80 shadow-2xl flex flex-col justify-center items-center text-center animate-pop-up">
+              <div className="bg-white text-green-500 rounded-full p-4 mb-4 shadow-lg animate-bounce-slow">
+                <div className="text-5xl">✅</div>
+              </div>
+              <h2 className="text-xl font-extrabold text-white mb-2">Order Delivered!</h2>
+              <p className="text-sm text-white opacity-90 px-6">Thank you for completing the delivery.</p>
+            </div>
           </div>
-        </div>
+        )}
+        {/* Outer Big White Card */}
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
   
-        {/* Map + Delivery Info Side by Side */}
-        {Array.isArray(deliveries) && deliveries.length > 0 && mapCoords && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Delivery Info Box */}
-            <div className="relative bg-white p-6 rounded-xl shadow  h-[400px]">
-              <div>
-                <h2 className="text-lg font-bold text-gray-800 mb-4">Current Delivery</h2>
-                <div className="text-sm text-gray-700 space-y-2">
-                  <p><strong>Order ID :</strong> {deliveries[0].orderId}</p>
-                  <p><strong>Customer :</strong> {deliveries[0].customerName}</p>
-                  <p><strong>Address  :</strong> {deliveries[0].deliveryAddress}</p>
-                  <p><strong>Item :</strong> {deliveries[0].items?.[0]?.name || '—'}</p>
-                  <p><strong>Total Price  :</strong> Rs. {deliveries[0].totalPrice?.toLocaleString() || '0.00'}</p>
-                  <p><strong>Payment Method :</strong> {deliveries[0].paymentMethod}</p>
-                  <span className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold 
-                    ${deliveries[0].status === 'delivered' ? 'bg-green-100 text-green-700' : 
-                      deliveries[0].status === 'picked_up' ? 'bg-yellow-100 text-yellow-700' : 
-                      'bg-gray-100 text-gray-800'}`}>
-                    {deliveries[0].status?.toUpperCase()}
+          {/* Green Header inside White Card */}
+          <div className="bg-gradient-to-r from-green-600 to-green-500 text-white px-8 py-6 flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-extrabold">Delivery Dashboard</h1>
+              <p className="text-sm opacity-90 mt-1">Manage your current deliveries and navigate easily.</p>
+            </div>
+  
+            {/* Toggle inside Green Box */}
+            <div className="flex items-center gap-3">
+              <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+                isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+              }`}>
+                {isAvailable ? 'Available' : 'Not Available'}
+              </span>
+              <button
+                onClick={handleToggleAvailability}
+                disabled={hasActiveOrder}
+                className={`w-14 h-8 flex items-center rounded-full p-1 duration-300 ease-in-out 
+                  ${hasActiveOrder 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : actualAvailability 
+                      ? 'bg-green-700' 
+                      : 'bg-red-500'
+                  }`}
+              >
+                <div
+                  className={`bg-white w-6 h-6 rounded-full shadow-md transform duration-300 ease-in-out ${
+                    actualAvailability ? 'translate-x-6' : ''
+                  }`}
+                ></div>
+              </button>
+            </div>
+          </div>
+  
+          {/* Delivery Details + Map */}
+          {Array.isArray(deliveries) && deliveries.length > 0 && mapCoords && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+              {/* Delivery Info */}
+              <div className="relative space-y-4">
+                {/* Status Badge */}
+                <div className="absolute top-0 right-0 mt-2 mr-2">
+                  <span className={`text-xs font-bold px-4 py-2 rounded-full ${
+                    deliveries[0].status === 'delivered' ? 'bg-green-100 text-green-700' :
+                    deliveries[0].status === 'picked_up' ? 'bg-blue-800 text-white' :
+                    'bg-yellow-200 text-gray-800'
+                  }`}>
+                    {formatStatus(deliveries[0].status)}
                   </span>
                 </div>
-              </div>
-              {/* Action Buttons */}
-              <div className="flex flex-col gap-3 mt-6">
-                {deliveries[0].status !== 'delivered' && (
-                  <button
+  
+                {/* Delivery Info Text */}
+                <div className="space-y-2 text-sm text-gray-700 mt-6">
+                  <p><span className="font-bold">Order ID:</span> {deliveries[0].orderId}</p>
+                  <p><span className="font-bold">Customer:</span> {deliveries[0].customerName}</p>
+                  <p><span className="font-bold">Address:</span> {deliveries[0].deliveryAddress}</p>
+                  <p><span className="font-bold">Item:</span> {deliveries[0].items?.[0]?.name || '—'}</p>
+                  <p><span className="font-bold">Total Price:</span> Rs. {deliveries[0].totalPrice?.toLocaleString() || '0.00'}</p>
+                  <p><span className="font-bold">Payment Method:</span> {deliveries[0].paymentMethod}</p>
+                </div>
+  
+                {/* Action Buttons */}
+                <div className="flex flex-col gap-3 mt-6">
+                  {deliveries[0].status !== 'delivered' && (
+                    <button
                     onClick={() =>
                       handleStatusUpdate(
                         deliveries[0]._id,
                         deliveries[0].status === 'assigned' ? 'picked_up' : 'delivered'
                       )
                     }
-                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                    disabled={updatingStatus}
+                    className={`w-full py-2 ${
+                      updatingStatus ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-800 hover:bg-blue-700'
+                    } text-white text-sm font-semibold rounded-md transition flex justify-center items-center`}
                   >
-                    Mark as {deliveries[0].status === 'assigned' ? 'Picked Up' : 'Delivered'}
+                    {updatingStatus ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      `Mark as ${deliveries[0].status === 'assigned' ? 'Picked Up' : 'Delivered'}`
+                    )}
                   </button>
-                )}
-                {mapCoords?.restaurant?.length === 2 && mapCoords?.customer?.length === 2 && (
-                  <a
-                    href={`https://www.google.com/maps/dir/?api=1&origin=${mapCoords.restaurant[1]},${mapCoords.restaurant[0]}&destination=${mapCoords.customer[1]},${mapCoords.customer[0]}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full px-4 py-2 mt-2 bg-green-700 hover:bg-green-800 text-white rounded-md text-center"
-                  >
-                    📍 Open in Google Maps
-                  </a>
-                )}
+                  )}
+                  {mapCoords?.restaurant?.length === 2 && mapCoords?.customer?.length === 2 && (
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&origin=${mapCoords.restaurant[1]},${mapCoords.restaurant[0]}&destination=${mapCoords.customer[1]},${mapCoords.customer[0]}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-md text-center transition"
+                    >
+                      📍 Open in Google Maps
+                    </a>
+                  )}
+                </div>
+              </div>
+  
+              {/* Google Map */}
+              <div className="h-[400px] rounded-xl overflow-hidden">
+                <DeliveryMap origin={mapCoords.restaurant} destination={mapCoords.customer} />
               </div>
             </div>
-  
-            {/* Google Map Box */}
-            <div className="rounded-2xl overflow-hidden shadow-lg h-[400px]">
-              <DeliveryMap origin={mapCoords.restaurant} destination={mapCoords.customer} />
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
     </div>
   );
@@ -176,3 +247,4 @@ const DeliveryDashboard = () => {
 };
 
 export default DeliveryDashboard;
+

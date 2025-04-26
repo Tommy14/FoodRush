@@ -5,6 +5,7 @@ import axios from "axios";
 
 
 import {NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY} from '../config/index.js'
+import e from "express";
 
 export const registerUserService = async ({ name, email, password, phone ,role, gender, dob }) => {
   const existingUser = await User.findOne({ email });
@@ -327,3 +328,19 @@ export const getAllUsersService = async () => {
     rejectionReason: user.rejectionReason || null
   }));
 };
+
+// update user availability
+export const updateUserAvailabilityService = async (userId, isAvailable) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  user.isAvailable = isAvailable;
+  await user.save();
+
+  return user.isAvailable;
+}

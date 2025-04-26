@@ -1,64 +1,123 @@
-// src/pages/CompletedDeliveries.jsx
-
 import { useEffect, useState } from 'react';
-import { fetchCompletedDeliveries } from '../../services/deliveryService'; 
+import { fetchCompletedDeliveries, getRestaurantCoordinates, getCustomerCoordinates } from '../../services/deliveryService';
 import DashSidebar from '../../components/DashSidebar';
+import DeliveryMap from '../../components/DeliveryMap';
 
 const CompletedDeliveries = () => {
   const [deliveries, setDeliveries] = useState([]);
+  const [mapCoords, setMapCoords] = useState({});
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   const loadCompletedDeliveries = async () => {
     try {
-      const res = await fetchCompletedDeliveries(); 
+      const res = await fetchCompletedDeliveries();
       setDeliveries(res);
     } catch (error) {
       console.error('Failed to fetch completed deliveries:', error);
     }
   };
 
+  const fetchCoordinates = async (delivery) => {
+    try {
+      const restaurantCoords = await getRestaurantCoordinates(delivery.orderId);
+      const customerCoords = await getCustomerCoordinates(delivery.orderId);
+      return { restaurant: restaurantCoords, customer: customerCoords };
+    } catch (err) {
+      console.error("Error fetching coordinates:", err);
+      return null;
+    }
+  };
+
+  const handleShowMap = async (delivery) => {
+    const coords = await fetchCoordinates(delivery);
+    if (coords) {
+      setMapCoords((prev) => ({
+        ...prev,
+        [delivery._id]: coords
+      }));
+    }
+  };
+
   useEffect(() => {
-    loadCompletedDeliveries();
+    const init = async () => {
+      await loadCompletedDeliveries();
+    };
+    init();
   }, []);
 
+  useEffect(() => {
+    if (!mapLoaded && deliveries.length > 0) {
+      handleShowMap(deliveries[0]); // preload first map
+      setMapLoaded(true);
+    }
+  }, [deliveries, mapLoaded]);
+
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-100">
       <DashSidebar />
 
-      <main className="flex-1 bg-gray-100 p-8 overflow-auto mt-16">
-        <h1 className="text-3xl font-extrabold text-gray-800 mb-6">Completed Deliveries</h1>
+      <main className="flex-1 p-8 md:p-10 mt-16 overflow-auto">
+        <h1 className="text-4xl font-extrabold text-gray-800 mb-10">📦 Completed Deliveries</h1>
 
         {deliveries.length === 0 ? (
-          <p className="text-gray-600">No completed deliveries found.</p>
+          <div className="flex flex-col items-center justify-center mt-20 text-center space-y-3">
+            <p className="text-2xl text-gray-500 font-semibold">No Deliveries Found</p>
+            <p className="text-gray-400">Completed deliveries will appear here once available.</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {deliveries.map((delivery) => (
-              <div key={delivery._id} className="bg-white rounded-lg shadow p-5 space-y-3">
-                <div className="text-sm text-gray-600">
-                  <p className="font-semibold text-gray-500">Order ID</p>
-                  <p className="break-all text-gray-800">{delivery.orderId}</p>
-                </div>
+          <div className="grid gap-8 grid-cols-1 xl:grid-cols-1">
+            {deliveries.map((delivery) => {
+              const coords = mapCoords[delivery._id];
 
-                <div className="text-sm text-gray-600">
-                  <p className="font-semibold text-gray-500">Delivered At</p>
-                  <p className="text-gray-800">{new Date(delivery.deliveredAt).toLocaleString()}</p>
-                </div>
+              return (
+                <div
+                  key={delivery._id}
+                  className="bg-white rounded-2xl shadow-lg p-6 flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-4 border hover:shadow-2xl transition-all duration-300"
+                >
+                  {/* Delivery Info */}
+                  <div className="flex-1 space-y-4 flex flex-col justify-between">
 
-                <div className="text-sm text-gray-600">
-                  <p className="font-semibold text-gray-500">Address</p>
-                  <p className="text-gray-800">{delivery.deliveryAddress || '—'}</p>
-                </div>
+                    <div className="space-y-3">
+                      <Attribute label="Order ID" value={delivery.orderId} />
+                      <Attribute label="Customer" value={delivery.customerName || '—'} />
+                      <Attribute label="Address" value={delivery.deliveryAddress || '—'} />
+                      <Attribute label="Total Price" value={`Rs. ${delivery.totalPrice?.toLocaleString() || '—'}`} />
+                      <Attribute label="Payment" value={delivery.paymentMethod || '—'} />
+                      <Attribute label="Delivered At" value={new Date(delivery.deliveredAt).toLocaleString()} />
+                    </div>
 
-                <div className="text-sm text-gray-600">
-                  <p className="font-semibold text-gray-500">Customer</p>
-                  <p className="text-gray-800">{delivery.customerName || '—'}</p>
+                    <div>
+                      <span className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-4 py-2 rounded-full mt-2">
+                        Delivered ✅
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Google Map */}
+                  <div className="flex-1 h-50 rounded-lg overflow-hidden">
+                    {coords ? (
+                      <DeliveryMap origin={coords.restaurant} destination={coords.customer} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 italic">
+                        Loading map...
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
     </div>
   );
 };
+
+const Attribute = ({ label, value }) => (
+  <div>
+    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{label}</p>
+    <p className="text-gray-700 break-words">{value}</p>
+  </div>
+);
 
 export default CompletedDeliveries;

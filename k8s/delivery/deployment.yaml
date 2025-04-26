@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-deployment
+  namespace: foodrush
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: delivery
+  template:
+    metadata:
+      labels:
+        app: delivery
+    spec:
+      containers:
+        - name: delivery
+          image: foodrush48/foodrush-delivery-service:latest
+          ports:
+            - containerPort: 9300
+          env:
+            - name: MONGO_URI_DELIVERY_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: MONGO_URI_DELIVERY_SERVICE
+            - name: DELIVERY_PORT
+              value: "9300"
+            - name: DELIVERY_SERVICE_URL
+              value: "http://delivery-service:9300"
+            - name: INTERNAL_SERVICE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: INTERNAL_SERVICE_API_KEY
+            - name: SYSTEM_JWT
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: SYSTEM_JWT
+            # Internal service URLs (Kubernetes Service Discovery names)
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://notification-service:9800"
+            - name: ORDER_SERVICE_URL
+              value: "http://order-service:9200"
+            - name: RESTAURANT_SERVICE_URL
+              value: "http://restaurant-service:9100"
+            - name: USER_SERVICE_URL
+              value: "http://user-auth-service:9000"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: JWT_SECRET

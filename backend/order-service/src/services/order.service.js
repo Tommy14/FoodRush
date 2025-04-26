@@ -1,14 +1,11 @@
 // services/order.service.js
 import Order from '../models/Order.js';
 import axios from 'axios';
-import { DELIVERY_SERVICE_URL, NOTIFICATION_SERVICE_URL, SYSTEM_JWT } from '../config/index.js';
+import { DELIVERY_SERVICE_URL, NOTIFICATION_SERVICE_URL, SYSTEM_JWT, INTERNAL_SERVICE_API_KEY, USER_SERVICE_URL } from '../config/index.js';
+
 
 const updateOrderStatusService = async (orderId, status) => {
-  const validStatuses = [
-    'placed', 'preparing', 'ready_for_delivery',
-    'picked_up', 'delivered', 'cancelled'
-  ];
-
+  const validStatuses = ['placed', 'preparing', 'ready_for_delivery', 'picked_up', 'delivered', 'cancelled'];
   if (!validStatuses.includes(status)) {
     const error = new Error('Invalid status value');
     error.status = 400;
@@ -25,48 +22,131 @@ const updateOrderStatusService = async (orderId, status) => {
   order.status = status;
   await order.save();
 
-  // Notify on placed
+  // Trigger other services externally
   if (status === 'placed') {
-    try {
-      await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/order-placed`, {
-        user: {
-          name: order.customerName,
-          phone: order.contactNumber,
-          email: order.customerEmail
-        },
-        orderDetails: {
-          id: order._id,
-          totalAmount: order.totalAmount,
-          items: order.items,
-          address: order.deliveryAddress
-        }
-      }, {
-        headers: {
-          Authorization: `Bearer ${SYSTEM_JWT}`
-        }
-      });
-    } catch (err) {
-      console.error(' Notification failed:', err.message);
-    }
+    notifyOrderPlaced(order); // 🚀 Notification Logic
   }
-
-  // Notify Delivery Service on preparing only
   if (status === 'preparing') {
-    try {
-      await axios.post(`${DELIVERY_SERVICE_URL}/api/auto-assign`, {
-        orderId: order._id
-      }, {
-        headers: {
-          Authorization: `Bearer ${SYSTEM_JWT}`
-        }
-      });
-    } catch (err) {
-      console.error(' Auto-assign delivery failed:', err.message);
-    }
+    autoAssignDelivery(order); // 🚚 Delivery Logic
   }
 
   return order;
 };
+// const updateOrderStatusService = async (orderId, status) => {
+//   const validStatuses = [
+//     'placed', 'preparing', 'ready_for_delivery',
+//     'picked_up', 'delivered', 'cancelled'
+//   ];
+
+//   if (!validStatuses.includes(status)) {
+//     const error = new Error('Invalid status value');
+//     error.status = 400;
+//     throw error;
+//   }
+
+//   const order = await Order.findById(orderId);
+//   if (!order) {
+//     const error = new Error('Order not found');
+//     error.status = 404;
+//     throw error;
+//   }
+
+//   order.status = status;
+//   await order.save();
+
+  // Notify on placed
+  // if (status === 'placed') {
+  //   try {
+  //     await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/order-placed`, {
+  //       user: {
+  //         name: order.customerName,
+  //         phone: order.contactNumber,
+  //         email: order.customerEmail
+  //       },
+  //       orderDetails: {
+  //         id: order._id,
+  //         totalAmount: order.totalAmount,
+  //         items: order.items,
+  //         address: order.deliveryAddress
+  //       }
+  //     }, {
+  //       headers: {
+  //         Authorization: `Bearer ${SYSTEM_JWT}`
+  //       }
+  //     });
+  //   } catch (err) {
+  //     console.error(' Notification failed:', err.message);
+  //   }
+  // }
+
+  // if (status === 'placed') {
+  //   console.log('Sending notification payload:', {
+  //     recipient: { email: order.customerEmail },
+  //     subject: "We’ve received your order!",
+  //     type: "orderPlaced",
+  //     data: {
+  //       customerName: "order.customerName", 
+  //       restaurantName: order.restaurantName,
+  //       orderId: order._id.toString(),
+  //       total: order.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+  //       paymentMethod: order.paymentMethod,
+  //       orderDateTime: new Date(order.createdAt).toLocaleString('en-US', {
+  //         dateStyle: 'long',
+  //         timeStyle: 'short',
+  //         timeZone: 'Asia/Colombo'
+  //       }),
+  //       deliveryAddress: order.deliveryAddress
+  //     }
+  //   });
+    
+  //   try {
+  //     await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/email`, {
+  //       recipient: {
+  //         email: order.customerEmail
+  //       },
+  //       subject: "We’ve received your order!",
+  //       type: "orderPlaced",
+  //       data: {
+  //         customerName: "order.customerName", // remove this
+  //         restaurantName: order.restaurantName, // Assuming you have this in order
+  //         orderId: order._id.toString(),
+  //         total: order.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+  //         paymentMethod: order.paymentMethod,
+  //         orderDateTime: new Date(order.createdAt).toLocaleString('en-US', {
+  //           dateStyle: 'long',
+  //           timeStyle: 'short',
+  //           timeZone: 'Asia/Colombo'
+  //         }),
+  //         deliveryAddress: order.deliveryAddress
+  //       }
+  //     }, {
+  //       headers: {
+  //         'X-Internal-API-Key': INTERNAL_SERVICE_API_KEY,
+  //       }
+  //     });
+  //   } catch (err) {
+  //     console.error('Notification failed:', err.message);
+  //   }
+  // }
+  
+
+  // Notify Delivery Service on preparing only
+//   if (status === 'preparing') {
+//     try {
+//       await axios.post(`${DELIVERY_SERVICE_URL}/api/delivery/auto-assign`, {
+//         orderId: order._id
+//       }, {
+//         headers: {
+//           Authorization: `Bearer ${SYSTEM_JWT}`
+//         }
+//       });
+//     } catch (err) {
+//       console.error(' Auto-assign delivery failed:', err.message);
+//     }
+//   }
+
+//   return order;
+// };
 
 const createOrder = async (orderData, user) => {
   const {
@@ -170,6 +250,66 @@ const getOrdersByCustomer = async (customerId) => {
   return orders;
 };
 
+// Notify Order Placed
+const notifyOrderPlaced = async (order) => {
+
+  // Fetch user details from User Service
+  const userDetails = await getUserDetails(order.customerId);
+  const payload = {
+    recipient: { email: order.customerEmail },
+    subject: "We’ve received your order!",
+    type: "orderPlaced",
+    data: {
+      customerName: userDetails.name,
+      restaurantName: order.restaurantName,
+      orderId: order._id.toString(),
+      total: order.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+      paymentMethod: order.paymentMethod,
+      orderDateTime: new Date(order.createdAt).toLocaleString('en-US', {
+        dateStyle: 'long',
+        timeStyle: 'short',
+        timeZone: 'Asia/Colombo'
+      }),
+      deliveryAddress: order.deliveryAddress
+    }
+  };
+
+  try {
+    await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/email`, payload, {
+      headers: { 'X-Internal-API-Key': INTERNAL_SERVICE_API_KEY }
+    });
+  } catch (err) {
+    console.error('Notification failed:', err.message);
+  }
+};
+
+// Auto-Assign Delivery
+const autoAssignDelivery = async (order) => {
+  try {
+    await axios.post(`${DELIVERY_SERVICE_URL}/api/delivery/auto-assign`, {
+      orderId: order._id
+    }, {
+      headers: { Authorization: `Bearer ${SYSTEM_JWT}` }
+    });
+  } catch (err) {
+    console.error('Auto-assign delivery failed:', err.message);
+  }
+};
+
+const getUserDetails = async (userId) => {
+  try {
+    const response = await axios.get(`${USER_SERVICE_URL}/api/users/by/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${SYSTEM_JWT}`
+      }
+    });
+    return response.data; // Adjust if your User Service wraps the response in { user: {...} }
+  } catch (err) {
+    console.error('Failed to fetch user details:', err.message);
+    throw new Error('Could not retrieve user details');
+  }
+};
+
 export {
   updateOrderStatusService,
   createOrder,
@@ -177,7 +317,8 @@ export {
   getActiveOrders,
   getOrderById,
   getOrdersByRestaurant,
-  getOrdersByCustomer
+  getOrdersByCustomer,
+  getUserDetails
 };
 
 

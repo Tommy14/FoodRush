@@ -1,5 +1,5 @@
 # Use official Node.js image
-FROM node:18
+FROM node:20
 
 # Set working directory
 WORKDIR /app
@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Expose the port the app runs on
-EXPOSE 9600
+EXPOSE 9800
 
 # Start the app
 CMD ["npm", "run", "dev"]
