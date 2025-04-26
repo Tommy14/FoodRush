@@ -1,4 +1,17 @@
 export default function MenuItemCard({ item }) {
+  const dispatch = useDispatch();
+
+  const handleAddToCart = () => {
+    const cartItem = {
+      menuItemId: item._id, // assuming backend uses _id
+      name: item.name,
+      price: item.price,
+      quantity: 1, // default to 1
+      imageUrl: item.image?.url || ''
+    };
+    dispatch(addToCart(cartItem));
+  };
+  
     return (
       <div className="flex gap-4 p-4 bg-white shadow rounded-lg">
         <img
