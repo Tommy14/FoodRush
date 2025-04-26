@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-deployment
+  namespace: foodrush
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification
+  template:
+    metadata:
+      labels:
+        app: notification
+    spec:
+      containers:
+        - name: notification
+          image: foodrush48/foodrush-notification-service:latest
+          ports:
+            - containerPort: 9800
+          env:
+            - name: MONGO_URI_NOTIFICATION_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: MONGO_URI_NOTIFICATION_SERVICE
+            - name: PORT
+              value: "9800"
+            - name: INTERNAL_SERVICE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: INTERNAL_SERVICE_API_KEY
+            - name: GOOGLE_API_USER
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: GOOGLE_API_USER
+            - name: GOOGLE_API_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: GOOGLE_API_CLIENT_ID
+            - name: GOOGLE_API_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: GOOGLE_API_CLIENT_SECRET
+            - name: GOOGLE_API_REDIRECT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: GOOGLE_API_REDIRECT_URL
+            - name: GOOGLE_API_REFRESH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: GOOGLE_API_REFRESH_TOKEN
+
+            - name: TWILIO_ACCOUNT_SID
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: TWILIO_ACCOUNT_SID
+            - name: TWILIO_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: TWILIO_AUTH_TOKEN
+            - name: TWILIO_PHONE_NUMBER
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: TWILIO_PHONE_NUMBER
+
+            - name: META_WA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: META_WA_TOKEN
+            - name: META_WA_PHONE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: META_WA_PHONE_ID
+            - name: META_WA_BUSSINESS_ID
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: META_WA_BUSSINESS_ID
+            - name: META_WA_TOKEN_PERM
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: META_WA_TOKEN_PERM
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: JWT_SECRET

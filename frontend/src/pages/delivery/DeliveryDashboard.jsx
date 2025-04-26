@@ -9,6 +9,8 @@ const DeliveryDashboard = () => {
   const [isAvailable, setIsAvailable] = useState(true);
   const [mapCoords, setMapCoords] = useState({});
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [showDeliveredPopup, setShowDeliveredPopup] = useState(false);
 
 
   const fetchOrders = async () => {
@@ -52,10 +54,25 @@ const DeliveryDashboard = () => {
 
   const handleStatusUpdate = async (deliveryId, newStatus) => {
     try {
+      setUpdatingStatus(true);
       await updateDeliveryStatus(deliveryId, newStatus);
-      fetchOrders();
+  
+      if (newStatus === 'delivered') {
+        setShowDeliveredPopup(true); // 🎯 Show popup
+  
+        // Wait 5 seconds (5000ms) before refreshing orders
+        setTimeout(async () => {
+          setShowDeliveredPopup(false);
+          await fetchOrders(); // ⏰ After 5s, fetch updated orders
+        }, 5000);
+      } else {
+        // If not "delivered", just refresh immediately
+        await fetchOrders();
+      }
     } catch (error) {
       alert('Failed to update status');
+    } finally {
+      setUpdatingStatus(false);
     }
   };
 
@@ -83,6 +100,7 @@ const DeliveryDashboard = () => {
 
   const actualAvailability = hasActiveOrder ? false : isAvailable;
   
+  
   useEffect(() => {
     const loadInitialData = async () => {
       await fetchOrders();
@@ -104,6 +122,18 @@ const DeliveryDashboard = () => {
       <DashSidebar />
   
       <main className="flex-1 overflow-auto mt-16 p-8">
+        {/* ✅ Popup for Order Delivered */}
+        {showDeliveredPopup && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-green-500/80 rounded-full w-80 h-80 shadow-2xl flex flex-col justify-center items-center text-center animate-pop-up">
+              <div className="bg-white text-green-500 rounded-full p-4 mb-4 shadow-lg animate-bounce-slow">
+                <div className="text-5xl">✅</div>
+              </div>
+              <h2 className="text-xl font-extrabold text-white mb-2">Order Delivered!</h2>
+              <p className="text-sm text-white opacity-90 px-6">Thank you for completing the delivery.</p>
+            </div>
+          </div>
+        )}
         {/* Outer Big White Card */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
   
@@ -171,16 +201,23 @@ const DeliveryDashboard = () => {
                 <div className="flex flex-col gap-3 mt-6">
                   {deliveries[0].status !== 'delivered' && (
                     <button
-                      onClick={() =>
-                        handleStatusUpdate(
-                          deliveries[0]._id,
-                          deliveries[0].status === 'assigned' ? 'picked_up' : 'delivered'
-                        )
-                      }
-                      className="w-full py-2 bg-blue-800 hover:bg-blue-700 text-white text-sm font-semibold rounded-md transition"
-                    >
-                      Mark as {deliveries[0].status === 'assigned' ? 'Picked Up' : 'Delivered'}
-                    </button>
+                    onClick={() =>
+                      handleStatusUpdate(
+                        deliveries[0]._id,
+                        deliveries[0].status === 'assigned' ? 'picked_up' : 'delivered'
+                      )
+                    }
+                    disabled={updatingStatus}
+                    className={`w-full py-2 ${
+                      updatingStatus ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-800 hover:bg-blue-700'
+                    } text-white text-sm font-semibold rounded-md transition flex justify-center items-center`}
+                  >
+                    {updatingStatus ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      `Mark as ${deliveries[0].status === 'assigned' ? 'Picked Up' : 'Delivered'}`
+                    )}
+                  </button>
                   )}
                   {mapCoords?.restaurant?.length === 2 && mapCoords?.customer?.length === 2 && (
                     <a
@@ -210,3 +247,4 @@ const DeliveryDashboard = () => {
 };
 
 export default DeliveryDashboard;
+

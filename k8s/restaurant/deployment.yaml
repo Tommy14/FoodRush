@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restaurant-deployment
+  namespace: foodrush
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: restaurant
+  template:
+    metadata:
+      labels:
+        app: restaurant
+    spec:
+      containers:
+        - name: restaurant
+          image: foodrush48/foodrush-restaurant-service:latest
+          ports:
+            - containerPort: 9100
+          env:
+            - name: MONGO_URI_RESTAURANT_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: MONGO_URI_RESTAURANT_SERVICE
+            - name: RESTAURANT_PORT
+              value: "9100"
+            - name: RESTAURANT_SERVICE_URL
+              value: "http://restaurant-service:9100"
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: INTERNAL_SERVICE_API_KEY
+            - name: INTERNAL_SERVICE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: INTERNAL_SERVICE_API_KEY
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://notification-service:9800"
+            - name: LOCATION_SERVICE_URL
+              value: "http://location-service:9500"
+            - name: GOOGLE_MAPS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: GOOGLE_MAPS_API_KEY
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: JWT_SECRET

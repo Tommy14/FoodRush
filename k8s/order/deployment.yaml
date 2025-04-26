@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-deployment
+  namespace: foodrush
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+        - name: order
+          image: foodrush48/foodrush-order-service:latest
+          ports:
+            - containerPort: 9200
+          env:
+            - name: MONGO_URI_ORDER_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: MONGO_URI_ORDER_SERVICE
+            - name: ORDER_PORT
+              value: "9200"
+            - name: ORDER_SERVICE_URL
+              value: "http://order-service:9200"
+            - name: INTERNAL_SERVICE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: INTERNAL_SERVICE_API_KEY
+            # Internal service URLs
+            - name: DELIVERY_SERVICE_URL
+              value: "http://delivery-service:9300"
+            - name: LOCATION_SERVICE_URL
+              value: "http://location-service:9500"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://notification-service:9800"
+            - name: PAYMENT_SERVICE_URL
+              value: "http://payment-service:9400"
+            - name: RESTAURANT_SERVICE_URL
+              value: "http://restaurant-service:9100"
+            - name: USER_SERVICE_URL
+              value: "http://user-auth-service:9000"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: JWT_SECRET
+            - name: SYSTEM_JWT
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: SYSTEM_JWT

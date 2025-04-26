@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: location-deployment
+  namespace: foodrush
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: location
+  template:
+    metadata:
+      labels:
+        app: location
+    spec:
+      containers:
+        - name: location
+          image: foodrush48/foodrush-location-service:latest
+          ports:
+            - containerPort: 9500
+          env:
+            - name: MONGO_URI_LOCATION_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: MONGO_URI_LOCATION_SERVICE
+            - name: LOCATION_PORT
+              value: "9500"
+            - name: LOCATION_SERVICE_URL
+              value: "http://location-service:9700"
+            - name: INTERNAL_SERVICE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: INTERNAL_SERVICE_API_KEY
+            - name: GOOGLE_MAPS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: GOOGLE_MAPS_API_KEY
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: JWT_SECRET
