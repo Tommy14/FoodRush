@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
-  FaEdit,
-  FaTrashAlt,
-  FaEye,
-  FaToggleOn,
-  FaToggleOff,
-  FaStar,
-  FaRegStar,
-  FaStarHalfAlt,
-} from "react-icons/fa";
+import { FaEdit, FaTrashAlt, FaEye, FaToggleOn, FaToggleOff, FaStar, FaRegStar, FaStarHalfAlt, FaList } from "react-icons/fa";
 import { MdAccessTime, MdLocationOn, MdRateReview } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { getRestaurantReviewSummary } from "../../services/restaurantService";
@@ -184,6 +175,19 @@ const RestaurantManageCard = ({ restaurant, onToggle, onDelete }) => {
               {restaurant.estimatedDeliveryTime || "30-45"} min delivery
             </span>
           </div>
+        </div>
+
+        {/* Menu Management Section - Fix status and _id references */}
+        <div className="mt-4 mb-4">
+          {restaurant.status === "APPROVED" && (
+            <Link
+              to={`/restaurants/${restaurant._id}/menu`}
+              className="w-full flex justify-center items-center py-2.5 px-3 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition"
+            >
+              <FaList className="mr-1.5" />
+              <span>Manage Menu Items</span>
+            </Link>
+          )}
         </div>
 
         <div className="mt-4 pt-3 border-t flex justify-between items-center">
