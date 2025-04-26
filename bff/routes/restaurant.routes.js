@@ -408,9 +408,51 @@ router.put("/:id", restaurantUpload, async (req, res) => {
   try {
     const formData = new FormData();
 
-    // Add JSON data
+    // JSON data with proper handling for arrays and objects
     Object.keys(req.body).forEach((key) => {
-      formData.append(key, req.body[key]);
+      // For arrays like cuisineTypes
+      if (key === "cuisineTypes") {
+        if (Array.isArray(req.body[key])) {
+          req.body[key].forEach((item) => {
+            formData.append(key, item);
+          });
+        } else if (typeof req.body[key] === "string") {
+          try {
+            // Try parsing it as JSON first
+            const parsedArray = JSON.parse(req.body[key]);
+            if (Array.isArray(parsedArray)) {
+              parsedArray.forEach((item) => {
+                formData.append(key, item);
+              });
+            } else {
+              formData.append(key, req.body[key]);
+            }
+          } catch (e) {
+            // If parsing fails, treat as single value
+            formData.append(key, req.body[key]);
+          }
+        } else {
+          // If it's a single value
+          formData.append(key, req.body[key]);
+        }
+      }
+      // For objects that need to be sent as JSON strings
+      else if (key === "address" || key === "openingHours") {
+        try {
+          const value =
+            typeof req.body[key] === "string"
+              ? req.body[key]
+              : JSON.stringify(req.body[key]);
+          formData.append(key, value);
+        } catch (e) {
+          console.error(`Error processing ${key}:`, e);
+          formData.append(key, req.body[key]);
+        }
+      }
+      // For regular fields
+      else {
+        formData.append(key, req.body[key]);
+      }
     });
 
     // Add files if they exist
@@ -454,8 +496,24 @@ router.put("/:id", restaurantUpload, async (req, res) => {
       }
     );
 
-    // Clean up temp files
-    // cleanupFiles(req.files);
+    // Parse stringified JSON fields in the response
+    if (response.data) {
+      if (typeof response.data.address === "string") {
+        try {
+          response.data.address = JSON.parse(response.data.address);
+        } catch (err) {
+          console.error("Failed to parse address JSON:", err);
+        }
+      }
+
+      if (typeof response.data.openingHours === "string") {
+        try {
+          response.data.openingHours = JSON.parse(response.data.openingHours);
+        } catch (err) {
+          console.error("Failed to parse openingHours JSON:", err);
+        }
+      }
+    }
 
     res.json(response.data);
   } catch (err) {
@@ -510,8 +568,8 @@ router.patch("/:id/status", async (req, res) => {
     );
     res.json(response.data);
   } catch (err) {
-    res.status(err.response?.status || 500).json({ 
-      message: err.response?.data?.message || err.message 
+    res.status(err.response?.status || 500).json({
+      message: err.response?.data?.message || err.message,
     });
   }
 });
