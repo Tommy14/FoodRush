@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-deployment
+  namespace: foodrush
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+        - name: payment
+          image: foodrush48/foodrush-payment-service:latest
+          ports:
+            - containerPort: 9400
+          env:
+            - name: MONGO_URI_PAYMENT_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: MONGO_URI_PAYMENT_SERVICE
+            - name: PAYMENT_PORT
+              value: "9400"
+            - name: PAYMENT_SERVICE_URL
+              value: "http://payment-service:9400"
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: STRIPE_SECRET_KEY
+            - name: STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: STRIPE_WEBHOOK_SECRET
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: JWT_SECRET
+            - name: INTERNAL_SERVICE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: foodrush-secrets
+                  key: INTERNAL_SERVICE_API_KEY
