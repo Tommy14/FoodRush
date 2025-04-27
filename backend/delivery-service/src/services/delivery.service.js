@@ -1,9 +1,10 @@
 import Delivery from '../models/Delivery.js';
 import axios from 'axios';
-import { NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY, ORDER_SERVICE_URL, SYSTEM_JWT, USER_SERVICE_URL} from '../config/index.js';
+import { NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY, ORDER_SERVICE_URL, SYSTEM_JWT, USER_SERVICE_URL, LOCATION_SERVICE_URL} from '../config/index.js';
 
 
-export const autoAssignDeliveryService = async (orderId) => {
+export const autoAssignDeliveryService = async (orderId, address) => {
+  console.log('Auto-assigning delivery for order:', address);
   try {
     // 1. Fetch delivery personnel from User Service
     const res = await axios.get(`${USER_SERVICE_URL}/api/users/role/delivery_person`, {
@@ -23,6 +24,9 @@ export const autoAssignDeliveryService = async (orderId) => {
     const selectedDriver = availableDrivers[0];
     console.log('Selected driver:', selectedDriver);
 
+    if (!selectedDriver) {
+      throw new Error('No driver selected for assignment');
+    }
     // Update the selected driver to not available
     await axios.put(`${USER_SERVICE_URL}/api/users/update-user/${selectedDriver.id}`, {
       isAvailable: false
@@ -35,7 +39,8 @@ export const autoAssignDeliveryService = async (orderId) => {
     // 3. Assign delivery
     const assignedDelivery = await assignDeliveryService({
       orderId,
-      deliveryPersonId: selectedDriver.id
+      deliveryPersonId: selectedDriver.id,
+      address
     });
 
     return assignedDelivery;
@@ -46,11 +51,22 @@ export const autoAssignDeliveryService = async (orderId) => {
   }
 };
 
-export const assignDeliveryService = async ({ orderId, deliveryPersonId }) => {
-  console.log('Assigning delivery:', orderId, deliveryPersonId);
+export const assignDeliveryService = async ({ orderId, deliveryPersonId, address }) => {
+  console.log('TDDILK:', orderId, deliveryPersonId, address);
+  const res = await axios.post(`${LOCATION_SERVICE_URL}/api/location/geocode`, {
+    address: address
+  });
+
+  const deliveryCoordinates = {
+    type: 'Point',
+    coordinates: res.data.coordinates
+  };
+  console.log('Delivery coordinates:', deliveryCoordinates);
+
   const delivery = new Delivery({
     orderId,
     deliveryPersonId,
+    deliveryCoordinates,
     status: 'assigned',
     assignedAt: new Date()
   });

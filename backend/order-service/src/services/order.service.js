@@ -155,7 +155,6 @@ const createOrder = async (orderData, user) => {
     items,
     totalAmount,
     deliveryAddress,
-    deliveryCoordinates,
     paymentMethod
   } = orderData;
 
@@ -169,7 +168,6 @@ const createOrder = async (orderData, user) => {
     items,
     totalAmount,
     deliveryAddress,
-    deliveryCoordinates,
     paymentMethod,
     status: 'pending',
     paymentStatus: 'not_paid',
@@ -285,9 +283,12 @@ const notifyOrderPlaced = async (order) => {
 
 // Auto-Assign Delivery
 const autoAssignDelivery = async (order) => {
+  console.log('Auto-assigning delivery for order:', order);
+  console.log('Delivery Address:', order.deliveryAddress);
   try {
     await axios.post(`${DELIVERY_SERVICE_URL}/api/delivery/auto-assign`, {
-      orderId: order._id
+      orderId: order._id,
+      address: order.deliveryAddress
     }, {
       headers: { Authorization: `Bearer ${SYSTEM_JWT}` }
     });

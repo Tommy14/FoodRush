@@ -10,11 +10,12 @@ import {
 export const autoAssignDelivery = async (req, res) => {
   try {
     const { orderId } = req.body;
+    const { address} = req.body;
     if (!orderId) {
       return res.status(400).json({ message: 'Order ID is required' });
     }
 
-    const delivery = await autoAssignDeliveryService(orderId);;
+    const delivery = await autoAssignDeliveryService(orderId, address);;
 
     res.status(201).json({ message: 'Delivery assigned', data: delivery });
   } catch (error) {
@@ -27,8 +28,8 @@ export const autoAssignDelivery = async (req, res) => {
 // @desc Assign a delivery person to an order
 export const assignDelivery = async (req, res) => {
   try {
-    const { orderId, deliveryPersonId } = req.body;
-    const delivery = await assignDeliveryService({ orderId, deliveryPersonId });
+    const { orderId, deliveryPersonId, address } = req.body;
+    const delivery = await assignDeliveryService({ orderId, deliveryPersonId, address });
 
     res.status(201).json({ message: 'Delivery assigned', data: delivery });
   } catch (error) {
