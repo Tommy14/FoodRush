@@ -65,13 +65,10 @@ const menuItemUpload = upload.fields([{ name: "image", maxCount: 1 }]);
 // Public: View Menu Items of a Restaurant
 router.get("/:id/menu", async (req, res) => {
   try {
-    console.log(`Attempting to fetch menu for restaurant ${req.params.id}`);
-    console.log(`Calling: ${RESTAURANT_SERVICE}/${req.params.id}/menu`);
-
     const response = await axios.get(
       `${RESTAURANT_SERVICE}/${req.params.id}/menu`
     );
-    console.log("Menu items fetched successfully");
+
     res.json(response.data);
   } catch (err) {
     console.error("Error fetching menu items:", err);

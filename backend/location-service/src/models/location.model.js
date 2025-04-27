@@ -26,7 +26,7 @@ const locationSchema = new mongoose.Schema({
       default: 'Point'
     },
     coordinates: {
-      type: [Number], // [longitude, latitude]
+      type: [Number],
       required: true
     }
   },
@@ -41,7 +41,6 @@ const locationSchema = new mongoose.Schema({
   }
 });
 
-// Create a geospatial index on the location field
 locationSchema.index({ location: '2dsphere' });
 
 export default mongoose.model('Location', locationSchema);

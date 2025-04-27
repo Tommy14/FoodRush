@@ -175,7 +175,6 @@ router.get("/admin/pending", async (req, res) => {
 // Public: Get single restaurant by ID
 router.get("/:id", async (req, res) => {
   try {
-    console.log("BFF - Fetching restaurant details for ID:", req.params.id);
 
     // Prepare headers to forward any auth token if present
     const headers = {};
@@ -233,7 +232,6 @@ router.get("/:id", async (req, res) => {
       }
     }
 
-    console.log("Restaurant details retrieved successfully");
     res.json(response.data);
   } catch (err) {
     console.error(`Error fetching restaurant ${req.params.id}:`, err.message);
@@ -255,12 +253,6 @@ router.use(authenticate);
 // Restaurant Admin: Create restaurant with file upload
 router.post("/", restaurantUpload, async (req, res) => {
   try {
-    console.log("BFF - Restaurant creation request received");
-    console.log("Request body:", req.body);
-    console.log(
-      "Request files:",
-      req.files ? Object.keys(req.files) : "No files"
-    );
 
     const formData = new FormData();
 
@@ -301,7 +293,6 @@ router.post("/", restaurantUpload, async (req, res) => {
     if (req.files) {
       // Handle logo file
       if (req.files.logo && req.files.logo[0]) {
-        console.log("Adding logo file:", req.files.logo[0].originalname);
         formData.append("logo", fs.createReadStream(req.files.logo[0].path), {
           filename: req.files.logo[0].originalname,
           contentType: req.files.logo[0].mimetype,
@@ -310,10 +301,7 @@ router.post("/", restaurantUpload, async (req, res) => {
 
       // Handle coverImage file
       if (req.files.coverImage && req.files.coverImage[0]) {
-        console.log(
-          "Adding cover image:",
-          req.files.coverImage[0].originalname
-        );
+
         formData.append(
           "coverImage",
           fs.createReadStream(req.files.coverImage[0].path),
@@ -326,7 +314,6 @@ router.post("/", restaurantUpload, async (req, res) => {
 
       // Handle multiple gallery images
       if (req.files.images) {
-        console.log("Adding gallery images:", req.files.images.length);
         req.files.images.forEach((image) => {
           formData.append("images", fs.createReadStream(image.path), {
             filename: image.originalname,
@@ -336,7 +323,6 @@ router.post("/", restaurantUpload, async (req, res) => {
       }
     }
 
-    console.log("Forwarding request to restaurant service...");
     const response = await axios.post(`${RESTAURANT_API}/`, formData, {
       headers: {
         ...formData.getHeaders(),
@@ -346,7 +332,6 @@ router.post("/", restaurantUpload, async (req, res) => {
       maxBodyLength: Infinity,
     });
 
-    console.log("Restaurant created successfully");
 
     // Clean up temp files after successful creation
     if (req.files) {

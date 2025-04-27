@@ -17,8 +17,6 @@ export const uploadImage = async (file, folder = 'restaurants') => {
     // Determine if we have a file path string or a file object
     const filePath = typeof file === 'string' ? file : file.path;
     
-    console.log(`Uploading image from path: ${filePath}`);
-    
     // Check if file exists
     if (!fs.existsSync(filePath)) {
       console.error(`File does not exist at path: ${filePath}`);
@@ -31,7 +29,6 @@ export const uploadImage = async (file, folder = 'restaurants') => {
       resource_type: 'image'
     });
     
-    console.log(`Successfully uploaded to Cloudinary: ${result.secure_url}`);
     
     // Remove the file from local storage after upload
     fs.unlinkSync(filePath);
