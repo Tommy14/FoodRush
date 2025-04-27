@@ -11,11 +11,14 @@ import {
 import { MdAccessTime, MdLocationOn, MdRateReview } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { getRestaurantReviewSummary } from "../../services/restaurantService";
+import { checkFavoriteStatus, toggleFavoriteStatus } from "../../services/favoriteService";
+import { toast } from "react-toastify";
 
 const RestaurantCard = ({ restaurant }) => {
   const [ratingSummary, setRatingSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const auth = useSelector((state) => state.auth);
 
   useEffect(() => {
@@ -39,7 +42,20 @@ const RestaurantCard = ({ restaurant }) => {
       }
     };
 
+    // Check favorite status when component mounts
+    const checkFavorite = async () => {
+      try {
+        if (auth?.token && restaurant?._id) {
+          const result = await checkFavoriteStatus(restaurant._id);
+          setIsFavorite(result.isFavorited);
+        }
+      } catch (error) {
+        console.error("Error checking favorite status:", error);
+      }
+    };
+
     fetchRatingSummary();
+    checkFavorite();
   }, [restaurant, restaurant?._id, auth?.token]);
 
   // Generate rating stars display
@@ -61,11 +77,32 @@ const RestaurantCard = ({ restaurant }) => {
     return <div className="flex">{stars}</div>;
   };
 
-  // Toggle favorite (could be connected to a real service in the future)
-  const toggleFavorite = (e) => {
+  // Toggle favorite 
+  const toggleFavorite = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
+    
+    if (!auth?.token) {
+      toast.info("Please log in to save favorites");
+      return;
+    }
+    
+    try {
+      setFavoriteLoading(true);
+      const result = await toggleFavoriteStatus(restaurant._id);
+      setIsFavorite(result.favorited);
+      
+      toast.success(
+        result.favorited 
+          ? "Added to favorites" 
+          : "Removed from favorites"
+      );
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      toast.error("Failed to update favorites");
+    } finally {
+      setFavoriteLoading(false);
+    }
   };
 
   // Format address from various possible formats
@@ -147,13 +184,18 @@ const RestaurantCard = ({ restaurant }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 group-hover:opacity-80"></div>
         </div>
 
-        {/* Favorite Button */}
+        {/* Favorite Button - Updated with loading state */}
         <button
           onClick={toggleFavorite}
-          className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-colors z-10"
+          disabled={favoriteLoading}
+          className={`absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-colors z-10 ${
+            favoriteLoading ? 'opacity-70' : ''
+          }`}
           aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
-          {isFavorite ? (
+          {favoriteLoading ? (
+            <div className="w-4 h-4 border-2 border-t-red-500 rounded-full animate-spin"></div>
+          ) : isFavorite ? (
             <FaHeart className="text-red-500 text-lg" />
           ) : (
             <FaRegHeart className="text-gray-500 text-lg hover:text-red-400" />
