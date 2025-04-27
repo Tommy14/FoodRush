@@ -17,7 +17,6 @@ const DeliveryDashboard = () => {
     try {
       const res = await fetchAssignedOrders();
       setDeliveries(res);
-      console.log('Fetched Deliveries:', res);
     } catch (error) {
       console.error('Failed to fetch orders', error);
     }
@@ -26,7 +25,7 @@ const DeliveryDashboard = () => {
   const fetchCoordinates = async (delivery) => {
     try {
       const restaurantCoords = await getRestaurantCoordinates(delivery.orderId);
-      const customerCoords = await getCustomerCoordinates(delivery.orderId);
+      const customerCoords = await getCustomerCoordinates(delivery._id);
 
       setMapCoords({ restaurant: restaurantCoords, customer: customerCoords });
     } catch (err) {
