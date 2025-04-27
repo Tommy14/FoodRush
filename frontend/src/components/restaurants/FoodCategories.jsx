@@ -28,10 +28,10 @@ const categories = [
   { id: "srilankan", name: "Sri Lankan", image: srilankan },
   { id: "dessert", name: "Dessert", image: desserts },
   { id: "vegan", name: "Vegan", image: vegan },
-  { id: "fish", name: "fish", image: fish },
-  { id: "bbq", name: "bbq", image: barbecue },
-  { id: "healthy", name: "healthy", image: healthy },
-  { id: "bakery", name: "bakery", image: bakery },
+  { id: "fish", name: "Fish", image: fish },
+  { id: "bbq", name: "Bbq", image: barbecue },
+  { id: "healthy", name: "Healthy", image: healthy },
+  { id: "bakery", name: "Bakery", image: bakery },
   
   
 ];
