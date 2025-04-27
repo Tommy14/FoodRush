@@ -259,7 +259,7 @@ const notifyOrderPlaced = async (order) => {
     type: "orderPlaced",
     data: {
       customerName: userDetails.name,
-      restaurantName: order.restaurantName,
+      restaurantName: "Test Restaurant",
       orderId: order._id.toString(),
       total: order.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }),
       paymentMethod: order.paymentMethod,
