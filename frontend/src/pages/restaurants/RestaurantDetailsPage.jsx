@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import axios from 'axios';
 import RestaurantDetails from '../../components/restaurants/RestaurantDetails';
+import RestaurantMenu from '../../components/menu/RestaurantMenu';
 import DashSidebar from '../../components/DashSidebar';
 import { getRestaurantById } from '../../services/restaurantService';
 
@@ -94,9 +94,23 @@ const RestaurantDetailsPage = () => {
     <div className="flex min-h-screen bg-gray-50">
       {isOwner && <DashSidebar />}
       
-      <div className={`flex-1 p-4 ${isOwner ? 'lg:ml-64' : ''}`}>
-        <div className="max-w-5xl mx-auto">
+      <div className={`flex-1 ${isOwner ? 'lg:ml-64' : ''}`}>
+        <div className="max-w-5xl mx-auto p-4">
           <RestaurantDetails restaurant={restaurant} isOwner={isOwner} />
+          
+          {/* Divider */}
+          <div className="relative my-12">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            
+          </div>
+          
+          {/* Restaurant Menu */}
+          <RestaurantMenu 
+            restaurantId={restaurantId} 
+            restaurantName={restaurant.name} 
+          />
         </div>
       </div>
     </div>
