@@ -91,15 +91,11 @@ export const createRestaurant = async (req, res) => {
     }
     
     // Create the restaurant first
-    console.log('Creating restaurant in database...');
     const restaurant = await restaurantService.createRestaurant({...parsedData, ...imageData}, userId);
     
     // Now we have the restaurant object, process location
     if (restaurant && restaurant.address) {
       try {
-        console.log("Creating location for restaurant...");
-        console.log("Address to geocode:", JSON.stringify(restaurant.address));
-
         // Prepare a properly formatted address object
         const addressToGeocode = {
           street: restaurant.address.street || "",
@@ -143,8 +139,6 @@ export const createRestaurant = async (req, res) => {
             placeId: geocodeResponse.data.placeId || null,
           };
 
-          console.log("Saving location data:", JSON.stringify(locationData));
-
           const locationResponse = await axios.post(
             `${process.env.LOCATION_SERVICE_URL}/api/location`,
             locationData,
@@ -162,7 +156,6 @@ export const createRestaurant = async (req, res) => {
               "location.coordinates": geocodeResponse.data.coordinates,
               locationId: locationResponse.data._id,
             });
-            console.log("Location created and linked to restaurant");
           }
         } else {
           console.error("Geocoding failed for address:", restaurant.address);
@@ -175,7 +168,6 @@ export const createRestaurant = async (req, res) => {
       }
     }
     
-    console.log('Restaurant creation complete.');
     const updatedRestaurant = await Restaurant.findById(restaurant._id);
     res.status(201).json(updatedRestaurant);
   } catch (err) {
@@ -190,14 +182,12 @@ export const updateRestaurant = async (req, res) => {
 
     // Handle logo upload
     if (req.files && req.files.logo && req.files.logo[0]) {
-      console.log("Processing logo:", req.files.logo[0]);
       try {
         const logoResult = await imageService.uploadImage(
           req.files.logo[0].path,
           "restaurants/logos"
         );
         imageData.logo = logoResult.url;
-        console.log("Logo uploaded successfully:", imageData.logo);
       } catch (uploadErr) {
         console.error("Logo upload error:", uploadErr);
       }
