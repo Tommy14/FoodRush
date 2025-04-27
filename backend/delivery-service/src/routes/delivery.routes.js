@@ -4,7 +4,8 @@ import {
   updateDeliveryStatus,
   getDeliveriesByPerson,
   getCompletedDeliveriesByPerson,
-  autoAssignDelivery
+  autoAssignDelivery,
+  getDeliveryById
 } from '../controllers/delivery.controller.js';
 
 import authMiddleware from '../middleware/auth.js';
@@ -22,6 +23,9 @@ router.post('/auto-assign', autoAssignDelivery);
 
 // 🔁 Update delivery status (delivery person)
 router.put('/:id/status', updateDeliveryStatus);
+
+// 📄 Get delivery by delivery id
+router.get('/by/:id', getDeliveryById);
 
 // 📄 Get deliveries assigned to logged-in delivery person
 router.get('/my-deliveries', getDeliveriesByPerson);

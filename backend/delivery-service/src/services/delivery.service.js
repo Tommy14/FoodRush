@@ -126,61 +126,14 @@ export const getCompletedDeliveriesByPersonService = async (deliveryPersonId) =>
   return await Delivery.find({ deliveryPersonId, status: 'delivered' }).sort({ deliveredAt: -1 });
 };
 
-// async function sendDeliveryUpdateEmail(delivery) {
-//   const order = await axios.get(`${ORDER_SERVICE_URL}/api/orders/${delivery.orderId.toString()}`, {
-//     headers: {
-//       Authorization: `Bearer ${SYSTEM_JWT}`
-//     }
-//   });
-
-//   const customer = await axios.get(`${USER_SERVICE_URL}/api/users/by/${order.data.data.customerId}`, {
-//     headers: {
-//       Authorization: `Bearer ${SYSTEM_JWT}`
-//     }
-//   });
-
-//   const deliveryPerson = await axios.get(`${USER_SERVICE_URL}/api/users/by/${delivery.deliveryPersonId.toString()}`, {
-//     headers: {
-//       Authorization: `Bearer ${SYSTEM_JWT}`
-//     }
-//   });
-//   try {
-//     await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notify/email`, {
-//       recipient: {
-//         email: customer.data.email,
-//       },
-//       subject: 'Your order has been delivered! 🎉',
-//       type: 'orderDelivered', 
-//       data: {
-//         customerName: customer.data.name,
-//         restaurantName: order.data.data.restaurantName,
-//         orderId: delivery.orderId,
-//         total: order.data.data.totalAmount,
-//         paymentMethod: order.data.data.paymentMethod,
-//         orderDateTime: new Date(order.data.data.createdAt).toLocaleString('en-US', {
-//           timeZone: 'Asia/Colombo',
-//           dateStyle: 'long',
-//           timeStyle: 'short'
-//         }),
-//         deliveryAddress: order.data.data.deliveryAddress,
-//         deliveryPerson: [
-//             {name: deliveryPerson.data.name},
-//         ],
-//         updatedAt: new Date().toLocaleString('en-US', {
-//           timeZone: 'Asia/Colombo',
-//           dateStyle: 'long',
-//           timeStyle: 'short'
-//         })
-//       }
-//     }, {
-//       headers: {
-//         'X-Internal-API-Key': INTERNAL_SERVICE_API_KEY
-//       }
-//     });
-//   } catch (err) {
-//     console.error('Delivery updated, but failed to send email:', err.message);
-//   }
-// }
+//get delivery by deliveryId
+export const getDeliveryByIdService = async (deliveryId) => {
+  const delivery = await Delivery.findById(deliveryId);
+  if (!delivery) {
+    throw new Error('Delivery not found');
+  }
+  return delivery;
+};
 
 
 async function sendDeliveryUpdateEmail(delivery) {

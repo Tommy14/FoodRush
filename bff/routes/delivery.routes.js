@@ -68,4 +68,20 @@ router.get('/my-deliveries/completed', async (req, res) => {
   }
 });
 
+//get delivery by delivery id
+router.get('/by/:id', async (req, res) => {
+  const deliveryId = req.params.id;
+
+  try {
+    const response = await axios.get(`${DELIVERY_API}/by/${deliveryId}`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      }
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ message: err.message });
+  }
+});
+
 export default router;

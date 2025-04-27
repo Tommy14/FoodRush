@@ -3,7 +3,8 @@ import {
   updateDeliveryStatusService,
   getDeliveriesByPersonService,
   getCompletedDeliveriesByPersonService,
-  autoAssignDeliveryService
+  autoAssignDeliveryService,
+  getDeliveryByIdService
 } from '../services/delivery.service.js';
 
 // @desc Assign a delivery person automatically to an order
@@ -70,5 +71,21 @@ export const getCompletedDeliveriesByPerson = async (req, res) => {
     res.status(200).json({ data: deliveries });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch deliveries', error: error.message });
+  }
+};
+
+//get delivery by delivery id
+export const getDeliveryById = async (req, res) => {
+  try {
+    const deliveryId = req.params.id;
+    const delivery = await getDeliveryByIdService(deliveryId);
+
+    if (!delivery) {
+      return res.status(404).json({ message: 'Delivery not found' });
+    }
+
+    res.status(200).json({ data: delivery });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch delivery', error: error.message });
   }
 };
