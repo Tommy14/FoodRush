@@ -19,7 +19,7 @@ export const fetchAssignedOrders = async () => {
       try {
         const orderRes = await apiPrivate.get(`/orders/${delivery.orderId}`);
         const order = orderRes.data;
-        console.log('Order:', order);
+
         deliveryAddress = order.order.deliveryAddress;
         totalPrice = order.order.totalAmount;
         paymentMethod = order.order.paymentMethod;
@@ -161,9 +161,15 @@ export const getRestaurantCoordinates = async (orderId) => {
  * @param {string} orderId - The ID of the order
  * @returns {Promise<[number, number]>} Coordinates in [lng, lat] format
  */
-export const getCustomerCoordinates = async (orderId) => {
+export const getCustomerCoordinates = async (_id) => {
   try {
-    const response = await apiPrivate.get(`/orders/${orderId}`);    return response.data?.order.deliveryCoordinates?.coordinates || null;
+    const response = await apiPrivate.get(`/delivery/by/${_id}`);
+
+    if (!response.data) {
+      throw new Error("No data found for the given delivery ID");
+    } 
+    return response.data?.data.deliveryCoordinates?.coordinates || null;
+
   } catch (error) {
     console.error("Failed to fetch customer coordinates:", error);
     throw error;

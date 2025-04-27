@@ -43,7 +43,6 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-
   // deliveryCoordinates: {
   //   type: {
   //     type: String,
@@ -55,7 +54,6 @@ const orderSchema = new mongoose.Schema({
   //     required: true
   //   }
   // },  
-
   paymentMethod: {
     type: String,
     enum: ['cash', 'card'],

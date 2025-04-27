@@ -3,18 +3,20 @@ import {
   updateDeliveryStatusService,
   getDeliveriesByPersonService,
   getCompletedDeliveriesByPersonService,
-  autoAssignDeliveryService
+  autoAssignDeliveryService,
+  getDeliveryByIdService
 } from '../services/delivery.service.js';
 
 // @desc Assign a delivery person automatically to an order
 export const autoAssignDelivery = async (req, res) => {
   try {
     const { orderId } = req.body;
+    const { address} = req.body;
     if (!orderId) {
       return res.status(400).json({ message: 'Order ID is required' });
     }
 
-    const delivery = await autoAssignDeliveryService(orderId);;
+    const delivery = await autoAssignDeliveryService(orderId, address);;
 
     res.status(201).json({ message: 'Delivery assigned', data: delivery });
   } catch (error) {
@@ -27,8 +29,8 @@ export const autoAssignDelivery = async (req, res) => {
 // @desc Assign a delivery person to an order
 export const assignDelivery = async (req, res) => {
   try {
-    const { orderId, deliveryPersonId } = req.body;
-    const delivery = await assignDeliveryService({ orderId, deliveryPersonId });
+    const { orderId, deliveryPersonId, address } = req.body;
+    const delivery = await assignDeliveryService({ orderId, deliveryPersonId, address });
 
     res.status(201).json({ message: 'Delivery assigned', data: delivery });
   } catch (error) {
@@ -69,5 +71,21 @@ export const getCompletedDeliveriesByPerson = async (req, res) => {
     res.status(200).json({ data: deliveries });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch deliveries', error: error.message });
+  }
+};
+
+//get delivery by delivery id
+export const getDeliveryById = async (req, res) => {
+  try {
+    const deliveryId = req.params.id;
+    const delivery = await getDeliveryByIdService(deliveryId);
+
+    if (!delivery) {
+      return res.status(404).json({ message: 'Delivery not found' });
+    }
+
+    res.status(200).json({ data: delivery });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch delivery', error: error.message });
   }
 };

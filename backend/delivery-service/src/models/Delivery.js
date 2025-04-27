@@ -16,6 +16,17 @@ const deliverySchema = new mongoose.Schema({
     enum: ['assigned', 'picked_up', 'delivered'],
     default: 'assigned'
   },
+  deliveryCoordinates: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number],
+      required: true
+    }
+  },  
   assignedAt: {
     type: Date,
     default: Date.now
