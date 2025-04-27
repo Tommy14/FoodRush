@@ -6,6 +6,11 @@ import DashSidebar from '../../components/DashSidebar';
 import { FaCamera, FaUpload, FaSpinner, FaPlusCircle, FaTimes } from 'react-icons/fa';
 import { v4 as uuidv4 } from 'uuid';
 
+// Update input styles to have light green background and green focus
+const inputClasses = "w-full px-3 py-2 border rounded-md bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-500";
+const buttonClasses = "px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200";
+const secondaryButtonClasses = "px-4 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition duration-200";
+
 const CreateRestaurant = () => {
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
@@ -265,7 +270,7 @@ const CreateRestaurant = () => {
       <DashSidebar />
 
       <div className="flex-1 p-8 overflow-auto">
-        <h1 className="text-3xl font-bold mb-6">Create New Restaurant</h1>
+        <h1 className="text-3xl font-bold mb-6 text-green-800">Create New Restaurant</h1>
 
         {error && (
           <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6">
@@ -286,7 +291,7 @@ const CreateRestaurant = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Basic Information */}
             <div>
-              <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+              <h2 className="text-xl font-semibold mb-4 text-green-700">Basic Information</h2>
 
               {/* Hidden field */}
               <input
@@ -304,7 +309,7 @@ const CreateRestaurant = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={inputClasses}
                   required
                 />
               </div>
@@ -317,7 +322,7 @@ const CreateRestaurant = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={inputClasses}
                   rows="3"
                   required
                 />
@@ -332,13 +337,13 @@ const CreateRestaurant = () => {
                   {formData.cuisineTypes.map((type, index) => (
                     <div
                       key={index}
-                      className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full flex items-center"
+                      className="bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center"
                     >
                       <span>{type}</span>
                       <button
                         type="button"
                         onClick={() => removeCuisineType(index)}
-                        className="ml-1 text-blue-600 hover:text-blue-800"
+                        className="ml-1 text-green-600 hover:text-green-800"
                       >
                         <FaTimes />
                       </button>
@@ -352,12 +357,12 @@ const CreateRestaurant = () => {
                     onChange={(e) => setCuisineInput(e.target.value)}
                     onKeyPress={handleCuisineKeyPress}
                     placeholder="e.g., Italian, Chinese, Sri Lankan"
-                    className="w-full px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border rounded-l-md bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-500"
                   />
                   <button
                     type="button"
                     onClick={addCuisineType}
-                    className="px-3 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600"
+                    className="px-3 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700"
                   >
                     <FaPlusCircle />
                   </button>
@@ -375,7 +380,7 @@ const CreateRestaurant = () => {
                   name="priceRange"
                   value={formData.priceRange}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={inputClasses}
                 >
                   <option value="$">$ (Budget)</option>
                   <option value="$$">$$ (Moderate)</option>
@@ -385,10 +390,9 @@ const CreateRestaurant = () => {
               </div>
             </div>
 
-            {/* Rest of the component remains unchanged... */}
             {/* Contact & Address */}
             <div>
-              <h2 className="text-xl font-semibold mb-4">Contact & Address</h2>
+              <h2 className="text-xl font-semibold mb-4 text-green-700">Contact & Address</h2>
 
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">
@@ -399,7 +403,7 @@ const CreateRestaurant = () => {
                   name="contactPhone"
                   value={formData.contactPhone}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={inputClasses}
                   required
                 />
               </div>
@@ -411,7 +415,7 @@ const CreateRestaurant = () => {
                   name="contactEmail"
                   value={formData.contactEmail}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={inputClasses}
                 />
               </div>
 
@@ -424,7 +428,7 @@ const CreateRestaurant = () => {
                   name="street"
                   value={formData.address.street}
                   onChange={handleAddressChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={inputClasses}
                   required
                 />
               </div>
@@ -437,7 +441,7 @@ const CreateRestaurant = () => {
                     name="city"
                     value={formData.address.city}
                     onChange={handleAddressChange}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={inputClasses}
                     required
                   />
                 </div>
@@ -451,7 +455,7 @@ const CreateRestaurant = () => {
                     name="state"
                     value={formData.address.state}
                     onChange={handleAddressChange}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={inputClasses}
                     required
                   />
                 </div>
@@ -467,7 +471,7 @@ const CreateRestaurant = () => {
                     name="postalCode"
                     value={formData.address.postalCode}
                     onChange={handleAddressChange}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={inputClasses}
                     required
                   />
                 </div>
@@ -477,7 +481,7 @@ const CreateRestaurant = () => {
 
           {/* Restaurant Images */}
           <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">Restaurant Images</h2>
+            <h2 className="text-xl font-semibold mb-4 text-green-700">Restaurant Images</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Logo Upload */}
@@ -485,17 +489,17 @@ const CreateRestaurant = () => {
                 <label className="block text-gray-700 mb-2">
                   Restaurant Logo
                 </label>
-                <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                <div className="border-2 border-dashed border-green-200 rounded-lg p-4 text-center hover:border-green-400 transition duration-300">
                   {previews.logo ? (
                     <div className="mb-2">
                       <img
                         src={previews.logo}
                         alt="Logo Preview"
-                        className="mx-auto h-32 w-32 object-cover rounded-full"
+                        className="mx-auto h-32 w-32 object-cover rounded-full border-2 border-green-200"
                       />
                     </div>
                   ) : (
-                    <div className="text-gray-500 flex items-center justify-center h-32">
+                    <div className="text-green-500 flex items-center justify-center h-32">
                       <FaCamera className="text-3xl" />
                     </div>
                   )}
@@ -510,7 +514,7 @@ const CreateRestaurant = () => {
                   />
                   <label
                     htmlFor="logo-upload"
-                    className="mt-2 inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 cursor-pointer"
+                    className="mt-2 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer transition duration-200"
                   >
                     <FaUpload className="mr-2" />{" "}
                     {previews.logo ? "Change Logo" : "Upload Logo"}
@@ -521,17 +525,17 @@ const CreateRestaurant = () => {
               {/* Cover Image Upload */}
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Cover Image</label>
-                <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                <div className="border-2 border-dashed border-green-200 rounded-lg p-4 text-center hover:border-green-400 transition duration-300">
                   {previews.coverImage ? (
                     <div className="mb-2">
                       <img
                         src={previews.coverImage}
                         alt="Cover Preview"
-                        className="mx-auto h-32 w-full object-cover rounded-md"
+                        className="mx-auto h-32 w-full object-cover rounded-md border-2 border-green-200"
                       />
                     </div>
                   ) : (
-                    <div className="text-gray-500 flex items-center justify-center h-32">
+                    <div className="text-green-500 flex items-center justify-center h-32">
                       <FaCamera className="text-3xl" />
                     </div>
                   )}
@@ -546,7 +550,7 @@ const CreateRestaurant = () => {
                   />
                   <label
                     htmlFor="cover-upload"
-                    className="mt-2 inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 cursor-pointer"
+                    className="mt-2 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer transition duration-200"
                   >
                     <FaUpload className="mr-2" />{" "}
                     {previews.coverImage ? "Change Cover" : "Upload Cover"}
@@ -560,14 +564,14 @@ const CreateRestaurant = () => {
               <label className="block text-gray-700 mb-2">
                 Gallery Images (up to 10)
               </label>
-              <div className="border-2 border-dashed rounded-lg p-4">
+              <div className="border-2 border-dashed border-green-200 rounded-lg p-4 hover:border-green-400 transition duration-300">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
                   {previews.images.map((src, index) => (
                     <div key={index} className="relative">
                       <img
                         src={src}
                         alt={`Gallery ${index + 1}`}
-                        className="h-24 w-full object-cover rounded-md"
+                        className="h-24 w-full object-cover rounded-md border border-green-200"
                       />
                       <button
                         type="button"
@@ -580,7 +584,7 @@ const CreateRestaurant = () => {
                   ))}
 
                   {previews.images.length < 10 && (
-                    <div className="flex items-center justify-center h-24 border rounded-md">
+                    <div className="flex items-center justify-center h-24 border rounded-md border-green-200 bg-green-50">
                       <input
                         type="file"
                         name="images"
@@ -594,8 +598,8 @@ const CreateRestaurant = () => {
                         htmlFor="gallery-upload"
                         className="flex flex-col items-center text-center p-2 cursor-pointer"
                       >
-                        <FaCamera className="text-gray-400 text-2xl mb-1" />
-                        <span className="text-sm text-gray-500">Add Photo</span>
+                        <FaCamera className="text-green-500 text-2xl mb-1" />
+                        <span className="text-sm text-green-600">Add Photo</span>
                       </label>
                     </div>
                   )}
@@ -613,7 +617,7 @@ const CreateRestaurant = () => {
                   />
                   <label
                     htmlFor="gallery-upload-btn"
-                    className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 cursor-pointer"
+                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer transition duration-200"
                   >
                     <FaUpload className="mr-2" /> Upload Gallery Images
                   </label>
@@ -627,16 +631,16 @@ const CreateRestaurant = () => {
 
           {/* Opening Hours */}
           <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">Opening Hours</h2>
+            <h2 className="text-xl font-semibold mb-4 text-green-700">Opening Hours</h2>
 
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="bg-green-50 rounded-lg p-4 border border-green-100">
               <div className="grid grid-cols-1 gap-4">
                 {Object.entries(formData.openingHours).map(([day, hours]) => (
                   <div
                     key={day}
-                    className="flex flex-col md:flex-row md:items-center p-2 rounded hover:bg-gray-100"
+                    className="flex flex-col md:flex-row md:items-center p-2 rounded hover:bg-green-100 transition"
                   >
-                    <div className="w-full md:w-1/5 font-medium capitalize mb-2 md:mb-0">
+                    <div className="w-full md:w-1/5 font-medium capitalize mb-2 md:mb-0 text-green-800">
                       {day}
                     </div>
 
@@ -657,7 +661,7 @@ const CreateRestaurant = () => {
                               },
                             }));
                           }}
-                          className="form-checkbox h-4 w-4 text-red-600 transition duration-150 ease-in-out"
+                          className="form-checkbox h-4 w-4 text-green-600 transition duration-150 ease-in-out"
                         />
                         <span className="ml-2 text-sm text-gray-700">
                           Closed
@@ -685,7 +689,7 @@ const CreateRestaurant = () => {
                                   },
                                 }));
                               }}
-                              className="flex-1 px-2 py-1 border rounded text-sm"
+                              className="flex-1 px-2 py-1 border rounded text-sm bg-green-50 focus:outline-none focus:ring-1 focus:ring-green-500"
                             />
                           </div>
 
@@ -708,7 +712,7 @@ const CreateRestaurant = () => {
                                   },
                                 }));
                               }}
-                              className="flex-1 px-2 py-1 border rounded text-sm"
+                              className="flex-1 px-2 py-1 border rounded text-sm bg-green-50 focus:outline-none focus:ring-1 focus:ring-green-500"
                             />
                           </div>
                         </div>
@@ -724,9 +728,9 @@ const CreateRestaurant = () => {
                 ))}
               </div>
 
-              <div className="mt-4 bg-yellow-50 p-3 rounded-md">
+              <div className="mt-4 bg-green-100 p-3 rounded-md">
                 <div className="flex items-start">
-                  <div className="text-yellow-800 mt-0.5">
+                  <div className="text-green-800 mt-0.5">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
@@ -740,7 +744,7 @@ const CreateRestaurant = () => {
                       />
                     </svg>
                   </div>
-                  <p className="ml-2 text-sm text-yellow-800">
+                  <p className="ml-2 text-sm text-green-800">
                     Please use 24-hour format (e.g., 08:00 for 8 AM, 18:00 for 6
                     PM). Make sure closing time is after opening time.
                   </p>
@@ -754,7 +758,7 @@ const CreateRestaurant = () => {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 shadow-md hover:shadow-lg"
             >
               {loading ? (
                 <>
