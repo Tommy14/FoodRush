@@ -92,7 +92,8 @@ INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 if want to start the paymnet service you have download stripe for windows, for mac refer this link :https://docs.stripe.com/stripe-cli?install-method=windows
 
 after download extract put the env variables
-then open cmd run stripe login do the authentication using our common Foodrush48 email
+then open cmd run "stripe login"
+do the authentication using our common Foodrush48 email
 then run the below command to start the stripe cli and forward the webhook to our payment service
 stripe listen --forward-to localhost:9400/api/pay/webhook
 sometime you will come new webhook secret, so copy that and put in the env file as STRIPE_WEBHOOK_SECRET
