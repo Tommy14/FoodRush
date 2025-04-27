@@ -43,7 +43,17 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-
+  // deliveryCoordinates: {
+  //   type: {
+  //     type: String,
+  //     enum: ['Point'],
+  //     default: 'Point'
+  //   },
+  //   coordinates: {
+  //     type: [Number],
+  //     required: true
+  //   }
+  // },  
   paymentMethod: {
     type: String,
     enum: ['cash', 'card'],
@@ -54,7 +64,6 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: [
       'pending',
-      'awaiting_payment',
       'placed',
       'preparing',
       'ready_for_delivery',
@@ -63,17 +72,6 @@ const orderSchema = new mongoose.Schema({
       'cancelled'
     ],
     default: 'pending'
-  },
-
-  paymentStatus: {
-    type: String,
-    enum: ['not_paid', 'paid', 'failed'],
-    default: 'not_paid'
-  },
-
-  editable: {
-    type: Boolean,
-    default: true
   },
 
   placedAt: {

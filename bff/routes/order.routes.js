@@ -23,10 +23,12 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get all orders for user
-router.get('/', async (req, res) => {
+// Get all orders for a customer
+router.get('/customer/:customerId', async (req, res) => {
+  const customerId = req.params.customerId;
+
   try {
-    const response = await axios.get(`${ORDER_API}`, {
+    const response = await axios.get(`${ORDER_API}/customer/${customerId}`, {
       headers: {
         Authorization: req.headers.authorization,
       }
@@ -50,7 +52,6 @@ router.get('/active', async (req, res) => {
     res.status(err.response?.status || 500).json({ message: err.message });
   }
 });
-export default router;
 
 //get order by id
 router.get('/:id', async (req, res) => {
@@ -65,3 +66,35 @@ router.get('/:id', async (req, res) => {
     res.status(err.response?.status || 500).json({ message: err.message });
   }
 });
+
+//get order by restaurant id
+router.get('/restaurant/:restaurantId', async (req, res) => {
+  const restaurantId = req.params.restaurantId;
+  try {
+    const response = await axios.get(`${ORDER_API}/restaurant/${restaurantId}`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      }
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ message: err.message });
+  }
+});
+
+//update order status
+router.put('/:orderId/status', async (req, res) => {
+  const orderId = req.params.orderId;
+  try {
+    const response = await axios.put(`${ORDER_API}/${orderId}/status`, req.body, {
+      headers: {
+        Authorization: req.headers.authorization,
+      }
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ message: err.message });
+  }
+});
+
+export default router;

@@ -210,11 +210,11 @@ const cancelOrder = async (orderId, user) => {
 const getActiveOrders = async (userId) => {
   const activeStatuses = [
     'pending',
-    'awaiting_payment',
     'placed',
     'preparing',
     'ready_for_delivery',
-    'picked_up'
+    'picked_up',
+    'delivered'
   ];
 
   const orders = await Order.find({

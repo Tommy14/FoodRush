@@ -19,6 +19,7 @@ import AddMenuItemPage from '../pages/Menu/AdminAddMenuItemPage';
 import EditMenuItemPage from '../pages/Menu/AdminEditMenuItemPage';
 import MenuPage from '../pages/Menu/AdminMenuPage';
 import ProtectedRoute from '../components/ProtectedRoute'; 
+import PlaceOrder from '../pages/order/PlaceOrder';
 
 
 
@@ -46,7 +47,9 @@ export default function AppRoutes() {
 
         <Route path="/restaurants/:restaurantId/menu" element={<MenuPage />} />
         <Route path="/restaurants/:restaurantId/menu/add" element={ <ProtectedRoute allowedRoles={['restaurant_admin']}> <AddMenuItemPage /></ProtectedRoute>} />
-        <Route path="/restaurants/:restaurantId/menu/:menuItemId/edit" element={ <ProtectedRoute allowedRoles={['restaurant_admin']}><EditMenuItemPage /></ProtectedRoute> } />        
+        <Route path="/restaurants/:restaurantId/menu/:menuItemId/edit" element={ <ProtectedRoute allowedRoles={['restaurant_admin']}><EditMenuItemPage /></ProtectedRoute> } /> 
+
+        <Route path="/place-order" element={<PlaceOrder/>} />       
       </Routes>
     </>
   );
