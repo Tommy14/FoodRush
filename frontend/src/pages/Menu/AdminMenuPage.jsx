@@ -136,7 +136,7 @@ const MenuPage = () => {
 
   const handleAddToCart = (item) => {
     const cartItem = {
-      restaurantId: restaurantId,  // Add restaurantId here!
+      restaurantId: restaurantId,
       menuItemId: item._id,
       name: item.name,
       price: item.price,
@@ -152,24 +152,17 @@ const MenuPage = () => {
     <div className="flex min-h-screen bg-gray-50">
       {isRestaurantAdmin && <DashSidebar />}
 
-      <div className={`flex-1 p-4 ${isRestaurantAdmin ? "lg:ml-64" : ""}`}>
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6 flex items-center justify-between">
-            {isRestaurantAdmin ? (
-              <Link
-                to="/manage-restaurants"
-                className="flex items-center text-gray-600 hover:text-gray-900"
-              >
-                <FaArrowLeft className="mr-2" /> Back to Restaurant Management
-              </Link>
-            ) : (
-              <Link
-                to={`/restaurants/${restaurantId}`}
-                className="flex items-center text-gray-600 hover:text-gray-900"
-              >
-                <FaArrowLeft className="mr-2" /> Back to Restaurant
-              </Link>
-            )}
+      <div className={`flex-1 flex justify-center ${isRestaurantAdmin ? "lg:ml-64" : ""}`}>
+        <div className="w-full max-w-6xl py-6 px-4 sm:px-6 md:px-8 pt-24">
+          {/* Header Section with Responsive Design */}
+          <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <Link
+              to={isRestaurantAdmin ? "/manage-restaurants" : `/restaurants/${restaurantId}`}
+              className="flex items-center text-gray-600 hover:text-gray-900"
+            >
+              <FaArrowLeft className="mr-2" /> 
+              {isRestaurantAdmin ? "Back to Restaurant Management" : "Back to Restaurant"}
+            </Link>
 
             <h1 className="text-2xl font-bold text-center">
               {isRestaurantAdmin ? "Admin Menu Management" : "Menu Management"}
@@ -185,8 +178,8 @@ const MenuPage = () => {
             )}
           </div>
 
-          {/* Filters Section */}
-          <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+          {/* Filters Section - More Mobile Friendly */}
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -266,23 +259,23 @@ const MenuPage = () => {
           </div>
 
           {/* Display results count */}
-          <div className="mb-4 text-gray-600">
+          <div className="mb-4 text-gray-600 text-center sm:text-left">
             Showing {filteredItems.length} of {menuItems.length} menu items
           </div>
 
-          {/* Menu List */}
+          {/* Menu List - Better Centered and Responsive */}
           {loading ? (
             <div className="flex justify-center items-center p-8">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
             </div>
           ) : error ? (
-            <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6">
+            <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6 text-center">
               {error}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 justify-items-center">
               {filteredItems.length === 0 ? (
-                <div className="col-span-full text-center py-8 bg-gray-50 rounded-lg">
+                <div className="col-span-full text-center py-8 bg-gray-50 rounded-lg w-full">
                   <p className="text-gray-500">
                     No menu items match your filters.
                   </p>
@@ -313,7 +306,7 @@ const MenuPage = () => {
                 filteredItems.map((item) => (
                   <div
                     key={item._id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200"
+                    className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 w-full max-w-sm transition-transform hover:scale-102 hover:shadow-lg"
                   >
                     <div className="h-48 overflow-hidden">
                       {item.image && item.image.url ? (
@@ -347,6 +340,12 @@ const MenuPage = () => {
                         </span>
                       )}
 
+                      {item.isAvailable === false && (
+                        <span className="inline-block mt-2 ml-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-full">
+                          Unavailable
+                        </span>
+                      )}
+
                       {isRestaurantAdmin && (
                         <div className="mt-4 flex justify-end space-x-2">
                           <Link
@@ -367,12 +366,16 @@ const MenuPage = () => {
                       {!isRestaurantAdmin && (
                         <button
                           onClick={() => handleAddToCart(item)}
-                          className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded transition"
+                          disabled={item.isAvailable === false}
+                          className={`mt-4 w-full py-2 rounded transition flex items-center justify-center ${
+                            item.isAvailable === false
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-green-500 hover:bg-green-600 text-white'
+                          }`}
                         >
-                          Add to Cart
+                          {item.isAvailable === false ? 'Unavailable' : 'Add to Cart'}
                         </button>
                       )}
-
                     </div>
                   </div>
                 ))
@@ -383,7 +386,6 @@ const MenuPage = () => {
       </div>
       <CartSidebar isOpen={isCartOpen} onClose={() => setCartOpen(false)} />
     </div>
-    
   );
 };
 
