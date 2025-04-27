@@ -7,21 +7,13 @@ import mongoose from 'mongoose';
 
 
 export const createRestaurant = async (req, res) => {
-  console.log('Auth User Object:', req.user);
   const userId = req.user.id || req.user.userId; 
   try {
-    console.log('Restaurant Service - Create Restaurant Request');
-    
-    // Log received data for debugging
-    console.log('Body fields:', Object.keys(req.body));
-    console.log('Files:', req.files ? Object.keys(req.files) : 'No files');
-    
-    // Extract and process data
+// Extract and process data
     let imageData = {};
     
     // Handle logo upload
     if (req.files && req.files.logo && req.files.logo[0]) {
-      console.log('Processing logo file path:', req.files.logo[0].path);
       try {
         const logoResult = await imageService.uploadImage(
           req.files.logo[0].path,
@@ -29,7 +21,6 @@ export const createRestaurant = async (req, res) => {
         );
         // Store both URL and publicId
         imageData.logo = logoResult.url;
-        console.log('Logo uploaded successfully:', imageData.logo);
       } catch (uploadErr) {
         console.error('Logo upload error:', uploadErr);
       }
@@ -73,7 +64,6 @@ export const createRestaurant = async (req, res) => {
     
     // Handle cuisineTypes - ensure it's an array
     if (req.body.cuisineTypes) {
-      console.log('Processing cuisine types:', req.body.cuisineTypes);
       if (typeof req.body.cuisineTypes === 'string') {
         try {
           // Try to parse it as JSON first (if it's a stringified array)
@@ -91,26 +81,21 @@ export const createRestaurant = async (req, res) => {
 
     // Parse address if it's a string
     if (req.body.address && typeof req.body.address === 'string') {
-      console.log('Parsing address...');
       parsedData.address = JSON.parse(req.body.address);
     }
     
     // Parse openingHours if it's a string
     if (req.body.openingHours && typeof req.body.openingHours === 'string') {
-      console.log('Parsing opening hours...');
+
       parsedData.openingHours = JSON.parse(req.body.openingHours);
     }
     
     // Create the restaurant first
-    console.log('Creating restaurant in database...');
     const restaurant = await restaurantService.createRestaurant({...parsedData, ...imageData}, userId);
     
     // Now we have the restaurant object, process location
     if (restaurant && restaurant.address) {
       try {
-        console.log("Creating location for restaurant...");
-        console.log("Address to geocode:", JSON.stringify(restaurant.address));
-
         // Prepare a properly formatted address object
         const addressToGeocode = {
           street: restaurant.address.street || "",
@@ -154,8 +139,6 @@ export const createRestaurant = async (req, res) => {
             placeId: geocodeResponse.data.placeId || null,
           };
 
-          console.log("Saving location data:", JSON.stringify(locationData));
-
           const locationResponse = await axios.post(
             `${process.env.LOCATION_SERVICE_URL}/api/location`,
             locationData,
@@ -173,7 +156,6 @@ export const createRestaurant = async (req, res) => {
               "location.coordinates": geocodeResponse.data.coordinates,
               locationId: locationResponse.data._id,
             });
-            console.log("Location created and linked to restaurant");
           }
         } else {
           console.error("Geocoding failed for address:", restaurant.address);
@@ -186,7 +168,6 @@ export const createRestaurant = async (req, res) => {
       }
     }
     
-    console.log('Restaurant creation complete.');
     const updatedRestaurant = await Restaurant.findById(restaurant._id);
     res.status(201).json(updatedRestaurant);
   } catch (err) {
@@ -201,14 +182,12 @@ export const updateRestaurant = async (req, res) => {
 
     // Handle logo upload
     if (req.files && req.files.logo && req.files.logo[0]) {
-      console.log("Processing logo:", req.files.logo[0]);
       try {
         const logoResult = await imageService.uploadImage(
           req.files.logo[0].path,
           "restaurants/logos"
         );
         imageData.logo = logoResult.url;
-        console.log("Logo uploaded successfully:", imageData.logo);
       } catch (uploadErr) {
         console.error("Logo upload error:", uploadErr);
       }

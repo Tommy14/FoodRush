@@ -7,7 +7,6 @@ import * as mapsService from "../services/maps.service.js";
 export const geocodeAddress = async (req, res) => {
   try {
     const { address } = req.body;
-    console.log("Received address for geocoding:", address);
 
     if (!address) {
       return res.status(400).json({ message: "Address is required" });
@@ -18,7 +17,6 @@ export const geocodeAddress = async (req, res) => {
       ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''}, ${address.postalCode || ''}, ${address.country || ''}`
       : address;
       
-    console.log("Geocoding this address:", addressToGeocode);
 
     const geocodeResult = await mapsService.geocodeAddress(addressToGeocode);
     res.json(geocodeResult);
