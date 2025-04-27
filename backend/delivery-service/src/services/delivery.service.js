@@ -12,17 +12,14 @@ export const autoAssignDeliveryService = async (orderId, address) => {
         Authorization: `Bearer ${SYSTEM_JWT}`
       }
     });
-    console.log('Fetched delivery personnel:', res.data);
     const availableDrivers = res.data.filter(user => user.isAvailable);
 
     if (availableDrivers.length === 0) {
       throw new Error('No available delivery personnel at the moment');
     }
-    console.log('Available delivery personnel:', availableDrivers);
 
     // 2. Pick one (you can randomize or use logic like load balancing)
     const selectedDriver = availableDrivers[0];
-    console.log('Selected driver:', selectedDriver);
 
     if (!selectedDriver) {
       throw new Error('No driver selected for assignment');
@@ -52,7 +49,6 @@ export const autoAssignDeliveryService = async (orderId, address) => {
 };
 
 export const assignDeliveryService = async ({ orderId, deliveryPersonId, address }) => {
-  console.log('TDDILK:', orderId, deliveryPersonId, address);
   const res = await axios.post(`${LOCATION_SERVICE_URL}/api/location/geocode`, {
     address: address
   });
@@ -61,7 +57,6 @@ export const assignDeliveryService = async ({ orderId, deliveryPersonId, address
     type: 'Point',
     coordinates: res.data.coordinates
   };
-  console.log('Delivery coordinates:', deliveryCoordinates);
 
   const delivery = new Delivery({
     orderId,
@@ -90,7 +85,7 @@ export const updateDeliveryStatusService = async (id, status) => {
 
   await delivery.save();
 
-  // 🛰️ Notify Order Service about status change
+  // Notify Order Service about status change
   if (['picked_up', 'delivered'].includes(status)) {
     try {
       await axios.put(`${ORDER_SERVICE_URL}/api/orders/${delivery.orderId}/status`, {
@@ -101,11 +96,11 @@ export const updateDeliveryStatusService = async (id, status) => {
         }
       });
     } catch (err) {
-      console.error('❌ Failed to update order status in Order Service:', err.message);
+      console.error('Failed to update order status in Order Service:', err.message);
     }
   }
 
-  // 📧 Send notification email if delivered
+  // Send notification email if delivered
   if (status === 'delivered') {
     await sendDeliveryUpdateEmail(delivery);
   }
@@ -116,7 +111,7 @@ export const updateDeliveryStatusService = async (id, status) => {
 export const getDeliveriesByPersonService = async (deliveryPersonId) => {
   const deliveries = await Delivery.find({
     deliveryPersonId,
-    status: { $ne: 'delivered' } // $ne = "not equal"
+    status: { $ne: 'delivered' }
   }).sort({ createdAt: -1 });
 
   return deliveries;
@@ -148,7 +143,6 @@ async function sendDeliveryUpdateEmail(delivery) {
       Authorization: `Bearer ${SYSTEM_JWT}`
     }
   });
-  console.log('Customer data:', customer.data);
   const deliveryPerson = await axios.get(`${USER_SERVICE_URL}/api/users/by/${delivery.deliveryPersonId}`, {
     headers: {
       Authorization: `Bearer ${SYSTEM_JWT}`
@@ -158,7 +152,7 @@ async function sendDeliveryUpdateEmail(delivery) {
     recipient: {
       email: order.data.order.customerEmail,
     },
-    subject: 'Your order has been delivered! 🎉',
+    subject: 'Your order has been delivered!',
     type: 'orderDelivered',
     data: {
       customerName: customer.data.name,
@@ -191,7 +185,7 @@ async function sendDeliveryUpdateEmail(delivery) {
       }
     });
   } catch (err) {
-    console.error('❌ Email send failed:', err.response?.data || err.message);
+    console.error('Email send failed:', err.response?.data || err.message);
   }
   
 }

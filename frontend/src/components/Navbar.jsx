@@ -18,7 +18,7 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const location = useLocation();
-  const dashboardPaths = ["/restaurant-dashboard", "/delivery-panel", "/admin", "/delivery/completed"];
+  const dashboardPaths = ["/restaurant-dashboard", "/admin"];
   const isDashboard = dashboardPaths.includes(location.pathname);
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -63,7 +63,7 @@ export default function Navbar() {
           {/* Auth */}
           {!isAuthenticated ? (
             <Link to="/auth" className="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition">
-              Sign In
+              Sign Up
             </Link>
           ) : (
             <div className="relative group">
@@ -71,11 +71,9 @@ export default function Navbar() {
                 {user?.name?.split(" ")[0] || "User"}
               </button>
               <div className="absolute hidden group-hover:flex flex-col bg-white shadow-lg rounded-md top-10 right-0 min-w-[140px] text-sm border">
-                {user?.role === "customer" && (
                   <Link to="/profile" className="px-4 py-2 hover:bg-gray-100 transition">
                     Profile
                   </Link>
-                )}
                 <button
                   onClick={handleLogout}
                   className="text-left w-full px-4 py-2 hover:bg-red-100 text-red-600 transition"

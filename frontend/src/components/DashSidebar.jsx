@@ -50,7 +50,7 @@ const DashSidebar = () => {
       label: "Logout",
       action: () => {
         dispatch(logout());
-        navigate("/auth");
+        navigate("/");
       },
       icon: <FaSignOutAlt className="mr-2" />
     }
