@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { FaPlus, FaArrowLeft, FaEdit, FaTrash } from "react-icons/fa";
 import { getMenuItems, deleteMenuItem } from "../../services/menuService";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { addToCart } from "../../store/slices/cartSlice";
 import DashSidebar from "../../components/DashSidebar";
 import { toast } from "react-toastify";
+import CartSidebar from "../../components/CartSidebar";
 
 const MenuPage = () => {
   const { restaurantId } = useParams();
@@ -18,6 +20,8 @@ const MenuPage = () => {
     search: "",
     priceRange: { min: "", max: "" },
   });
+  const [isCartOpen, setCartOpen] = useState(false);
+
 
   const auth = useSelector((state) => state.auth);
   const isRestaurantAdmin = auth.user && auth.user.role === "restaurant_admin";
@@ -126,6 +130,22 @@ const MenuPage = () => {
       search: "",
       priceRange: { min: "", max: "" },
     });
+  };
+
+  const dispatch = useDispatch();
+
+  const handleAddToCart = (item) => {
+    const cartItem = {
+      restaurantId: restaurantId,  // Add restaurantId here!
+      menuItemId: item._id,
+      name: item.name,
+      price: item.price,
+      quantity: 1, 
+      imageUrl: item.image?.url || ''
+    };
+    console.log('Dispatching addToCart:', cartItem); 
+    dispatch(addToCart(cartItem));
+    setCartOpen(true); // Open sidebar after adding
   };
 
   return (
@@ -343,6 +363,16 @@ const MenuPage = () => {
                           </button>
                         </div>
                       )}
+
+                      {!isRestaurantAdmin && (
+                        <button
+                          onClick={() => handleAddToCart(item)}
+                          className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded transition"
+                        >
+                          Add to Cart
+                        </button>
+                      )}
+
                     </div>
                   </div>
                 ))
@@ -351,7 +381,9 @@ const MenuPage = () => {
           )}
         </div>
       </div>
+      <CartSidebar isOpen={isCartOpen} onClose={() => setCartOpen(false)} />
     </div>
+    
   );
 };
 

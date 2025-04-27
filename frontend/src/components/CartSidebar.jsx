@@ -1,11 +1,16 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { removeFromCart, updateQuantity, clearCart } from '../store/slices/cartSlice';
+import { useNavigate } from "react-router-dom";
 
 export default function CartSidebar({ isOpen, onClose }) {
-  const cartItems = useSelector((state) => state.cart.items);
+  const { items: cartItems } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
 
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
 
   return (
     <div className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 z-50
@@ -52,8 +57,12 @@ export default function CartSidebar({ isOpen, onClose }) {
             </div>
             <button
               onClick={() => {
-                // Later: add checkout logic here
-                alert('Proceeding to checkout...');
+                if (!isAuthenticated) {
+                  navigate("/auth");
+                } else {
+                  navigate("/place-order"); 
+                };
+                onClose();
               }}
               className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded transition"
             >

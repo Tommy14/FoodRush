@@ -7,6 +7,17 @@ import { apiPrivate } from '../config/api';
  * Enriches the order with delivery status if relevant.
  * @returns {Promise<Object[]>} Enriched list of customer orders
  */
+// 1️⃣ Place an order
+export const placeOrder = async (orderData) => {
+  try {
+    const res = await apiPrivate.post('/orders', orderData);
+    return res.data;
+  } catch (error) {
+    console.error('Error placing order:', error);
+    throw error.response?.data || error;
+  }
+};
+
 export const fetchCustomerOrders = async () => {
   try {
     const res = await apiPrivate.get('/orders/active');
@@ -58,5 +69,15 @@ export const cancelOrder = async (orderId) => {
     return res.data;
   } catch (error) {
     throw error;
+  }
+};
+
+export const initiatePaymentSession = async (paymentPayload) => {
+  try {
+    const res = await apiPrivate.post('/pay/checkout', paymentPayload);
+    return res.data;
+  } catch (error) {
+    console.error('Error initiating payment session:', error);
+    throw error.response?.data || error;
   }
 };

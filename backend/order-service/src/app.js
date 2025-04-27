@@ -19,7 +19,8 @@ app.use('/api/orders', orderRoutes);
 
 // Error Handler when route is not found
 app.use((req, res, next) => {
-  logger.error(`Route not found: ${req.method} ${req.originalUrl}`);
+  //logger.error(`Route not found: ${req.method} ${req.originalUrl}`);
+  console.error(`Route not found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({ message: "Route not found" });
 });
 
