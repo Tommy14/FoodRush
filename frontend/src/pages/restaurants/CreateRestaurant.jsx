@@ -263,33 +263,42 @@ const CreateRestaurant = () => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       <DashSidebar />
-      
+
       <div className="flex-1 p-8 overflow-auto">
         <h1 className="text-3xl font-bold mb-6">Create New Restaurant</h1>
-        
+
         {error && (
           <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6">
             {error}
           </div>
         )}
-        
+
         {success && (
           <div className="bg-green-50 text-green-700 p-4 rounded-md mb-6">
             {success}
           </div>
         )}
-        
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-lg shadow-md p-6"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Basic Information */}
             <div>
               <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
-              
+
               {/* Hidden field */}
-              <input type="hidden" name="restaurantId" value={formData.restaurantId} />
-              
+              <input
+                type="hidden"
+                name="restaurantId"
+                value={formData.restaurantId}
+              />
+
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Restaurant Name *</label>
+                <label className="block text-gray-700 mb-2">
+                  Restaurant Name *
+                </label>
                 <input
                   type="text"
                   name="name"
@@ -299,9 +308,11 @@ const CreateRestaurant = () => {
                   required
                 />
               </div>
-              
+
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Description *</label>
+                <label className="block text-gray-700 mb-2">
+                  Description *
+                </label>
                 <textarea
                   name="description"
                   value={formData.description}
@@ -311,13 +322,18 @@ const CreateRestaurant = () => {
                   required
                 />
               </div>
-              
+
               {/* Cuisine Types - Multiple Selection */}
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Cuisine Types *</label>
+                <label className="block text-gray-700 mb-2">
+                  Cuisine Types *
+                </label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {formData.cuisineTypes.map((type, index) => (
-                    <div key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full flex items-center">
+                    <div
+                      key={index}
+                      className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full flex items-center"
+                    >
                       <span>{type}</span>
                       <button
                         type="button"
@@ -347,10 +363,12 @@ const CreateRestaurant = () => {
                   </button>
                 </div>
                 {formData.cuisineTypes.length === 0 && (
-                  <p className="text-red-500 text-sm mt-1">At least one cuisine type is required</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    At least one cuisine type is required
+                  </p>
                 )}
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Price Range</label>
                 <select
@@ -366,14 +384,16 @@ const CreateRestaurant = () => {
                 </select>
               </div>
             </div>
-            
+
             {/* Rest of the component remains unchanged... */}
             {/* Contact & Address */}
             <div>
               <h2 className="text-xl font-semibold mb-4">Contact & Address</h2>
-              
+
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Phone Number *</label>
+                <label className="block text-gray-700 mb-2">
+                  Phone Number *
+                </label>
                 <input
                   type="tel"
                   name="contactPhone"
@@ -383,7 +403,7 @@ const CreateRestaurant = () => {
                   required
                 />
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Email</label>
                 <input
@@ -394,9 +414,11 @@ const CreateRestaurant = () => {
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Street Address *</label>
+                <label className="block text-gray-700 mb-2">
+                  Street Address *
+                </label>
                 <input
                   type="text"
                   name="street"
@@ -406,7 +428,7 @@ const CreateRestaurant = () => {
                   required
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="mb-4">
                   <label className="block text-gray-700 mb-2">City *</label>
@@ -419,9 +441,11 @@ const CreateRestaurant = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="mb-4">
-                  <label className="block text-gray-700 mb-2">Province/State *</label>
+                  <label className="block text-gray-700 mb-2">
+                    Province/State *
+                  </label>
                   <input
                     type="text"
                     name="state"
@@ -432,10 +456,12 @@ const CreateRestaurant = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="mb-4">
-                  <label className="block text-gray-700 mb-2">Postal Code *</label>
+                  <label className="block text-gray-700 mb-2">
+                    Postal Code *
+                  </label>
                   <input
                     type="text"
                     name="postalCode"
@@ -448,21 +474,23 @@ const CreateRestaurant = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Restaurant Images */}
           <div className="mt-8">
             <h2 className="text-xl font-semibold mb-4">Restaurant Images</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Logo Upload */}
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Restaurant Logo</label>
+                <label className="block text-gray-700 mb-2">
+                  Restaurant Logo
+                </label>
                 <div className="border-2 border-dashed rounded-lg p-4 text-center">
                   {previews.logo ? (
                     <div className="mb-2">
-                      <img 
-                        src={previews.logo} 
-                        alt="Logo Preview" 
+                      <img
+                        src={previews.logo}
+                        alt="Logo Preview"
                         className="mx-auto h-32 w-32 object-cover rounded-full"
                       />
                     </div>
@@ -471,7 +499,7 @@ const CreateRestaurant = () => {
                       <FaCamera className="text-3xl" />
                     </div>
                   )}
-                  
+
                   <input
                     type="file"
                     name="logo"
@@ -480,24 +508,25 @@ const CreateRestaurant = () => {
                     className="hidden"
                     id="logo-upload"
                   />
-                  <label 
+                  <label
                     htmlFor="logo-upload"
                     className="mt-2 inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 cursor-pointer"
                   >
-                    <FaUpload className="mr-2" /> {previews.logo ? 'Change Logo' : 'Upload Logo'}
+                    <FaUpload className="mr-2" />{" "}
+                    {previews.logo ? "Change Logo" : "Upload Logo"}
                   </label>
                 </div>
               </div>
-              
+
               {/* Cover Image Upload */}
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Cover Image</label>
                 <div className="border-2 border-dashed rounded-lg p-4 text-center">
                   {previews.coverImage ? (
                     <div className="mb-2">
-                      <img 
-                        src={previews.coverImage} 
-                        alt="Cover Preview" 
+                      <img
+                        src={previews.coverImage}
+                        alt="Cover Preview"
                         className="mx-auto h-32 w-full object-cover rounded-md"
                       />
                     </div>
@@ -506,7 +535,7 @@ const CreateRestaurant = () => {
                       <FaCamera className="text-3xl" />
                     </div>
                   )}
-                  
+
                   <input
                     type="file"
                     name="coverImage"
@@ -515,26 +544,29 @@ const CreateRestaurant = () => {
                     className="hidden"
                     id="cover-upload"
                   />
-                  <label 
+                  <label
                     htmlFor="cover-upload"
                     className="mt-2 inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 cursor-pointer"
                   >
-                    <FaUpload className="mr-2" /> {previews.coverImage ? 'Change Cover' : 'Upload Cover'}
+                    <FaUpload className="mr-2" />{" "}
+                    {previews.coverImage ? "Change Cover" : "Upload Cover"}
                   </label>
                 </div>
               </div>
             </div>
-            
+
             {/* Gallery Images */}
             <div className="mt-4">
-              <label className="block text-gray-700 mb-2">Gallery Images (up to 10)</label>
+              <label className="block text-gray-700 mb-2">
+                Gallery Images (up to 10)
+              </label>
               <div className="border-2 border-dashed rounded-lg p-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
                   {previews.images.map((src, index) => (
                     <div key={index} className="relative">
-                      <img 
-                        src={src} 
-                        alt={`Gallery ${index + 1}`} 
+                      <img
+                        src={src}
+                        alt={`Gallery ${index + 1}`}
                         className="h-24 w-full object-cover rounded-md"
                       />
                       <button
@@ -546,7 +578,7 @@ const CreateRestaurant = () => {
                       </button>
                     </div>
                   ))}
-                  
+
                   {previews.images.length < 10 && (
                     <div className="flex items-center justify-center h-24 border rounded-md">
                       <input
@@ -558,7 +590,7 @@ const CreateRestaurant = () => {
                         id="gallery-upload"
                         multiple
                       />
-                      <label 
+                      <label
                         htmlFor="gallery-upload"
                         className="flex flex-col items-center text-center p-2 cursor-pointer"
                       >
@@ -568,7 +600,7 @@ const CreateRestaurant = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="text-center">
                   <input
                     type="file"
@@ -579,7 +611,7 @@ const CreateRestaurant = () => {
                     id="gallery-upload-btn"
                     multiple
                   />
-                  <label 
+                  <label
                     htmlFor="gallery-upload-btn"
                     className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 cursor-pointer"
                   >
@@ -592,7 +624,131 @@ const CreateRestaurant = () => {
               </div>
             </div>
           </div>
-          
+
+          {/* Opening Hours */}
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-4">Opening Hours</h2>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="grid grid-cols-1 gap-4">
+                {Object.entries(formData.openingHours).map(([day, hours]) => (
+                  <div
+                    key={day}
+                    className="flex flex-col md:flex-row md:items-center p-2 rounded hover:bg-gray-100"
+                  >
+                    <div className="w-full md:w-1/5 font-medium capitalize mb-2 md:mb-0">
+                      {day}
+                    </div>
+
+                    <div className="flex items-center gap-2 w-full md:w-4/5">
+                      <label className="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={hours.isClosed}
+                          onChange={() => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              openingHours: {
+                                ...prev.openingHours,
+                                [day]: {
+                                  ...prev.openingHours[day],
+                                  isClosed: !hours.isClosed,
+                                },
+                              },
+                            }));
+                          }}
+                          className="form-checkbox h-4 w-4 text-red-600 transition duration-150 ease-in-out"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">
+                          Closed
+                        </span>
+                      </label>
+
+                      {!hours.isClosed && (
+                        <div className="flex flex-1 items-center gap-2">
+                          <div className="flex-1 flex items-center">
+                            <span className="text-sm text-gray-600 mr-2">
+                              Open:
+                            </span>
+                            <input
+                              type="time"
+                              value={hours.open}
+                              onChange={(e) => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  openingHours: {
+                                    ...prev.openingHours,
+                                    [day]: {
+                                      ...prev.openingHours[day],
+                                      open: e.target.value,
+                                    },
+                                  },
+                                }));
+                              }}
+                              className="flex-1 px-2 py-1 border rounded text-sm"
+                            />
+                          </div>
+
+                          <div className="flex-1 flex items-center">
+                            <span className="text-sm text-gray-600 mr-2">
+                              Close:
+                            </span>
+                            <input
+                              type="time"
+                              value={hours.close}
+                              onChange={(e) => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  openingHours: {
+                                    ...prev.openingHours,
+                                    [day]: {
+                                      ...prev.openingHours[day],
+                                      close: e.target.value,
+                                    },
+                                  },
+                                }));
+                              }}
+                              className="flex-1 px-2 py-1 border rounded text-sm"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {hours.isClosed && (
+                        <div className="flex-1 ml-2 text-gray-500 italic text-sm">
+                          Not open on this day
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 bg-yellow-50 p-3 rounded-md">
+                <div className="flex items-start">
+                  <div className="text-yellow-800 mt-0.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <p className="ml-2 text-sm text-yellow-800">
+                    Please use 24-hour format (e.g., 08:00 for 8 AM, 18:00 for 6
+                    PM). Make sure closing time is after opening time.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Submit Button */}
           <div className="mt-8 text-center">
             <button
@@ -606,7 +762,7 @@ const CreateRestaurant = () => {
                   Creating Restaurant...
                 </>
               ) : (
-                'Create Restaurant'
+                "Create Restaurant"
               )}
             </button>
           </div>
