@@ -3,6 +3,7 @@ import Transaction from '../models/Transaction.js';
 import axios from 'axios';
 
 export async function handlePaymentWebhook(req, res) {
+
   const sig = req.headers['stripe-signature'];
   let event;
 
@@ -43,18 +44,10 @@ export async function handlePaymentWebhook(req, res) {
       await transaction.save();
       console.log('Payment saved to DB:', transaction);
 
-    //   // Notify Order Service if payment succeeded
-    //   if (internalStatus === 'SUCCESS') {
-    //     await axios.post('http://order-service:9200/api/orders/mark-paid', {
-    //       orderId,
-    //       paymentStatus: internalStatus,
-    //       referenceId: session.id,
-    //       amount: transaction.amount,
-    //       currency: transaction.currency
-    //     });
-
-    //     console.log('Order Service notified about payment');
-    //   }
+      // Notify Order Service if payment succeeded
+      if (internalStatus === 'SUCCESS') {
+        await notifyOrderService(orderId);
+      }
 
     } catch (err) {
       console.error('Error during transaction or order update:', err.message);
@@ -63,4 +56,25 @@ export async function handlePaymentWebhook(req, res) {
   }
 
   res.status(200).json({ received: true });
+}
+
+async function notifyOrderService(orderId) {
+  try {
+    const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || 'http://localhost:9200';
+    const SYSTEM_JWT = process.env.SYSTEM_JWT;
+
+    const response = await axios.put(
+      `${ORDER_SERVICE_URL}/api/orders/${orderId}/status`,
+      { status: 'placed' }, 
+      {
+        headers: {
+          Authorization: `Bearer ${SYSTEM_JWT}`,
+        },
+      }
+    );
+
+    console.log('Order status updated:', response.data);
+  } catch (error) {
+    console.error('Failed to update order status:', error.message);
+  }
 }
