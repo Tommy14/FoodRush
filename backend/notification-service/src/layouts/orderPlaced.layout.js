@@ -1,7 +1,6 @@
 export default function orderPlacedLayout(data) {
     const {
       customerName,
-      restaurantName,
       orderId,
       total,
       paymentMethod,
@@ -13,7 +12,7 @@ export default function orderPlacedLayout(data) {
     <div style="max-width:600px;margin:auto;border:1px solid #ddd;border-radius:12px;overflow:hidden;font-family:Arial,sans-serif;background-color:#fff;">
       <div style="background:#e8f5e9;padding:30px 20px;">
         <h2 style="margin:0;font-size:22px;color:#1b5e20;">Thanks for your order, ${customerName}!</h2>
-        <p style="margin:8px 0;color:#333;">We’ve received your order from <strong>${restaurantName}</strong>.</p>
+        <p style="margin:8px 0;color:#333;">We’ve received your order.</p>
         <a href="#" style="display:inline-block;margin-top:12px;background:#1b5e20;color:white;padding:10px 16px;border-radius:6px;text-decoration:none;font-size:14px;">Track your order</a>
       </div>
   

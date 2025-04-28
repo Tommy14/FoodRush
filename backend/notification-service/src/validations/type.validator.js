@@ -2,7 +2,6 @@ export function validateOrderPlaced(data) {
     const errors = {};
   
     if (!data.customerName) errors.customerName = 'Customer name is required';
-    if (!data.restaurantName) errors.restaurantName = 'Restaurant name is required';
     if (!data.orderId) errors.orderId = 'Order ID is required';
     // if (!data.estimatedTime) errors.estimatedTime = 'Estimated time is required';
     if (!data.deliveryAddress) errors.deliveryAddress = 'Delivery address is required';

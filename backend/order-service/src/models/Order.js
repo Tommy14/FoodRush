@@ -27,7 +27,6 @@ const orderSchema = new mongoose.Schema({
     required: true,
     ref: 'Restaurant'
   },
-  restaurantName: { type: String },
 
   items: {
     type: [orderItemSchema],
