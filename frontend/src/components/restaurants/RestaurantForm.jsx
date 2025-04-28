@@ -9,12 +9,10 @@ import { getRestaurantById } from '../../services/restaurantService';
 
 // Update input styles with light green theme
 const inputClasses = "w-full px-3 py-2 border rounded-md bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-500";
-const buttonClasses = "px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200";
-const secondaryButtonClasses = "px-4 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition duration-200";
 
 const RestaurantForm = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Get restaurant ID from URL if present
+  const { id } = useParams();
   const isEditMode = !!id;
   const auth = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
@@ -59,6 +57,20 @@ const RestaurantForm = () => {
     coverImage: ''
   });
 
+  const availableCuisineTypes = [
+    'All', 'Grocery', 'Breakfast', 'Drinks', 'Chinese', 'Pizza', 
+    'Burger', 'Sri Lankan', 'Dessert', 'Vegan', 'Fish', 'BBQ', 'Healthy', 'Bakery'
+  ];
+
+  const addPredefinedCuisine = (cuisine) => {
+    if (!formData.cuisineTypes.includes(cuisine)) {
+      setFormData(prev => ({
+        ...prev,
+        cuisineTypes: [...prev.cuisineTypes, cuisine]
+      }));
+    }
+  };
+
   // Fetch restaurant data if in edit mode
   useEffect(() => {
     const fetchRestaurantData = async () => {
@@ -67,7 +79,7 @@ const RestaurantForm = () => {
           setFetchLoading(true);
           const restaurant = await getRestaurantById(id, auth.token);
           
-          // Handle cuisine types (ensure it's an array)
+          // Handle cuisine types
           let cuisineTypes = [];
           if (typeof restaurant.cuisineTypes === 'string') {
             cuisineTypes = restaurant.cuisineTypes.split(',').map(type => type.trim());
@@ -75,14 +87,25 @@ const RestaurantForm = () => {
             cuisineTypes = restaurant.cuisineTypes;
           }
           
-          // Handle opening hours (ensure it's an object)
-          let openingHours = { ...formData.openingHours };
+          // Create default opening hours outside of the effect dependency
+          const defaultOpeningHours = {
+            monday: { open: '08:00', close: '22:00', isClosed: false },
+            tuesday: { open: '08:00', close: '22:00', isClosed: false },
+            wednesday: { open: '08:00', close: '22:00', isClosed: false },
+            thursday: { open: '08:00', close: '22:00', isClosed: false },
+            friday: { open: '08:00', close: '22:00', isClosed: false },
+            saturday: { open: '08:00', close: '22:00', isClosed: false },
+            sunday: { open: '08:00', close: '22:00', isClosed: false }
+          };
+          
+          // Handle opening hours
+          let openingHours = { ...defaultOpeningHours };
           if (restaurant.openingHours) {
             if (typeof restaurant.openingHours === 'string') {
               try {
                 openingHours = JSON.parse(restaurant.openingHours);
-              } catch (e) {
-                // Silently handle parsing error
+              } catch (error) {
+                console.error("Failed to parse opening hours:", error);
               }
             } else if (typeof restaurant.openingHours === 'object') {
               openingHours = restaurant.openingHours;
@@ -139,11 +162,20 @@ const RestaurantForm = () => {
     }
   };
   
-  const removeCuisineType = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      cuisineTypes: prev.cuisineTypes.filter((_, i) => i !== index)
-    }));
+  const removeCuisineType = (indexOrValue) => {
+    if (typeof indexOrValue === 'number') {
+      // Remove by index
+      setFormData(prev => ({
+        ...prev,
+        cuisineTypes: prev.cuisineTypes.filter((_, i) => i !== indexOrValue)
+      }));
+    } else {
+      // Remove by value
+      setFormData(prev => ({
+        ...prev,
+        cuisineTypes: prev.cuisineTypes.filter(type => type !== indexOrValue)
+      }));
+    }
   };
   
   const handleCuisineKeyPress = (e) => {
@@ -383,12 +415,14 @@ const RestaurantForm = () => {
                 />
               </div>
 
-              {/* Cuisine Types - Multiple Selection */}
+              {/* Cuisine Types - Tag Selection */}
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">
                   Cuisine Types *
                 </label>
-                <div className="flex flex-wrap gap-2 mb-2">
+                
+                {/* Selected cuisines */}
+                <div className="flex flex-wrap gap-2 mb-3">
                   {formData.cuisineTypes.map((type, index) => (
                     <div
                       key={index}
@@ -405,23 +439,48 @@ const RestaurantForm = () => {
                     </div>
                   ))}
                 </div>
-                <div className="flex">
-                  <input
-                    type="text"
-                    value={cuisineInput}
-                    onChange={(e) => setCuisineInput(e.target.value)}
-                    onKeyPress={handleCuisineKeyPress}
-                    placeholder="e.g., Italian, Chinese, Sri Lankan"
-                    className="w-full px-3 py-2 border rounded-l-md bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={addCuisineType}
-                    className="px-3 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700"
-                  >
-                    <FaPlusCircle />
-                  </button>
+                
+                {/* Available cuisine tags */}
+                <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                  <p className="text-sm text-gray-600 mb-2">Select cuisine types:</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {availableCuisineTypes.map(cuisine => (
+                      <button
+                        key={cuisine}
+                        type="button"
+                        onClick={() => addPredefinedCuisine(cuisine)}
+                        disabled={formData.cuisineTypes.includes(cuisine)}
+                        className={`px-2.5 py-1 rounded-full text-sm transition-all ${
+                          formData.cuisineTypes.includes(cuisine) 
+                            ? 'bg-green-200 text-green-800 opacity-60 cursor-not-allowed' 
+                            : 'bg-green-100 text-green-800 hover:bg-green-200'
+                        }`}
+                      >
+                        {cuisine}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Custom cuisine input */}
+                  <div className="flex">
+                    <input
+                      type="text"
+                      value={cuisineInput}
+                      onChange={(e) => setCuisineInput(e.target.value)}
+                      onKeyPress={handleCuisineKeyPress}
+                      placeholder="Add custom cuisine type..."
+                      className="w-full px-3 py-2 border rounded-l-md bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={addCuisineType}
+                      className="px-3 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700"
+                    >
+                      <FaPlusCircle />
+                    </button>
+                  </div>
                 </div>
+                
                 {formData.cuisineTypes.length === 0 && (
                   <p className="text-red-500 text-sm mt-1">
                     At least one cuisine type is required
@@ -429,20 +488,6 @@ const RestaurantForm = () => {
                 )}
               </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Price Range</label>
-                <select
-                  name="priceRange"
-                  value={formData.priceRange}
-                  onChange={handleInputChange}
-                  className={inputClasses}
-                >
-                  <option value="$">$ (Budget)</option>
-                  <option value="$$">$$ (Moderate)</option>
-                  <option value="$$$">$$$ (Expensive)</option>
-                  <option value="$$$$">$$$$ (Very Expensive)</option>
-                </select>
-              </div>
             </div>
 
             {/* Contact & Address */}
@@ -530,6 +575,20 @@ const RestaurantForm = () => {
                     required
                   />
                 </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Price Range</label>
+                <select
+                  name="priceRange"
+                  value={formData.priceRange}
+                  onChange={handleInputChange}
+                  className={inputClasses}
+                >
+                  <option value="$">$ (Budget)</option>
+                  <option value="$$">$$ (Moderate)</option>
+                  <option value="$$$">$$$ (Expensive)</option>
+                  <option value="$$$$">$$$$ (Very Expensive)</option>
+                </select>
               </div>
             </div>
           </div>

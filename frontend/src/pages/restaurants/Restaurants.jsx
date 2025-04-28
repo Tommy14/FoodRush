@@ -168,20 +168,20 @@ const RestaurantList = () => {
     // Category filter
     const matchesCategory =
       category === "all" ||
-      (restaurant.cuisineType &&
-        (Array.isArray(restaurant.cuisineType)
-          ? restaurant.cuisineType.some(
+      (restaurant.cuisineTypes &&
+        (Array.isArray(restaurant.cuisineTypes)
+          ? restaurant.cuisineTypes.some(
               cuisine => cuisine.toLowerCase() === category.toLowerCase() ||
                         cuisine.toLowerCase().includes(category.toLowerCase())
             )
-          : restaurant.cuisineType.toLowerCase() === category.toLowerCase() ||
-            restaurant.cuisineType.toLowerCase().includes(category.toLowerCase())));
+          : restaurant.cuisineTypes.toLowerCase() === category.toLowerCase() ||
+            restaurant.cuisineTypes.toLowerCase().includes(category.toLowerCase())));
 
     // Search query filter
     const matchesSearch =
       searchQuery === "" ||
       restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (restaurant.cuisineType && restaurant.cuisineType.toLowerCase().includes(searchQuery.toLowerCase()));
+      (restaurant.cuisineTypes && restaurant.cuisineTypes.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // Rating filter
     const matchesRating = !filters.rating || restaurant.rating >= filters.rating;

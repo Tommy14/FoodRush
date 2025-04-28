@@ -1,7 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { FaPizzaSlice, FaHamburger, FaCoffee, FaIceCream, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { GiNoodles, GiSushis, GiChickenLeg } from 'react-icons/gi';
-import { MdFastfood, MdBreakfastDining, MdLocalGroceryStore } from 'react-icons/md';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import breakfast from "../../assets/icons/breakfast.png";
 import grocery from "../../assets/icons/grocery.png";
 import drinks from "../../assets/icons/drinks.png";
@@ -75,11 +73,11 @@ export default function FoodCategories({ onCategorySelect }) {
 
   const handleSelect = (categoryId) => {
     setActive(categoryId);
-    onCategorySelect(categoryId);
+    onCategorySelect(categoryId === 'all' ? 'all' : categoryId.toLowerCase());
   };
 
   const scroll = (direction) => {
-    const scrollAmount = 150; // Adjust based on your design
+    const scrollAmount = 150;
     if (scrollRef.current) {
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
@@ -109,7 +107,6 @@ export default function FoodCategories({ onCategorySelect }) {
           msOverflowStyle: 'none', // IE and Edge
           scrollbarWidth: 'none', // Firefox
           WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-          '::-webkit-scrollbar': { display: 'none' } // Hide scrollbar in Webkit browsers
         }}
       >
         {categories.map((category) => {
@@ -143,7 +140,7 @@ export default function FoodCategories({ onCategorySelect }) {
         })}
       </div>
 
-      {/* Right Arrow - Responsive positioning and styling */}
+      {/* Right Arrow  */}
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}

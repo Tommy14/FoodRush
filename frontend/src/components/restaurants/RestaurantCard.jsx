@@ -135,18 +135,42 @@ const RestaurantCard = ({ restaurant }) => {
       return null;
     }
 
-    const cuisines = restaurant.cuisineType
-      ? Array.isArray(restaurant.cuisineType)
-        ? restaurant.cuisineType
-        : [restaurant.cuisineType]
+    const cuisines = restaurant.cuisineTypes
+      ? Array.isArray(restaurant.cuisineTypes)
+        ? restaurant.cuisineTypes
+        : [restaurant.cuisineTypes]
       : ["Other"];
+      
+    // Pastel color palette for different cuisine types
+    const getCuisineColor = (cuisine) => {
+      const cuisineColors = {
+        all: "bg-green-100 text-green-700",
+        grocery: "bg-lime-100 text-lime-700",
+        breakfast: "bg-yellow-100 text-yellow-700",
+        drinks: "bg-pink-100 text-pink-600",
+        chinese: "bg-red-100 text-red-600",
+        pizza: "bg-amber-100 text-amber-700",
+        burger: "bg-orange-100 text-orange-700",
+        srilankan: "bg-purple-100 text-purple-700",
+        dessert: "bg-rose-100 text-rose-600",
+        vegan: "bg-emerald-100 text-emerald-700",
+        fish: "bg-cyan-100 text-cyan-700",
+        bbq: "bg-red-200 text-red-700",
+        healthy: "bg-teal-100 text-teal-700",
+        bakery: "bg-orange-100 text-orange-700",
+      };
+
+      // Convert cuisine to lowercase for case-insensitive matching
+      const lowercaseCuisine = cuisine.toLowerCase();
+      return cuisineColors[lowercaseCuisine] || "bg-yellow-100 text-yellow-800"; // Default to yellow if not found
+    };
 
     return (
       <div className="flex flex-wrap gap-1 mt-2">
         {cuisines.map((cuisine, index) => (
           <span
             key={index}
-            className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors"
+            className={`px-2 py-0.5 rounded-full text-xs ${getCuisineColor(cuisine)} hover:brightness-95 transition-colors`}
           >
             {cuisine}
           </span>
@@ -179,7 +203,7 @@ const RestaurantCard = ({ restaurant }) => {
               "https://placehold.co/600x400?text=No+Cover+Image"
             }
             alt={`${restaurant.name} cover`}
-            className="w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-125 group-hover:brightness-105"
+            className="w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-110 group-hover:brightness-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 group-hover:opacity-80"></div>
         </div>
