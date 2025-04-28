@@ -190,12 +190,12 @@ router.get("/:id", async (req, res) => {
     // Enrich response with owner details if available
     if (response.data && response.data.owner) {
       try {
-        const USER_API = process.env.USER_SERVICE;
+        const USER_API = process.env.AUTH_SERVICE;
         const ownerResponse = await axios.get(
-          `${USER_API}/users/${response.data.owner}`,
+          `${USER_API}/by/${response.data.owner}`,
           { headers }
         );
-
+    
         if (ownerResponse.data) {
           response.data.ownerName = ownerResponse.data.name;
           response.data.ownerId = ownerResponse.data._id;

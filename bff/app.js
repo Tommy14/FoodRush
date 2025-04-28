@@ -12,6 +12,7 @@ import paymentRoutes from './routes/payment.routes.js';
 import menuRoutes from './routes/menu.route.js';
 import reviewRoutes from './routes/review.routes.js';
 import locationRoutes from './routes/location.routes.js';
+import favoriteRoutes from './routes/favorite.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,6 +43,7 @@ app.use('/bff/pay', paymentRoutes);
 app.use('/bff/menu', menuRoutes);
 app.use('/bff/reviews', reviewRoutes);
 app.use('/bff/location', locationRoutes);
+app.use('/bff/favorites', favoriteRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`BFF running on port ${process.env.PORT}`);

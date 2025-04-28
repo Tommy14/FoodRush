@@ -1,19 +1,37 @@
 import { useRef, useState, useEffect } from 'react';
-import { FaPizzaSlice, FaHamburger, FaCoffee, FaIceCream, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { GiNoodles, GiSushis, GiChickenLeg } from 'react-icons/gi';
-import { MdFastfood, MdBreakfastDining, MdLocalGroceryStore } from 'react-icons/md';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import breakfast from "../../assets/icons/breakfast.png";
+import grocery from "../../assets/icons/grocery.png";
+import drinks from "../../assets/icons/drinks.png";
+import chinese from "../../assets/icons/chinese.png";
+import pizza from "../../assets/icons/pizza.png";
+import srilankan from "../../assets/icons/srilankan.png";
+import vegan from "../../assets/icons/vegan.png";
+import desserts from "../../assets/icons/desserts.png";
+import burger from "../../assets/icons/burger.png";
+import all from "../../assets/icons/all.png";
+import barbecue from "../../assets/icons/barbecue.png";
+import fish from "../../assets/icons/fish.png";
+import bakery from "../../assets/icons/bakery.png";
+import healthy from "../../assets/icons/healthy.png";
 
 const categories = [
-  { id: 'all', name: 'All', icon: MdFastfood },
-  { id: 'grocery', name: 'Grocery', icon: MdLocalGroceryStore },
-  { id: 'breakfast', name: 'Breakfast', icon: MdBreakfastDining },
-  { id: 'coffee', name: 'Coffee', icon: FaCoffee },
-  { id: 'pizza', name: 'Pizza', icon: FaPizzaSlice },
-  { id: 'burger', name: 'Burgers', icon: FaHamburger },
-  { id: 'dessert', name: 'Desserts', icon: FaIceCream },
-  { id: 'chinese', name: 'Chinese', icon: GiNoodles },
-  { id: 'sushi', name: 'Sushi', icon: GiSushis },
-  { id: 'bbq', name: 'BBQ', icon: GiChickenLeg },
+  { id: "all", name: "All", image: all },
+  { id: "grocery", name: "Grocery", image: grocery },
+  { id: "breakfast", name: "Breakfast", image: breakfast },
+  { id: "drinks", name: "Drinks", image: drinks },
+  { id: "chinese", name: "Chinese", image: chinese },
+  { id: "pizza", name: "Pizza", image: pizza },
+  { id: "burger", name: "Burger", image: burger },
+  { id: "srilankan", name: "Sri Lankan", image: srilankan },
+  { id: "dessert", name: "Dessert", image: desserts },
+  { id: "vegan", name: "Vegan", image: vegan },
+  { id: "fish", name: "Fish", image: fish },
+  { id: "bbq", name: "Bbq", image: barbecue },
+  { id: "healthy", name: "Healthy", image: healthy },
+  { id: "bakery", name: "Bakery", image: bakery },
+  
+  
 ];
 
 export default function FoodCategories({ onCategorySelect }) {
@@ -55,11 +73,11 @@ export default function FoodCategories({ onCategorySelect }) {
 
   const handleSelect = (categoryId) => {
     setActive(categoryId);
-    onCategorySelect(categoryId);
+    onCategorySelect(categoryId === 'all' ? 'all' : categoryId.toLowerCase());
   };
 
   const scroll = (direction) => {
-    const scrollAmount = 150; // Adjust based on your design
+    const scrollAmount = 150;
     if (scrollRef.current) {
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
@@ -89,26 +107,32 @@ export default function FoodCategories({ onCategorySelect }) {
           msOverflowStyle: 'none', // IE and Edge
           scrollbarWidth: 'none', // Firefox
           WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-          '::-webkit-scrollbar': { display: 'none' } // Hide scrollbar in Webkit browsers
         }}
       >
         {categories.map((category) => {
-          const Icon = category.icon;
           const isActive = active === category.id;
           return (
             <div
               key={category.id}
               onClick={() => handleSelect(category.id)}
-              className={`flex flex-col items-center flex-shrink-0 cursor-pointer transition-all min-w-[50px] sm:min-w-[60px] ${
+              className={`flex flex-col items-center flex-shrink-0 cursor-pointer transition-all min-w-[60px] sm:min-w-[70px] ${
                 isActive ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
               }`}
             >
               <div
-                className={`p-2 sm:p-3 rounded-full mb-1 sm:mb-2 ${
-                  isActive ? 'bg-green-100' : 'bg-gray-100 hover:bg-green-50'
+                className={`p-2 sm:p-3 rounded-full mb-1 sm:mb-2 transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-green-100 shadow-md transform scale-110' 
+                    : 'bg-gray-100 hover:bg-green-50'
                 }`}
               >
-                <Icon className="text-lg sm:text-xl" />
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  className={`w-8 h-8 sm:w-10 sm:h-10 object-contain transition-opacity duration-300 ${
+                    isActive ? 'opacity-100' : 'opacity-80'
+                  }`}
+                />
               </div>
               <span className="text-[10px] sm:text-xs font-medium text-center line-clamp-1 w-full">{category.name}</span>
             </div>
@@ -116,7 +140,7 @@ export default function FoodCategories({ onCategorySelect }) {
         })}
       </div>
 
-      {/* Right Arrow - Responsive positioning and styling */}
+      {/* Right Arrow  */}
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}

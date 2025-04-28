@@ -1,20 +1,22 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import DashSidebar from '../../components/DashSidebar';
 import { FaCamera, FaUpload, FaSpinner, FaPlusCircle, FaTimes } from 'react-icons/fa';
 import { v4 as uuidv4 } from 'uuid';
+import { getRestaurantById } from '../../services/restaurantService';
 
-// Update input styles to have light green background and green focus
+// Update input styles with light green theme
 const inputClasses = "w-full px-3 py-2 border rounded-md bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-500";
-const buttonClasses = "px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200";
-const secondaryButtonClasses = "px-4 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition duration-200";
 
-const CreateRestaurant = () => {
+const RestaurantForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = !!id;
   const auth = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(isEditMode);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [cuisineInput, setCuisineInput] = useState('');
@@ -47,15 +49,107 @@ const CreateRestaurant = () => {
   
   const [files, setFiles] = useState({
     logo: null,
-    coverImage: null,
-    images: []
+    coverImage: null
   });
   
   const [previews, setPreviews] = useState({
     logo: '',
-    coverImage: '',
-    images: []
+    coverImage: ''
   });
+
+  const availableCuisineTypes = [
+    'All', 'Grocery', 'Breakfast', 'Drinks', 'Chinese', 'Pizza', 
+    'Burger', 'Sri Lankan', 'Dessert', 'Vegan', 'Fish', 'BBQ', 'Healthy', 'Bakery'
+  ];
+
+  const addPredefinedCuisine = (cuisine) => {
+    if (!formData.cuisineTypes.includes(cuisine)) {
+      setFormData(prev => ({
+        ...prev,
+        cuisineTypes: [...prev.cuisineTypes, cuisine]
+      }));
+    }
+  };
+
+  // Fetch restaurant data if in edit mode
+  useEffect(() => {
+    const fetchRestaurantData = async () => {
+      if (isEditMode && auth.token) {
+        try {
+          setFetchLoading(true);
+          const restaurant = await getRestaurantById(id, auth.token);
+          
+          // Handle cuisine types
+          let cuisineTypes = [];
+          if (typeof restaurant.cuisineTypes === 'string') {
+            cuisineTypes = restaurant.cuisineTypes.split(',').map(type => type.trim());
+          } else if (Array.isArray(restaurant.cuisineTypes)) {
+            cuisineTypes = restaurant.cuisineTypes;
+          }
+          
+          // Create default opening hours outside of the effect dependency
+          const defaultOpeningHours = {
+            monday: { open: '08:00', close: '22:00', isClosed: false },
+            tuesday: { open: '08:00', close: '22:00', isClosed: false },
+            wednesday: { open: '08:00', close: '22:00', isClosed: false },
+            thursday: { open: '08:00', close: '22:00', isClosed: false },
+            friday: { open: '08:00', close: '22:00', isClosed: false },
+            saturday: { open: '08:00', close: '22:00', isClosed: false },
+            sunday: { open: '08:00', close: '22:00', isClosed: false }
+          };
+          
+          // Handle opening hours
+          let openingHours = { ...defaultOpeningHours };
+          if (restaurant.openingHours) {
+            if (typeof restaurant.openingHours === 'string') {
+              try {
+                openingHours = JSON.parse(restaurant.openingHours);
+              } catch (error) {
+                console.error("Failed to parse opening hours:", error);
+              }
+            } else if (typeof restaurant.openingHours === 'object') {
+              openingHours = restaurant.openingHours;
+            }
+          }
+          
+          // Update form data with fetched restaurant data
+          setFormData({
+            restaurantId: restaurant._id || uuidv4(),
+            name: restaurant.name || '',
+            description: restaurant.description || '',
+            cuisineTypes: cuisineTypes,
+            priceRange: restaurant.priceRange || '$$',
+            address: {
+              street: restaurant.address?.street || '',
+              city: restaurant.address?.city || '',
+              state: restaurant.address?.state || '',
+              postalCode: restaurant.address?.postalCode || '',
+              country: restaurant.address?.country || 'Sri Lanka'
+            },
+            contactPhone: restaurant.contactPhone || '',
+            contactEmail: restaurant.contactEmail || '',
+            openingHours: openingHours
+          });
+          
+          // Handle image URLs with fallbacks for different API response formats
+          if (restaurant.logoUrl || restaurant.logo) {
+            setPreviews(prev => ({ ...prev, logo: restaurant.logoUrl || restaurant.logo }));
+          }
+          
+          if (restaurant.coverImageUrl || restaurant.coverImage) {
+            setPreviews(prev => ({ ...prev, coverImage: restaurant.coverImageUrl || restaurant.coverImage }));
+          }
+          
+        } catch (err) {
+          setError('Failed to load restaurant data. Please try again.');
+        } finally {
+          setFetchLoading(false);
+        }
+      }
+    };
+    
+    fetchRestaurantData();
+  }, [id, auth.token, isEditMode]);
   
   // Functions for handling cuisine types
   const addCuisineType = () => {
@@ -68,11 +162,20 @@ const CreateRestaurant = () => {
     }
   };
   
-  const removeCuisineType = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      cuisineTypes: prev.cuisineTypes.filter((_, i) => i !== index)
-    }));
+  const removeCuisineType = (indexOrValue) => {
+    if (typeof indexOrValue === 'number') {
+      // Remove by index
+      setFormData(prev => ({
+        ...prev,
+        cuisineTypes: prev.cuisineTypes.filter((_, i) => i !== indexOrValue)
+      }));
+    } else {
+      // Remove by value
+      setFormData(prev => ({
+        ...prev,
+        cuisineTypes: prev.cuisineTypes.filter(type => type !== indexOrValue)
+      }));
+    }
   };
   
   const handleCuisineKeyPress = (e) => {
@@ -113,47 +216,19 @@ const CreateRestaurant = () => {
   const handleFileChange = (e) => {
     const { name, files: selectedFiles } = e.target;
     
-    if (name === 'images') {
-      // For multiple images
-      const newImages = Array.from(selectedFiles);
-      setFiles(prev => ({
-        ...prev,
-        images: [...prev.images, ...newImages].slice(0, 10) // Limit to 10 images
-      }));
-      
-      // Create previews
-      const newPreviews = newImages.map(file => URL.createObjectURL(file));
-      setPreviews(prev => ({
-        ...prev,
-        images: [...prev.images, ...newPreviews].slice(0, 10)
-      }));
-    } else {
-      // For single file (logo or coverImage)
-      setFiles(prev => ({
-        ...prev,
-        [name]: selectedFiles[0]
-      }));
-      
-      // Create preview
-      if (selectedFiles[0]) {
-        setPreviews(prev => ({
-          ...prev,
-          [name]: URL.createObjectURL(selectedFiles[0])
-        }));
-      }
-    }
-  };
-  
-  const removeImage = (index) => {
+    // For single file (logo or coverImage)
     setFiles(prev => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      [name]: selectedFiles[0]
     }));
     
-    setPreviews(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
+    // Create preview
+    if (selectedFiles[0]) {
+      setPreviews(prev => ({
+        ...prev,
+        [name]: URL.createObjectURL(selectedFiles[0])
+      }));
+    }
   };
   
   const isFormValid = () => {
@@ -184,7 +259,10 @@ const CreateRestaurant = () => {
     try {
       const restaurantFormData = new FormData();
       
-      // Add restaurantId first to ensure it's not null
+      // Add the ID fields first
+      if (isEditMode) {
+        restaurantFormData.append('_id', id);
+      }
       restaurantFormData.append('restaurantId', formData.restaurantId);
       
       // Add basic fields
@@ -193,18 +271,23 @@ const CreateRestaurant = () => {
       restaurantFormData.append('priceRange', formData.priceRange);
       restaurantFormData.append('contactPhone', formData.contactPhone);
       
-      // Only add email if it exists
       if (formData.contactEmail) {
         restaurantFormData.append('contactEmail', formData.contactEmail);
       }
       
-      // Add cuisineTypes as multiple values
+      // Add cuisineTypes as individual fields
       formData.cuisineTypes.forEach(type => {
         restaurantFormData.append('cuisineTypes', type);
       });
       
-      // Add objects as JSON strings
-      restaurantFormData.append('address', JSON.stringify(formData.address));
+      // Append each address field individually
+      restaurantFormData.append('address.street', formData.address.street);
+      restaurantFormData.append('address.city', formData.address.city);
+      restaurantFormData.append('address.state', formData.address.state);
+      restaurantFormData.append('address.postalCode', formData.address.postalCode);
+      restaurantFormData.append('address.country', formData.address.country || 'Sri Lanka');
+      
+      // Add opening hours
       restaurantFormData.append('openingHours', JSON.stringify(formData.openingHours));
       
       // Add files if they exist
@@ -216,47 +299,35 @@ const CreateRestaurant = () => {
         restaurantFormData.append('coverImage', files.coverImage);
       }
       
-      if (files.images.length > 0) {
-        files.images.forEach(image => {
-          restaurantFormData.append('images', image);
-        });
-      }
+      // Use the API_BASE from the restaurantService
+      const API_BASE = 'http://localhost:5001/bff/restaurants';
+      const apiUrl = isEditMode ? `${API_BASE}/${id}` : API_BASE;
       
-      console.log('Submitting restaurant data with ID:', formData.restaurantId);
-      
-      const response = await axios.post('/bff/restaurants', restaurantFormData, {
+      const response = await axios({
+        method: isEditMode ? 'put' : 'post',
+        url: apiUrl,
+        data: restaurantFormData,
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${auth.token}`
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          console.log(`Upload progress: ${percentCompleted}%`);
         }
       });
       
-      console.log('Restaurant created:', response.data);
+      setSuccess(`Restaurant ${isEditMode ? 'updated' : 'created'} successfully! Redirecting to management page...`);
       
-      setSuccess('Restaurant created successfully! Redirecting to management page...');
+      // Redirect after success
       setTimeout(() => {
         navigate('/manage-restaurants');
       }, 2000);
     } catch (err) {
-      console.error('Error creating restaurant:', err);
-      
-      // Improved error handling
-      let errorMessage = 'Failed to create restaurant. Please try again.';
+      let errorMessage = 'Failed to save restaurant. Please try again.';
       
       if (err.response) {
-        console.error('Response status:', err.response.status);
-        console.error('Response data:', err.response.data);
-        
         errorMessage = err.response.data.message || errorMessage;
-        
-        // If we have more detailed error information
-        if (err.response.data.details) {
-          console.error('Error details:', err.response.data.details);
-        }
+      } else if (err.request) {
+        errorMessage = 'No response from server. Please check your connection.';
+      } else {
+        errorMessage = err.message || errorMessage;
       }
       
       setError(errorMessage);
@@ -265,12 +336,28 @@ const CreateRestaurant = () => {
     }
   };
   
+  if (fetchLoading) {
+    return (
+      <div className="flex min-h-screen bg-gray-100">
+        <DashSidebar />
+        <div className="flex-1 p-8 flex items-center justify-center">
+          <div className="text-center">
+            <FaSpinner className="animate-spin text-green-600 text-4xl mx-auto mb-4" />
+            <p className="text-gray-600">Loading restaurant data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="flex min-h-screen bg-gray-100">
       <DashSidebar />
 
-      <div className="flex-1 p-8 overflow-auto">
-        <h1 className="text-3xl font-bold mb-6 text-green-800">Create New Restaurant</h1>
+      <div className="flex-1 p-8 pt-20 overflow-auto">
+        <h1 className="text-3xl font-bold mb-6 text-green-800">
+          {isEditMode ? 'Update Restaurant' : 'Create New Restaurant'}
+        </h1>
 
         {error && (
           <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6">
@@ -328,12 +415,14 @@ const CreateRestaurant = () => {
                 />
               </div>
 
-              {/* Cuisine Types - Multiple Selection */}
+              {/* Cuisine Types - Tag Selection */}
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">
                   Cuisine Types *
                 </label>
-                <div className="flex flex-wrap gap-2 mb-2">
+                
+                {/* Selected cuisines */}
+                <div className="flex flex-wrap gap-2 mb-3">
                   {formData.cuisineTypes.map((type, index) => (
                     <div
                       key={index}
@@ -350,23 +439,48 @@ const CreateRestaurant = () => {
                     </div>
                   ))}
                 </div>
-                <div className="flex">
-                  <input
-                    type="text"
-                    value={cuisineInput}
-                    onChange={(e) => setCuisineInput(e.target.value)}
-                    onKeyPress={handleCuisineKeyPress}
-                    placeholder="e.g., Italian, Chinese, Sri Lankan"
-                    className="w-full px-3 py-2 border rounded-l-md bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={addCuisineType}
-                    className="px-3 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700"
-                  >
-                    <FaPlusCircle />
-                  </button>
+                
+                {/* Available cuisine tags */}
+                <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                  <p className="text-sm text-gray-600 mb-2">Select cuisine types:</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {availableCuisineTypes.map(cuisine => (
+                      <button
+                        key={cuisine}
+                        type="button"
+                        onClick={() => addPredefinedCuisine(cuisine)}
+                        disabled={formData.cuisineTypes.includes(cuisine)}
+                        className={`px-2.5 py-1 rounded-full text-sm transition-all ${
+                          formData.cuisineTypes.includes(cuisine) 
+                            ? 'bg-green-200 text-green-800 opacity-60 cursor-not-allowed' 
+                            : 'bg-green-100 text-green-800 hover:bg-green-200'
+                        }`}
+                      >
+                        {cuisine}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Custom cuisine input */}
+                  <div className="flex">
+                    <input
+                      type="text"
+                      value={cuisineInput}
+                      onChange={(e) => setCuisineInput(e.target.value)}
+                      onKeyPress={handleCuisineKeyPress}
+                      placeholder="Add custom cuisine type..."
+                      className="w-full px-3 py-2 border rounded-l-md bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={addCuisineType}
+                      className="px-3 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700"
+                    >
+                      <FaPlusCircle />
+                    </button>
+                  </div>
                 </div>
+                
                 {formData.cuisineTypes.length === 0 && (
                   <p className="text-red-500 text-sm mt-1">
                     At least one cuisine type is required
@@ -374,20 +488,6 @@ const CreateRestaurant = () => {
                 )}
               </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Price Range</label>
-                <select
-                  name="priceRange"
-                  value={formData.priceRange}
-                  onChange={handleInputChange}
-                  className={inputClasses}
-                >
-                  <option value="$">$ (Budget)</option>
-                  <option value="$$">$$ (Moderate)</option>
-                  <option value="$$$">$$$ (Expensive)</option>
-                  <option value="$$$$">$$$$ (Very Expensive)</option>
-                </select>
-              </div>
             </div>
 
             {/* Contact & Address */}
@@ -476,6 +576,20 @@ const CreateRestaurant = () => {
                   />
                 </div>
               </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Price Range</label>
+                <select
+                  name="priceRange"
+                  value={formData.priceRange}
+                  onChange={handleInputChange}
+                  className={inputClasses}
+                >
+                  <option value="$">$ (Budget)</option>
+                  <option value="$$">$$ (Moderate)</option>
+                  <option value="$$$">$$$ (Expensive)</option>
+                  <option value="$$$$">$$$$ (Very Expensive)</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -558,75 +672,6 @@ const CreateRestaurant = () => {
                 </div>
               </div>
             </div>
-
-            {/* Gallery Images */}
-            <div className="mt-4">
-              <label className="block text-gray-700 mb-2">
-                Gallery Images (up to 10)
-              </label>
-              <div className="border-2 border-dashed border-green-200 rounded-lg p-4 hover:border-green-400 transition duration-300">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
-                  {previews.images.map((src, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={src}
-                        alt={`Gallery ${index + 1}`}
-                        className="h-24 w-full object-cover rounded-md border border-green-200"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  ))}
-
-                  {previews.images.length < 10 && (
-                    <div className="flex items-center justify-center h-24 border rounded-md border-green-200 bg-green-50">
-                      <input
-                        type="file"
-                        name="images"
-                        onChange={handleFileChange}
-                        accept="image/*"
-                        className="hidden"
-                        id="gallery-upload"
-                        multiple
-                      />
-                      <label
-                        htmlFor="gallery-upload"
-                        className="flex flex-col items-center text-center p-2 cursor-pointer"
-                      >
-                        <FaCamera className="text-green-500 text-2xl mb-1" />
-                        <span className="text-sm text-green-600">Add Photo</span>
-                      </label>
-                    </div>
-                  )}
-                </div>
-
-                <div className="text-center">
-                  <input
-                    type="file"
-                    name="images"
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    className="hidden"
-                    id="gallery-upload-btn"
-                    multiple
-                  />
-                  <label
-                    htmlFor="gallery-upload-btn"
-                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer transition duration-200"
-                  >
-                    <FaUpload className="mr-2" /> Upload Gallery Images
-                  </label>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {previews.images.length}/10 images uploaded
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Opening Hours */}
@@ -669,7 +714,7 @@ const CreateRestaurant = () => {
                       </label>
 
                       {!hours.isClosed && (
-                        <div className="flex flex-1 items-center gap-2">
+                        <div className="flex-1 flex items-center gap-2">
                           <div className="flex-1 flex items-center">
                             <span className="text-sm text-gray-600 mr-2">
                               Open:
@@ -754,7 +799,15 @@ const CreateRestaurant = () => {
           </div>
 
           {/* Submit Button */}
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center flex gap-4 justify-center">
+            <button
+              type="button"
+              onClick={() => navigate('/manage-restaurants')}
+              className="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 font-medium transition duration-200 shadow-md hover:shadow-lg"
+            >
+              Cancel
+            </button>
+            
             <button
               type="submit"
               disabled={loading}
@@ -763,10 +816,10 @@ const CreateRestaurant = () => {
               {loading ? (
                 <>
                   <FaSpinner className="inline animate-spin mr-2" />
-                  Creating Restaurant...
+                  {isEditMode ? 'Updating Restaurant...' : 'Creating Restaurant...'}
                 </>
               ) : (
-                "Create Restaurant"
+                isEditMode ? 'Update Restaurant' : 'Create Restaurant'
               )}
             </button>
           </div>
@@ -776,4 +829,4 @@ const CreateRestaurant = () => {
   );
 };
 
-export default CreateRestaurant;
+export default RestaurantForm;
