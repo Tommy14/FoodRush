@@ -81,3 +81,23 @@ export const initiatePaymentSession = async (paymentPayload) => {
     throw error.response?.data || error;
   }
 };
+
+export const getOrdersByRestaurant = async (restaurantId) => {
+  try {
+    const res = await apiPrivate.get(`/orders/restaurant/${restaurantId}`);
+    return res.data;
+  } catch (error) {
+    console.error('Error fetching orders by restaurant:', error);
+    throw error.response?.data || error;
+  }
+};
+
+export const updateOrderStatus = async (orderId, newStatus) => {
+  try {
+    const response = await apiPrivate.put(`/orders/${orderId}/status`, { status: newStatus });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    throw error.response?.data || error;
+  }
+};

@@ -1,92 +1,60 @@
-import React from 'react';
-import { 
-  FaUtensils, FaMapMarkerAlt, FaCalendarDay, 
-  FaMoneyBillWave, FaCheck, FaClock, FaTimes 
-} from 'react-icons/fa';
+import { FaMapMarkerAlt, FaClock } from "react-icons/fa";
 
-const RestaurantOrdersCard = ({ restaurant, onViewOrders }) => {
-  const formattedAddress = typeof restaurant.address === 'object' 
-    ? `${restaurant.address.street || ''}, ${restaurant.address.city || ''}, ${restaurant.address.state || ''} ${restaurant.address.postalCode || ''}`
-    : restaurant.address || 'No address available';
+export default function RestaurantOrdersCard({ restaurant, onViewOrders }) {
+  const { name, address, cuisineTypes, isOpen, coverImage, rating, reviewCount } = restaurant;
+
+  const formattedAddress = [
+    address?.street,
+    address?.city,
+    address?.state,
+    address?.postalCode,
+  ].filter(Boolean).join(", ");
+
+  console.log("Restaurant Address:", restaurant);
+
+  // const imageUrl = images?.[0]?.url || "https://via.placeholder.com/400x200.png?text=Restaurant+Image";
 
   return (
-    <div className="bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 p-5">
-      <div className="flex flex-col">
-        {/* Restaurant Name and Address */}
-        <div className="mb-4">
-          <div className="flex items-center mb-2">
-            <FaUtensils className="text-amber-500 mr-2" />
-            <h2 className="text-xl font-semibold">Restaurant: {restaurant.name}</h2>
+    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow hover:shadow-md transition duration-300 flex flex-col">
+      {/* Image Section */}
+      <div className="relative">
+        <img src={coverImage} alt={name} className="w-full h-40 object-cover" />
+      </div>
+
+      {/* Content Section */}
+      <div className="p-4 flex flex-col flex-1">
+        <h3 className="text-lg font-semibold text-gray-800 mb-1">{name}</h3>
+        <p className="text-sm text-gray-500 mb-2">{cuisineTypes?.join(", ") || "Other"}</p>
+
+        {/* Rating and Reviews */}
+        <div className="flex items-center text-sm text-gray-600 mb-2">
+          <div className="flex items-center">
+            {/* You can replace these stars with icons */}
+            <span className="text-yellow-400">★</span>
+            <span className="ml-1 font-bold">{rating?.toFixed(1) || "0.0"}</span>
+            <span className="ml-1">/ 5.0</span>
           </div>
-          <div className="flex items-center text-gray-600">
-            <FaMapMarkerAlt className="text-gray-500 mr-2" />
-            <p>Address: {formattedAddress}</p>
-          </div>
+          <span className="ml-auto">{reviewCount || 0} reviews</span>
         </div>
-        
-        {/* Order Statistics */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="flex items-center">
-            <FaCalendarDay className="text-blue-500 mr-2" />
-            <div>
-              <p className="text-sm text-gray-600">Orders Today:</p>
-              <p className="font-bold">{restaurant.stats.ordersToday}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center">
-            <FaMoneyBillWave className="text-green-500 mr-2" />
-            <div>
-              <p className="text-sm text-gray-600">Revenue Today:</p>
-              <p className="font-bold">LKR {restaurant.stats.revenueToday.toLocaleString()}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center">
-            <FaCheck className="text-green-600 mr-2" />
-            <div>
-              <p className="text-sm text-gray-600">Delivered Orders:</p>
-              <p className="font-bold">{restaurant.stats.deliveredOrders}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center">
-            <FaClock className="text-amber-500 mr-2" />
-            <div>
-              <p className="text-sm text-gray-600">Pending Orders:</p>
-              <p className="font-bold">{restaurant.stats.pendingOrders}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center">
-            <FaTimes className="text-red-500 mr-2" />
-            <div>
-              <p className="text-sm text-gray-600">Cancelled Orders:</p>
-              <p className="font-bold">{restaurant.stats.cancelledOrders}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center">
-            <FaClock className="text-blue-400 mr-2" />
-            <div>
-              <p className="text-sm text-gray-600">Avg. Delivery Time:</p>
-              <p className="font-bold">{restaurant.stats.avgDeliveryTime} min</p>
-            </div>
-          </div>
+
+        {/* Address and Delivery Time */}
+        <div className="flex items-center text-sm text-gray-500 mb-4">
+          <FaMapMarkerAlt className="mr-2" />
+          <span className="truncate">{formattedAddress || "No address provided"}</span>
+        </div>
+        <div className="flex items-center text-sm text-gray-500 mb-4">
+          <FaClock className="mr-2" />
+          <span>30 min</span> {/* Hardcoded delivery time */}
         </div>
 
         {/* View Orders Button */}
-        <div className="mt-auto pt-4">
         <button
-            onClick={() => onViewOrders(restaurant._id)}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
-          >
-            View Orders
-          </button>
-        </div>
+          onClick={() => onViewOrders(restaurant._id)}
+          className="mt-auto bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition"
+        >
+          View Orders
+        </button>
       </div>
     </div>
   );
-};
-
-export default RestaurantOrdersCard;
+}
