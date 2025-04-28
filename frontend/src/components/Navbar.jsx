@@ -19,10 +19,21 @@ export default function Navbar() {
 
   const location = useLocation();
   const dashboardPaths = [
-    "/restaurant-dashboard", "/admin", "/delivery-panel", 
-    "/manage-restaurants", "/restaurant-orders", 
-    "/create-restaurant", "/restaurant-status", "/user-management"];
-  const isDashboard = dashboardPaths.includes(location.pathname);
+    "/restaurant-dashboard", 
+    "/admin", 
+    "/delivery-panel", 
+    "/manage-restaurants", 
+    "/restaurant-orders", 
+    "/create-restaurant", 
+    "/restaurant-status", 
+    "/user-management"
+  ];
+  
+  // Regex patterns for dynamic routes
+  const isRestaurantMenu = /^\/restaurants\/[^\/]+\/menu(\/[^\/]+\/edit)?$/.test(location.pathname);
+  
+  const isDashboard = dashboardPaths.includes(location.pathname) || isRestaurantMenu;
+  
   const [cartOpen, setCartOpen] = useState(false);
   const cartItems = useSelector((state) => state.cart.items);
   
