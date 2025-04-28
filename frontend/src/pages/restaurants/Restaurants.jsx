@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
-  FaShoppingBag,
   FaFilter,
   FaStar,
   FaClock,
@@ -9,7 +8,7 @@ import {
   FaSearch,
   FaHeart
 } from "react-icons/fa";
-import { MdDeliveryDining, MdLocationOn } from "react-icons/md";
+import { MdLocationOn } from "react-icons/md";
 import LocationSearchBar from "../../components/restaurants/LocationSearchBar";
 import FoodCategories from "../../components/restaurants/FoodCategories";
 import RestaurantCard from "../../components/restaurants/RestaurantCard";
@@ -17,7 +16,6 @@ import { getAllRestaurants } from "../../services/restaurantService";
 import LocationService from "../../services/locationService";
 import { getUserFavorites } from "../../services/favoriteService";
 import Footer from "../../components/Footer";
-
 
 const MAX_LOCATION_AGE = 4 * 60 * 60 * 1000; // 4 hours
 
@@ -44,79 +42,53 @@ const RestaurantList = () => {
         const favorites = await getUserFavorites();
         setFavoriteRestaurants(favorites);
       } catch (error) {
-        console.error("Error fetching favorites:", error);
         // Don't set error state as this is not critical
       }
     }
     
-    // Only fetch if the user is filtering by favorites
     if (filters.favorites) {
       fetchFavorites();
     }
   }, [filters.favorites]);
 
+  // Fetch restaurants based on location
   useEffect(() => {
     const fetchRestaurants = async () => {
       setLoading(true);
       try {
         let restaurantsData;
 
-        // If location is available, fetch nearby restaurants
         if (location && location.coordinates) {
           try {
-            // Use the location service
             restaurantsData = await LocationService.findNearbyRestaurants(
               location.coordinates,
               10000
             );
-
-            if (Array.isArray(restaurantsData) && restaurantsData.length > 0) {
-              console.log("Found nearby restaurants:", restaurantsData.length);
-            } else {
-              // Fall back to getting all restaurants if nearby search returned no results
-              console.log(
-                "No nearby restaurants found, fetching all restaurants"
-              );
+            
+            if (!(Array.isArray(restaurantsData) && restaurantsData.length > 0)) {
               restaurantsData = await getAllRestaurants();
             }
           } catch (err) {
-            console.error("Error fetching nearby restaurants:", err);
-            // Fall back to getting all restaurants
             restaurantsData = await getAllRestaurants();
           }
         } else {
-          // Use the service method for regular restaurant fetching
           restaurantsData = await getAllRestaurants();
-          console.log("No location provided, fetching all restaurants");
         }
 
-        // Validate restaurant data
+        // Validate and format restaurant data
         restaurantsData = restaurantsData
-          .filter(
-            (restaurant) =>
-              restaurant && typeof restaurant === "object" && restaurant._id
-          )
+          .filter(restaurant => restaurant && typeof restaurant === "object" && restaurant._id)
           .map((restaurant) => {
-            // Store the original restaurant address
             const originalAddress = restaurant.address;
-
-            // Format address if it's an object (for display purposes)
-            const formattedAddress =
-              typeof originalAddress === "object"
-                ? `${originalAddress.street || ""}, ${
-                    originalAddress.city || ""
-                  }`
-                : originalAddress;
+            const formattedAddress = typeof originalAddress === "object"
+              ? `${originalAddress.street || ""}, ${originalAddress.city || ""}`
+              : originalAddress;
 
             return {
               ...restaurant,
               distance: restaurant.distance || null,
               estimatedDeliveryTime: restaurant.estimatedDeliveryTime || 30,
-              geocodedAddress:
-                restaurant.geocodedAddress ||
-                formattedAddress ||
-                "Location unavailable",
-              // Add the original address explicitly
+              geocodedAddress: restaurant.geocodedAddress || formattedAddress || "Location unavailable",
               originalAddress: originalAddress,
             };
           });
@@ -124,7 +96,6 @@ const RestaurantList = () => {
         setRestaurants(restaurantsData);
         setError("");
       } catch (err) {
-        console.error("Error fetching restaurants:", err);
         setError("Failed to load restaurants. Please try again.");
       } finally {
         setLoading(false);
@@ -141,18 +112,12 @@ const RestaurantList = () => {
       Array.isArray(newLocation.coordinates) &&
       newLocation.coordinates.length === 2
     ) {
-      // Ensure that the location always has an address field
       const updatedLocation = {
         ...newLocation,
-        address:
-          newLocation.address ||
-          newLocation.formattedAddress ||
-          "Location selected",
+        address: newLocation.address || newLocation.formattedAddress || "Location selected",
       };
 
       setLocation(updatedLocation);
-
-      // Store in localStorage
       localStorage.setItem(
         "userLocation",
         JSON.stringify({
@@ -160,134 +125,102 @@ const RestaurantList = () => {
           timestamp: Date.now(),
         })
       );
-    } else {
-      console.error("Invalid location format:", newLocation);
     }
   };
 
-  // Check for saved location on component mount
+  // Load saved location on component mount
   useEffect(() => {
     const savedLocation = localStorage.getItem("userLocation");
     if (savedLocation) {
       try {
         const parsedLocation = JSON.parse(savedLocation);
-        // Ensure the address property exists
+        
         if (!parsedLocation.address && parsedLocation.formattedAddress) {
           parsedLocation.address = parsedLocation.formattedAddress;
         }
 
         if (
-          parsedLocation.timestamp &&
-          Date.now() - parsedLocation.timestamp > MAX_LOCATION_AGE
+          !parsedLocation.timestamp ||
+          Date.now() - parsedLocation.timestamp <= MAX_LOCATION_AGE
         ) {
-          // Prompt user to refresh location or do it silently
-          console.log("Location data is outdated. Please refresh.");
-        } else {
           setLocation(parsedLocation);
         }
       } catch (e) {
-        console.error("Error parsing saved location:", e);
         localStorage.removeItem("userLocation");
       }
     }
   }, []);
 
-  // Handle category selection
   const handleCategorySelect = (categoryId) => {
     setCategory(categoryId);
   };
 
-  // Handle search input
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Toggle mobile filters visibility
   const toggleMobileFilters = () => {
     setShowFiltersOnMobile(!showFiltersOnMobile);
   };
 
-  // Filter restaurants based on selected category, search query, and other filters
+  // Filter restaurants based on criteria
   const filteredRestaurants = restaurants.filter((restaurant) => {
-    // Skip category filter if "all" is selected
+    // Category filter
     const matchesCategory =
       category === "all" ||
       (restaurant.cuisineType &&
         (Array.isArray(restaurant.cuisineType)
           ? restaurant.cuisineType.some(
-              (cuisine) =>
-                cuisine.toLowerCase() === category.toLowerCase() ||
-                cuisine.toLowerCase().includes(category.toLowerCase())
+              cuisine => cuisine.toLowerCase() === category.toLowerCase() ||
+                        cuisine.toLowerCase().includes(category.toLowerCase())
             )
           : restaurant.cuisineType.toLowerCase() === category.toLowerCase() ||
-            restaurant.cuisineType
-              .toLowerCase()
-              .includes(category.toLowerCase())));
+            restaurant.cuisineType.toLowerCase().includes(category.toLowerCase())));
 
-    // Filter by search query (case insensitive)
+    // Search query filter
     const matchesSearch =
       searchQuery === "" ||
       restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (restaurant.cuisineType &&
-        restaurant.cuisineType
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()));
+      (restaurant.cuisineType && restaurant.cuisineType.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    // Apply rating filter if active
-    const matchesRating =
-      !filters.rating || restaurant.rating >= filters.rating;
+    // Rating filter
+    const matchesRating = !filters.rating || restaurant.rating >= filters.rating;
 
-    // Apply delivery time filter if active
-    const matchesDeliveryTime =
-      !filters.maxDeliveryTime ||
-      (restaurant.estimatedDeliveryTime &&
-        restaurant.estimatedDeliveryTime <= filters.maxDeliveryTime);
+    // Delivery time filter
+    const matchesDeliveryTime = !filters.maxDeliveryTime ||
+      (restaurant.estimatedDeliveryTime && restaurant.estimatedDeliveryTime <= filters.maxDeliveryTime);
         
-    // Apply favorites filter if active
-    const matchesFavorites = 
-      !filters.favorites || 
+    // Favorites filter
+    const matchesFavorites = !filters.favorites || 
       favoriteRestaurants.some(fav => fav._id === restaurant._id);
 
-    return (
-      matchesCategory && 
-      matchesSearch && 
-      matchesRating && 
-      matchesDeliveryTime && 
-      matchesFavorites
-    );
+    return matchesCategory && matchesSearch && matchesRating && matchesDeliveryTime && matchesFavorites;
   });
 
-  // Sort filtered restaurants based on selected sort option
+  // Sort filtered restaurants
   const sortedRestaurants = [...filteredRestaurants].sort((a, b) => {
     if (filters.sort === "rating") {
       return (b.rating || 0) - (a.rating || 0);
     } else if (filters.sort === "delivery") {
-      const aTime = a.estimatedDeliveryTime || 30;
-      const bTime = b.estimatedDeliveryTime || 30;
-      return aTime - bTime;
+      return (a.estimatedDeliveryTime || 30) - (b.estimatedDeliveryTime || 30);
     } else {
       // Sort by distance (default)
-      const aDist = a.distance || 10000;
-      const bDist = b.distance || 10000;
-      return aDist - bDist;
+      return (a.distance || 10000) - (b.distance || 10000);
     }
   });
 
-  // Toggle filter
+  // Toggle filters
   const toggleFilter = (filterType) => {
     setFilters((prev) => {
-      // For ratings and delivery time filters, toggle between null and a value
       if (filterType === "rating") {
         return { ...prev, rating: prev.rating ? null : 4.5 };
       }
       if (filterType === "maxDeliveryTime") {
         return { ...prev, maxDeliveryTime: prev.maxDeliveryTime ? null : 30 };
       }
-      // For favorites, toggle between true and false
       if (filterType === "favorites") {
         return { ...prev, favorites: !prev.favorites };
       }
-      // For sort, cycle through options
       if (filterType === "sort") {
         const options = ["nearest", "rating", "delivery"];
         const currentIndex = options.indexOf(prev.sort);
@@ -302,12 +235,8 @@ const RestaurantList = () => {
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 pt-16">
       {/* Side Panel for Location - Hidden on mobile, visible on desktop */}
       <div
-        className={`md:w-80 bg-white md:border-r md:h-screen md:sticky md:top-16 p-4 z-40 
-                      ${
-                        showFiltersOnMobile
-                          ? "fixed inset-0 z-50"
-                          : "hidden md:block"
-                      }`}
+        className={`md:w-[35%] bg-white md:border-r md:h-screen md:sticky md:top-16 p-4 z-40 
+                    ${showFiltersOnMobile ? "fixed inset-0 z-50" : "hidden md:block"}`}
       >
         {/* Close button for mobile view */}
         {showFiltersOnMobile && (
@@ -355,9 +284,7 @@ const RestaurantList = () => {
             {/* Favorites Filter Button */}
             <button
               className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                filters.favorites
-                  ? "bg-red-50 text-red-600"
-                  : "hover:bg-gray-50"
+                filters.favorites ? "bg-red-50 text-red-600" : "hover:bg-gray-50"
               }`}
               onClick={() => toggleFilter("favorites")}
             >
@@ -368,9 +295,7 @@ const RestaurantList = () => {
             {/* Rating Filter Button */}
             <button
               className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                filters.rating
-                  ? "bg-green-50 text-green-700"
-                  : "hover:bg-gray-50"
+                filters.rating ? "bg-green-50 text-green-700" : "hover:bg-gray-50"
               }`}
               onClick={() => toggleFilter("rating")}
             >
@@ -380,9 +305,7 @@ const RestaurantList = () => {
             {/* Delivery Time Filter Button */}
             <button
               className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                filters.maxDeliveryTime
-                  ? "bg-green-50 text-green-700"
-                  : "hover:bg-gray-50"
+                filters.maxDeliveryTime ? "bg-green-50 text-green-700" : "hover:bg-gray-50"
               }`}
               onClick={() => toggleFilter("maxDeliveryTime")}
             >
@@ -398,11 +321,8 @@ const RestaurantList = () => {
             onClick={() => toggleFilter("sort")}
           >
             <FaSort className="inline mr-2" />
-            {filters.sort === "nearest"
-              ? "Distance"
-              : filters.sort === "rating"
-              ? "Rating"
-              : "Delivery Time"}
+            {filters.sort === "nearest" ? "Distance" : 
+             filters.sort === "rating" ? "Rating" : "Delivery Time"}
           </button>
         </div>
       </div>
@@ -435,6 +355,33 @@ const RestaurantList = () => {
                   <FaSearch className="absolute left-3 top-3 text-gray-400" />
                 </div>
               </div>
+            </div>
+            
+            {/* Mobile Location Display and Selector */}
+            <div className="md:hidden mt-3">
+              {location ? (
+                <div 
+                  className="flex items-center p-2 bg-gray-50 rounded-lg cursor-pointer"
+                  onClick={toggleMobileFilters}
+                >
+                  <MdLocationOn className="text-green-600 mr-2 flex-shrink-0" />
+                  <div className="text-sm truncate">
+                    <span className="text-gray-500">Delivering to: </span>
+                    <span className="font-medium">{location.address}</span>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              ) : (
+                <div 
+                  className="flex items-center justify-center p-2 bg-green-50 rounded-lg cursor-pointer text-green-700"
+                  onClick={toggleMobileFilters}
+                >
+                  <MdLocationOn className="mr-2" />
+                  <span className="font-medium">Set delivery location</span>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -500,8 +447,7 @@ const RestaurantList = () => {
               {error}
               {!location && (
                 <p className="mt-2">
-                  Please enter your delivery address to see restaurants near
-                  you.
+                  Please enter your delivery address to see restaurants near you.
                 </p>
               )}
             </div>
@@ -550,7 +496,6 @@ const RestaurantList = () => {
               </p>
             </div>
           )}
-
 
           {/* Restaurant List Section */}
           {!loading && !error && location && sortedRestaurants.length > 0 && (
