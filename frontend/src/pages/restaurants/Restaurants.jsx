@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import {
   FaShoppingBag,
@@ -8,6 +7,7 @@ import {
   FaClock,
   FaSort,
   FaSearch,
+  FaHeart
 } from "react-icons/fa";
 import { MdDeliveryDining, MdLocationOn } from "react-icons/md";
 import LocationSearchBar from "../../components/restaurants/LocationSearchBar";
@@ -15,6 +15,7 @@ import FoodCategories from "../../components/restaurants/FoodCategories";
 import RestaurantCard from "../../components/restaurants/RestaurantCard";
 import { getAllRestaurants } from "../../services/restaurantService";
 import LocationService from "../../services/locationService";
+import { getUserFavorites } from "../../services/favoriteService";
 import Footer from "../../components/Footer";
 
 
@@ -22,6 +23,7 @@ const MAX_LOCATION_AGE = 4 * 60 * 60 * 1000; // 4 hours
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
+  const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState(null);
@@ -31,8 +33,27 @@ const RestaurantList = () => {
   const [filters, setFilters] = useState({
     rating: null,
     maxDeliveryTime: null,
+    favorites: false,
     sort: "nearest",
   });
+
+  // Fetch favorite restaurants
+  useEffect(() => {
+    async function fetchFavorites() {
+      try {
+        const favorites = await getUserFavorites();
+        setFavoriteRestaurants(favorites);
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+        // Don't set error state as this is not critical
+      }
+    }
+    
+    // Only fetch if the user is filtering by favorites
+    if (filters.favorites) {
+      fetchFavorites();
+    }
+  }, [filters.favorites]);
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -186,7 +207,7 @@ const RestaurantList = () => {
     setShowFiltersOnMobile(!showFiltersOnMobile);
   };
 
-  // Filter restaurants based on selected category and search query
+  // Filter restaurants based on selected category, search query, and other filters
   const filteredRestaurants = restaurants.filter((restaurant) => {
     // Skip category filter if "all" is selected
     const matchesCategory =
@@ -221,9 +242,18 @@ const RestaurantList = () => {
       !filters.maxDeliveryTime ||
       (restaurant.estimatedDeliveryTime &&
         restaurant.estimatedDeliveryTime <= filters.maxDeliveryTime);
+        
+    // Apply favorites filter if active
+    const matchesFavorites = 
+      !filters.favorites || 
+      favoriteRestaurants.some(fav => fav._id === restaurant._id);
 
     return (
-      matchesCategory && matchesSearch && matchesRating && matchesDeliveryTime
+      matchesCategory && 
+      matchesSearch && 
+      matchesRating && 
+      matchesDeliveryTime && 
+      matchesFavorites
     );
   });
 
@@ -253,6 +283,10 @@ const RestaurantList = () => {
       if (filterType === "maxDeliveryTime") {
         return { ...prev, maxDeliveryTime: prev.maxDeliveryTime ? null : 30 };
       }
+      // For favorites, toggle between true and false
+      if (filterType === "favorites") {
+        return { ...prev, favorites: !prev.favorites };
+      }
       // For sort, cycle through options
       if (filterType === "sort") {
         const options = ["nearest", "rating", "delivery"];
@@ -265,10 +299,10 @@ const RestaurantList = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 pt-16">
       {/* Side Panel for Location - Hidden on mobile, visible on desktop */}
       <div
-        className={`md:w-80 bg-white md:border-r md:h-screen md:sticky md:top-0 p-4 z-40 
+        className={`md:w-80 bg-white md:border-r md:h-screen md:sticky md:top-16 p-4 z-40 
                       ${
                         showFiltersOnMobile
                           ? "fixed inset-0 z-50"
@@ -299,14 +333,6 @@ const RestaurantList = () => {
         )}
 
         <div className="mb-6">
-          <Link
-            to="/"
-            className="text-green-600 font-bold text-xl flex items-center mb-6"
-          >
-            <FaShoppingBag className="mr-2" />
-            Food Rush
-          </Link>
-
           <h3 className="font-semibold mb-2">Delivery Location</h3>
           <div className="mb-4">
             <LocationSearchBar onLocationChange={handleLocationChange} />
@@ -326,6 +352,20 @@ const RestaurantList = () => {
         <div className="mb-4">
           <h3 className="font-semibold mb-2">Quick Filters</h3>
           <div className="space-y-2">
+            {/* Favorites Filter Button */}
+            <button
+              className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                filters.favorites
+                  ? "bg-red-50 text-red-600"
+                  : "hover:bg-gray-50"
+              }`}
+              onClick={() => toggleFilter("favorites")}
+            >
+              <FaHeart className={`inline mr-2 ${filters.favorites ? "text-red-600" : "text-gray-400"}`} /> 
+              Favorites Only
+            </button>
+            
+            {/* Rating Filter Button */}
             <button
               className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
                 filters.rating
@@ -336,6 +376,8 @@ const RestaurantList = () => {
             >
               <FaStar className="inline mr-2" /> Rating 4.5+
             </button>
+            
+            {/* Delivery Time Filter Button */}
             <button
               className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
                 filters.maxDeliveryTime
@@ -393,14 +435,6 @@ const RestaurantList = () => {
                   <FaSearch className="absolute left-3 top-3 text-gray-400" />
                 </div>
               </div>
-
-              {/* Delivery Toggle */}
-              <div className="hidden md:block">
-                <button className="flex items-center text-green-600 font-medium">
-                  <MdDeliveryDining className="mr-1 text-xl" />
-                  Delivery
-                </button>
-              </div>
             </div>
           </div>
         </header>
@@ -413,6 +447,14 @@ const RestaurantList = () => {
 
           {/* Applied Filters Pills - Mobile only */}
           <div className="md:hidden mb-4 flex flex-wrap gap-2">
+            {filters.favorites && (
+              <div className="flex items-center bg-red-50 text-red-600 px-3 py-1 rounded-full text-sm">
+                <FaHeart className="mr-1 text-xs" /> Favorites
+                <button className="ml-1" onClick={() => toggleFilter("favorites")}>
+                  ×
+                </button>
+              </div>
+            )}
             {filters.rating && (
               <div className="flex items-center bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm">
                 <FaStar className="mr-1 text-xs" /> 4.5+
@@ -480,8 +522,27 @@ const RestaurantList = () => {
             </div>
           )}
 
-          {/* No Results */}
-          {!loading && !error && location && sortedRestaurants.length === 0 && (
+          {/* No Results with Favorites Filter Notification */}
+          {!loading && !error && location && sortedRestaurants.length === 0 && filters.favorites && (
+            <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+              <div className="flex flex-col items-center">
+                <FaHeart className="text-red-200 text-5xl mb-4" />
+                <h3 className="text-xl font-medium">No favorite restaurants found</h3>
+                <p className="text-gray-500 mt-2 mb-4">
+                  You haven't added any restaurants to your favorites yet
+                </p>
+                <button 
+                  onClick={() => toggleFilter("favorites")}
+                  className="px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors"
+                >
+                  Show all restaurants
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* No Results (not due to favorites filter) */}
+          {!loading && !error && location && sortedRestaurants.length === 0 && !filters.favorites && (
             <div className="text-center py-12 bg-white rounded-lg shadow-sm">
               <h3 className="text-xl font-medium">No restaurants found</h3>
               <p className="text-gray-500 mt-2">
@@ -490,45 +551,15 @@ const RestaurantList = () => {
             </div>
           )}
 
-          {/* Special Offers Section */}
-          {!loading && !error && location && sortedRestaurants.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-bold mb-3">Special Offers</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-r from-green-100 to-green-50 p-4 rounded-lg shadow-sm">
-                  <h3 className="text-lg font-bold">
-                    40% Off Your First Order
-                  </h3>
-                  <p className="text-sm mb-2">Use code: FIRSTORDER</p>
-                  <Link
-                    to="/signup"
-                    className="text-green-600 font-medium text-sm"
-                  >
-                    Order now &rarr;
-                  </Link>
-                </div>
-                <div className="bg-gradient-to-r from-orange-100 to-amber-50 p-4 rounded-lg shadow-sm">
-                  <h3 className="text-lg font-bold">
-                    Free Delivery on orders $15+
-                  </h3>
-                  <p className="text-sm mb-2">Valid until April 30, 2025</p>
-                  <Link
-                    to="/restaurants"
-                    className="text-amber-600 font-medium text-sm"
-                  >
-                    Browse restaurants &rarr;
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Restaurant List Section */}
           {!loading && !error && location && sortedRestaurants.length > 0 && (
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">
-                  {searchQuery
+                  {filters.favorites
+                    ? "Your Favorite Restaurants"
+                    : searchQuery
                     ? `Results for "${searchQuery}"`
                     : "Restaurants near you"}
                 </h2>

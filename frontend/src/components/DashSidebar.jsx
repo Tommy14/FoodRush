@@ -61,7 +61,6 @@ const DashSidebar = () => {
     restaurant_admin: [
       { label: 'My Restaurants', path: '/manage-restaurants', icon: <FaStore className="mr-2" /> },
       { label: 'Orders', path: '/restaurant-orders', icon: <FaClipboardList className="mr-2" /> },
-      { label: 'Create Restaurant', path: '/create-restaurant', icon: <FaPlusCircle className="mr-2" /> }
     ],
     delivery_person: [
       { label: 'My Deliveries', path: '/delivery-panel', icon: <FaClipboardList className="mr-2" /> },

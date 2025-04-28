@@ -199,7 +199,7 @@ const RestaurantManageCard = ({ restaurant, onToggle, onDelete }) => {
           </Link>
 
           <Link
-            to={`/edit-restaurant/${restaurant._id}`}
+            to={`/restaurants/edit/${restaurant._id}`}
             className="inline-flex items-center px-3 py-1.5 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
           >
             <FaEdit className="mr-1" /> Edit

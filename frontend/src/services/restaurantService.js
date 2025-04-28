@@ -127,3 +127,25 @@ export const updateRestaurantStatus = async (id, status, token) => {
     throw new Error(err.response?.data?.message || 'Failed to update restaurant status');
   }
 };
+
+/**
+ * Update an existing restaurant
+ * @param {string} id - Restaurant ID
+ * @param {FormData} restaurantData - Form data with restaurant details
+ * @param {string} token - Auth token
+ * @returns {Promise<Object>} Updated restaurant
+ */
+export const updateRestaurant = async (id, restaurantData, token) => {
+  try {
+    const headers = {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${token}`
+    };
+    
+    const response = await axios.put(`${API_BASE}/${id}`, restaurantData, { headers });
+    return response.data;
+  } catch (err) {
+    console.error('Error updating restaurant:', err);
+    throw new Error(err.response?.data?.message || 'Failed to update restaurant');
+  }
+};
