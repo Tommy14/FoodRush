@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import {SignupService} from "../../services/authService";
+import { SignupService } from "../../services/authService";
 import CircularProgress from "@mui/material/CircularProgress";
 
 export default function SignUpPage({ onSuccessSwitchToLogin }) {
@@ -34,7 +34,6 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
   const [role, setRole] = useState("customer");
   const [isLoading, setIsLoading] = useState(false);
 
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,8 +47,16 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
     setOpenSnackbar(true);
   };
 
+  const passwordsMatch = password && confirmPassword && password === confirmPassword;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!passwordsMatch) {
+      showMessage("error", "Passwords do not match!");
+      return;
+    }
+
     setIsLoading(true); // Start spinner
 
     const formattedPhone = phone.startsWith("+94")
@@ -66,7 +73,7 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
       role,
     };
     console.log(data);
-    
+
     try {
       const response = await SignupService(data);
       if (response.status === 200) {
@@ -108,15 +115,10 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
-          
-                <Button fullWidth variant="contained" onClick={() => setPage(page + 1)} 
-                    sx={{
-                        mt: 2,
-                        borderRadius: "10px",
-                        }}>
-                  Next
-                </Button>
-         
+              <Button fullWidth variant="contained" onClick={() => setPage(page + 1)} 
+                  sx={{ mt: 2, borderRadius: "10px" }}>
+                Next
+              </Button>
             </>
           )}
 
@@ -138,16 +140,10 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
                 onChange={(e) => setPhone(e.target.value)}
               />
               <div className="flex justify-between mt-4">
-                <Button variant="outlined" onClick={() => setPage(page - 1)}
-                    sx={{
-                        borderRadius: "10px",
-                        }}>
+                <Button variant="outlined" onClick={() => setPage(page - 1)} sx={{ borderRadius: "10px" }}>
                   Back
                 </Button>
-                <Button variant="contained" onClick={() => setPage(page + 1)}
-                    sx={{
-                        borderRadius: "10px",
-                        }}>
+                <Button variant="contained" onClick={() => setPage(page + 1)} sx={{ borderRadius: "10px" }}>
                   Next
                 </Button>
               </div>
@@ -178,16 +174,10 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
                 </Select>
               </FormControl>
               <div className="flex justify-between mt-4">
-                <Button variant="outlined" onClick={() => setPage(page - 1)}
-                    sx={{
-                        borderRadius: "10px",
-                        }}>
+                <Button variant="outlined" onClick={() => setPage(page - 1)} sx={{ borderRadius: "10px" }}>
                   Back
                 </Button>
-                <Button variant="contained" onClick={() => setPage(page + 1)}
-                    sx={{
-                        borderRadius: "10px",
-                        }}>
+                <Button variant="contained" onClick={() => setPage(page + 1)} sx={{ borderRadius: "10px" }}>
                   Next
                 </Button>
               </div>
@@ -224,6 +214,9 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
                   setConfirmPasswordTouched(true);
                 }}
               />
+              {confirmPasswordTouched && !passwordsMatch && (
+                <p className="text-sm text-red-500 mt-1">Passwords do not match</p>
+              )}
               <FormControl fullWidth margin="normal">
                 <InputLabel id="role-label">Select Role</InputLabel>
                 <Select
@@ -240,17 +233,14 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
               </FormControl>
 
               <div className="flex justify-between mt-4">
-                <Button variant="outlined" onClick={() => setPage(page - 1)}
-                    sx={{
-                        borderRadius: "10px",
-                        }}>
+                <Button variant="outlined" onClick={() => setPage(page - 1)} sx={{ borderRadius: "10px" }}>
                   Back
                 </Button>
                 <Button
                   variant="contained"
                   type="submit"
                   sx={{ borderRadius: "10px" }}
-                  disabled={isLoading}
+                  disabled={!passwordsMatch || isLoading}
                 >
                   {isLoading ? (
                     <CircularProgress size={24} color="inherit" />
@@ -258,7 +248,6 @@ export default function SignUpPage({ onSuccessSwitchToLogin }) {
                     "Submit"
                   )}
                 </Button>
-
               </div>
             </>
           )}

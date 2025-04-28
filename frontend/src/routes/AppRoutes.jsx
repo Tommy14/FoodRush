@@ -20,6 +20,9 @@ import MenuPage from '../pages/Menu/AdminMenuPage';
 import ProtectedRoute from '../components/ProtectedRoute'; 
 import PlaceOrder from '../pages/order/PlaceOrder';
 import RestaurantForm from "../components/restaurants/RestaurantForm";
+import PaymentSuccess from '../pages/PaymentSuccess';
+import PaymentCancel from '../pages/PaymentCancel';
+
 
 
 export default function AppRoutes() {
@@ -48,7 +51,12 @@ export default function AppRoutes() {
         <Route path="/restaurants/:restaurantId/menu/add" element={ <ProtectedRoute allowedRoles={['restaurant_admin']}> <AddMenuItemPage /></ProtectedRoute>} />
         <Route path="/restaurants/:restaurantId/menu/:menuItemId/edit" element={ <ProtectedRoute allowedRoles={['restaurant_admin']}><EditMenuItemPage /></ProtectedRoute> } /> 
 
-        <Route path="/place-order" element={<PlaceOrder/>} />       
+        <Route path="/place-order" element={<PlaceOrder/>} />   
+
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/cancel" element={<PaymentCancel />} />
+
+        {/* Protected Routes */}    
       </Routes>
     </>
   );
