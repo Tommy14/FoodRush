@@ -34,4 +34,14 @@ export function validateOrderPlaced(data) {
   
     return errors;
   }
+
+  export function validateRestaurantPendingApproval(data) {
+    const errors = {};
+  
+    if (!data.restaurantName) errors.restaurantName = 'Restaurant name is required';
+    if (!data.restaurantId) errors.restaurantId = 'Restaurant ID is required';
+  
+    return errors;
+  }
+  
   

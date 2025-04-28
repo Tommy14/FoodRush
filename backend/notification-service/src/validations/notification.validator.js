@@ -3,7 +3,9 @@ import isEmpty from 'is-empty';
 import {
   validateOrderPlaced,
   validateOrderDelivered,
-  validateUserAccountCreated
+  validateUserAccountCreated,
+  validateRestaurantPendingApproval
+
 } from './type.validator.js';
 
 export default function validateNotification(data) {
@@ -44,6 +46,9 @@ export default function validateNotification(data) {
         break;
       case 'userAccountCreated':
         extra = validateUserAccountCreated(data.data);
+        break;
+      case 'restaurantPendingApproval':
+        extra = validateRestaurantPendingApproval(data.data);
         break;
       default:
         errors.type = 'Unsupported notification type';
