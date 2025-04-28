@@ -1,50 +1,94 @@
-import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import { Icon } from 'leaflet';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import React, { useState, useEffect } from 'react';
+import { GoogleMap, useJsApiLoader, InfoWindow, Marker } from '@react-google-maps/api';
+import { MdLocationOn } from 'react-icons/md';
 
-// Fix the default marker icon issue in Leaflet
-const defaultIcon = new Icon({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41]
-});
+const GoogleMapComponent = ({ position, name, address }) => {
+  const [showInfo, setShowInfo] = useState(true);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
-const LocationMap = ({ position, name, address }) => {
-  // If no coordinates are provided, don't render the map
-  if (!position || !position[0] || !position[1]) {
+  // Format the center properly if position is valid
+  const center = position && Array.isArray(position) && position.length === 2 
+    ? { lat: position[1], lng: position[0] } 
+    : { lat: 0, lng: 0 };
+
+  const mapStyles = {
+    height: '300px',
+    width: '100%',
+    borderRadius: '0.5rem'
+  };
+
+  // Get your API key from environment
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  // Load Google Maps script
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: apiKey || ''
+  });
+
+  // When the map is fully loaded, mark it
+  useEffect(() => {
+    if (isLoaded) {
+      setMapLoaded(true);
+    }
+  }, [isLoaded]);
+
+  // Show a nice fallback UI if map can't be loaded
+  if (loadError || (!isLoaded && !mapLoaded)) {
     return (
-      <div className="bg-gray-100 rounded-lg p-4 text-center text-gray-500">
-        No location coordinates available
+      <div className="h-[300px] w-full bg-blue-50 flex flex-col items-center justify-center rounded-lg border border-blue-100">
+        <div className="text-center p-4">
+          <div className="text-blue-500 text-4xl mb-2">
+            <MdLocationOn size={48} />
+          </div>
+          <h3 className="font-medium text-blue-800">{name || 'Restaurant'}</h3>
+          <p className="text-blue-600 mt-1">{address || 'Location information not available'}</p>
+          <p className="text-sm text-blue-500 mt-3 italic">Map display unavailable</p>
+          {/* Helpful fallback link to open manually in Google Maps */}
+          <a 
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address || name)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            View on Google Maps
+          </a>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="h-64 rounded-lg overflow-hidden shadow-md">
-      <MapContainer 
-        center={[position[1], position[0]]} 
-        zoom={15} 
-        style={{ height: '100%', width: '100%' }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        <Marker position={[position[1], position[0]]} icon={defaultIcon}>
-          <Popup>
-            <div>
-              <strong>{name}</strong>
-              <div>{address}</div>
-            </div>
-          </Popup>
-        </Marker>
-      </MapContainer>
-    </div>
-  );
+  // If map loads fine, render it
+  return isLoaded ? (
+    <GoogleMap
+      mapContainerStyle={mapStyles}
+      center={center}
+      zoom={15}
+      options={{
+        fullscreenControl: false,
+        streetViewControl: false,
+        mapTypeControl: false,
+        zoomControl: true
+      }}
+    >
+      <Marker 
+        position={center}
+        onClick={() => setShowInfo(!showInfo)}
+      />
+
+      {showInfo && (
+        <InfoWindow
+          position={center}
+          onCloseClick={() => setShowInfo(false)}
+        >
+          <div className="p-1">
+            <h3 className="font-medium text-sm">{name || 'Restaurant'}</h3>
+            {address && <p className="text-xs text-gray-600">{address}</p>}
+          </div>
+        </InfoWindow>
+      )}
+    </GoogleMap>
+  ) : null;
 };
 
-export default LocationMap;
+export default GoogleMapComponent;
