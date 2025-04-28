@@ -118,9 +118,9 @@ const DeliveryDashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <DashSidebar />
-  
-      <main className="flex-1 overflow-auto mt-16 p-8">
+        <DashSidebar />
+    
+        <main className="flex-1 overflow-auto mt-16 p-8">
         {/* ✅ Popup for Order Delivered */}
         {showDeliveredPopup && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -133,16 +133,16 @@ const DeliveryDashboard = () => {
             </div>
           </div>
         )}
+
         {/* Outer Big White Card */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-  
           {/* Green Header inside White Card */}
           <div className="bg-gradient-to-r from-green-600 to-green-500 text-white px-8 py-6 flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-extrabold">Delivery Dashboard</h1>
               <p className="text-sm opacity-90 mt-1">Manage your current deliveries and navigate easily.</p>
             </div>
-  
+
             {/* Toggle inside Green Box */}
             <div className="flex items-center gap-3">
               <span className={`text-sm font-medium px-3 py-1 rounded-full ${
@@ -169,23 +169,23 @@ const DeliveryDashboard = () => {
               </button>
             </div>
           </div>
-  
+
           {/* Delivery Details + Map */}
-          {Array.isArray(deliveries) && deliveries.length > 0 && mapCoords && (
+          {Array.isArray(deliveries) && deliveries.length > 0 && mapCoords ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
               {/* Delivery Info */}
               <div className="relative space-y-4">
                 {/* Status Badge */}
-                <div className="absolute top-0 right-0 mt-2 mr-2">
+                <div className="absolute top-2 right-0 mt-2 mr-2">
                   <span className={`text-xs font-bold px-4 py-2 rounded-full ${
                     deliveries[0].status === 'delivered' ? 'bg-green-100 text-green-700' :
-                    deliveries[0].status === 'picked_up' ? 'bg-blue-800 text-white' :
+                    deliveries[0].status === 'picked_up' ? 'bg-teal-500 text-white' :
                     'bg-yellow-200 text-gray-800'
                   }`}>
                     {formatStatus(deliveries[0].status)}
                   </span>
                 </div>
-  
+
                 {/* Delivery Info Text */}
                 <div className="space-y-2 text-sm text-gray-700 mt-6">
                   <p><span className="font-bold">Order ID:</span> {deliveries[0].orderId}</p>
@@ -195,7 +195,7 @@ const DeliveryDashboard = () => {
                   <p><span className="font-bold">Total Price:</span> Rs. {deliveries[0].totalPrice?.toLocaleString() || '0.00'}</p>
                   <p><span className="font-bold">Payment Method:</span> {deliveries[0].paymentMethod}</p>
                 </div>
-  
+
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3 mt-6">
                   {deliveries[0].status !== 'delivered' && (
@@ -207,9 +207,17 @@ const DeliveryDashboard = () => {
                       )
                     }
                     disabled={updatingStatus}
-                    className={`w-full py-2 ${
-                      updatingStatus ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-800 hover:bg-blue-700'
-                    } text-white text-sm font-semibold rounded-md transition flex justify-center items-center`}
+                    className={`w-full py-2 text-white font-bold text-sm rounded-full text-center transition-all hover:scale-105 flex justify-center items-center ${
+                      updatingStatus
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : deliveries[0].status === 'assigned'
+                        ? "bg-teal-500 hover:bg-green-600"
+                        : 'bg-green-600 hover:bg-green-700'
+                    }`}
+                    style={{
+                      textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+                      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.5)"
+                    }}
                   >
                     {updatingStatus ? (
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -217,29 +225,42 @@ const DeliveryDashboard = () => {
                       `Mark as ${deliveries[0].status === 'assigned' ? 'Picked Up' : 'Delivered'}`
                     )}
                   </button>
+                  
                   )}
                   {mapCoords?.restaurant?.length === 2 && mapCoords?.customer?.length === 2 && (
                     <a
-                      href={`https://www.google.com/maps/dir/?api=1&origin=${mapCoords.restaurant[1]},${mapCoords.restaurant[0]}&destination=${mapCoords.customer[1]},${mapCoords.customer[0]}`}
+                      href={`https://www.google.com/maps/dir/?api=1&origin=${mapCoords.restaurant[1]},${mapCoords.restaurant[0]}&destination=${mapCoords.customer[1]},${mapCoords.customer[0]}&travelmode=driving`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-2 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-md text-center transition"
+                      className="w-full py-2 text-white font-bold text-sm rounded-full text-center transition-all shadow-lg hover:scale-105"
+                      style={{
+                        backgroundImage: "repeating-linear-gradient(45deg, rgba(234, 67, 53, .9) 0 25%, rgba(66, 133, 244, 0.9) 25% 50%, rgba(251, 188, 5, 0.9) 50% 75%, rgba(52, 168, 83, 0.9) 75% 100%)",
+                        textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.5)"
+                      }}
+
                     >
-                      📍 Open in Google Maps
+                      Open in Google Maps
                     </a>
                   )}
                 </div>
               </div>
-  
+
               {/* Google Map */}
               <div className="h-[400px] rounded-xl overflow-hidden">
                 <DeliveryMap origin={mapCoords.restaurant} destination={mapCoords.customer} />
               </div>
             </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center p-16 text-center text-gray-500">
+              <div className="text-6xl mb-4">📦</div>
+              <h2 className="text-2xl font-bold mb-2">No Deliveries Yet</h2>
+              <p className="text-sm opacity-80">You currently have no assigned deliveries. Please check back later!</p>
+            </div>
           )}
         </div>
       </main>
-    </div>
+      </div>
   );
   
   
