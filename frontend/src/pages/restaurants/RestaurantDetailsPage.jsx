@@ -95,7 +95,7 @@ const RestaurantDetailsPage = () => {
       {isOwner && <DashSidebar />}
       
       <div className={`flex-1 ${isOwner ? 'lg:ml-64' : ''}`}>
-        <div className="max-w-5xl mx-auto p-4">
+      <div className="max-w-5xl mx-auto pt-16 px-4">
           <RestaurantDetails restaurant={restaurant} isOwner={isOwner} />
           
           {/* Divider */}
