@@ -18,7 +18,10 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const location = useLocation();
-  const dashboardPaths = ["/restaurant-dashboard", "/admin"];
+  const dashboardPaths = [
+    "/restaurant-dashboard", "/admin", "/delivery-panel", 
+    "/manage-restaurants", "/restaurant-orders", 
+    "/create-restaurant", "/restaurant-status", "/user-management"];
   const isDashboard = dashboardPaths.includes(location.pathname);
   const [cartOpen, setCartOpen] = useState(false);
   const cartItems = useSelector((state) => state.cart.items);
