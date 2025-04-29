@@ -88,7 +88,7 @@ export default function OrdersTable({ restaurantId, onBack }) {
                 <Fragment key={order._id}>
                   <TableRow sx={{ backgroundColor: "#fff", borderRadius: 3, "&:hover": { backgroundColor: "#f9f9f9" }, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
                     <TableCell sx={{ borderBottom: "none" }}><Typography fontWeight="bold">{order.customerEmail}</Typography></TableCell>
-                    <TableCell sx={{ borderBottom: "none" }}>{order._id}</TableCell>
+                    <TableCell sx={{ borderBottom: "none" }}>#FR-{order._id.slice(-6).toUpperCase()}</TableCell>
                     <TableCell sx={{ borderBottom: "none" }}>LKR {order.totalAmount.toFixed(2)}</TableCell>
                     <TableCell sx={{ borderBottom: "none" }}>
                       <Box className="flex items-center gap-2">

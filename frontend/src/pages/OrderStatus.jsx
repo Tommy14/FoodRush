@@ -14,6 +14,7 @@ const statusSteps = [
 const OrderStatus = () => {
   const [orders, setOrders] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState(null);
+  
 
   const fetchOrders = async () => {
     try {
@@ -63,13 +64,13 @@ const OrderStatus = () => {
       <DashSidebar />
 
       <div className="min-h-screen flex-1 bg-gray-100 px-10 py-24">
-        {/* 📨 Heading */}
+        {/*Heading */}
         <h1 className="text-4xl font-extrabold mb-10 text-gray-800 flex items-center gap-3">
           <Boxes className="w-8 h-8 text-green-600" />
           My Orders
         </h1>
 
-        {/* 🎨 Filter Bar */}
+        {/*Filter Bar */}
         <div className="flex items-center gap-4 mb-8">
           {statusFilters.map((filter) => {
             const Icon = filter.icon;
@@ -101,14 +102,14 @@ const OrderStatus = () => {
           )}
         </div>
 
-        {/* 📭 No Orders Message */}
+        {/*No Orders Message */}
         {filteredOrders.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl shadow-md">
             <CheckCircle className="w-10 h-10 mx-auto text-gray-400 mb-4" />
             <p className="text-gray-500 text-lg">No orders found for this status.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Existing Order Cards (unchanged) */}
             {filteredOrders.map((order) => {
               const effectiveStatus = order.deliveryStatus || order.status;
@@ -117,21 +118,27 @@ const OrderStatus = () => {
               return (
                 <div
                   key={order._id}
-                  className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-green-500 hover:shadow-xl hover:scale-105 transition transform hover:-translate-y-1"
+                  className="w-full min-w-[340px] md:min-w-[460px] bg-white rounded-2xl border border-green-300 shadow-lg p-6 hover:shadow-xl hover:scale-[1.01] transition transform"
                 >
-                  {/* Step Labels */}
-                  <div className="mb-5">
-                    <div className="flex justify-between text-[11px] font-semibold mb-2 text-center gap-x-2 flex-wrap">
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-xl border border-black">
+                    <div className="text-xs text-gray-400 font-medium">Order ID</div>
+                    <div className="text-[13px] font-semibold text-gray-700 break-all text-right">#FR-{order._id.slice(-6).toUpperCase()}</div>
+                  </div>
+
+                  {/* Status Steps */}
+                  <div className="px-6 py-3 border-l border-r border-black">
+                    <div className="flex items-center justify-between text-xs font-semibold text-gray-400 mb-1">
                       {statusSteps.map((step, index) => (
                         <span
                           key={step}
-                          className={`capitalize flex-1 text-center ${
+                          className={`capitalize ${
                             effectiveStatus === 'delivered' && index === currentStep
-                              ? 'text-green-600 font-bold'
+                              ? 'text-green-600 font-semibold'
                               : index === currentStep
-                              ? 'text-blue-600 font-semibold'
+                              ? 'text-blue-600'
                               : index < currentStep
-                              ? 'text-green-600'
+                              ? 'text-green-500'
                               : 'text-gray-300'
                           }`}
                         >
@@ -139,9 +146,9 @@ const OrderStatus = () => {
                         </span>
                       ))}
                     </div>
-                    <div className="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
                       <div
-                        className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-in-out ${
+                        className={`h-full transition-all duration-500 ${
                           effectiveStatus === 'delivered'
                             ? 'bg-green-500'
                             : 'bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 animate-pulse'
@@ -153,48 +160,39 @@ const OrderStatus = () => {
                     </div>
                   </div>
 
-                  {/* Order Info */}
-                  <div className="space-y-4 text-[13px] text-gray-700">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400 tracking-wide">Order ID</span>
-                      <span className="font-bold text-gray-800 text-[13px] break-all">{order._id}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400 tracking-wide">Status</span>
-                      <span className="flex items-center gap-1">
-                        {effectiveStatus === 'delivered' ? (
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <Clock className="w-4 h-4 text-yellow-500" />
-                        )}
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            effectiveStatus === 'delivered'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
-                        >
-                          {effectiveStatus.replace(/_/g, ' ')}
-                        </span>
+                  {/* Details */}
+                  <div className="px-6 py-4 space-y-2 text-sm text-gray-700 border-l border-r border-black">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Status</span>
+                      <span
+                        className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${
+                          effectiveStatus === 'delivered'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                        }`}
+                      >
+                        {effectiveStatus.replace(/_/g, ' ')}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400 tracking-wide">Payment</span>
-                      <span className="font-medium">{order.paymentMethod}</span>
+                      <span className="text-gray-500">Payment</span>
+                      <span className="font-medium text-gray-800">{order.paymentMethod}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400 tracking-wide">Total</span>
-                      <span className="font-bold text-green-700 text-[15px]">Rs. {order.totalAmount}</span>
+                      <span className="text-gray-500">Total</span>
+                      <span className="font-bold text-green-700">Rs. {order.totalAmount}</span>
                     </div>
-                    <div className="border-t pt-3 space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400 tracking-wide">Ordered At</span>
-                        <span className="font-medium">{new Date(order.createdAt).toLocaleString()}</span>
-                      </div>
-                      <div className="text-left">
-                        <span className="text-gray-400 tracking-wide block">Delivery Address</span>
-                        <p className="font-medium text-sm leading-snug">{order.deliveryAddress}</p>
-                      </div>
+                  </div>
+
+                  {/* Bottom Section */}
+                  <div className="px-6 py-4 bg-gray-50 rounded-b-xl text-[13px] text-gray-600 border-t border-gray-100 space-y-1 border border-black">
+                    <div className="flex justify-between">
+                      <span>Ordered At</span>
+                      <span className="text-gray-700 font-medium">{new Date(order.createdAt).toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="block text-gray-500 mb-0.5">Delivery Address</span>
+                      <p className="font-medium text-gray-800 leading-snug">{order.deliveryAddress}</p>
                     </div>
                   </div>
                   {/* 🧾 Ordered Items */}

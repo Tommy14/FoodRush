@@ -57,15 +57,12 @@ const DeliveryDashboard = () => {
       await updateDeliveryStatus(deliveryId, newStatus);
   
       if (newStatus === 'delivered') {
-        setShowDeliveredPopup(true); // 🎯 Show popup
-  
-        // Wait 5 seconds (5000ms) before refreshing orders
+        setShowDeliveredPopup(true);
         setTimeout(async () => {
           setShowDeliveredPopup(false);
-          await fetchOrders(); // ⏰ After 5s, fetch updated orders
+          await fetchOrders();
         }, 5000);
       } else {
-        // If not "delivered", just refresh immediately
         await fetchOrders();
       }
     } catch (error) {
@@ -88,9 +85,9 @@ const DeliveryDashboard = () => {
   const formatStatus = (status) => {
     if (!status) return '';
     return status
-      .split('_')          // split by underscore
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // capitalize each part
-      .join(' ');           // join back with spaces
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   };
 
   const hasActiveOrder = deliveries.some(
@@ -111,8 +108,8 @@ const DeliveryDashboard = () => {
 
   useEffect(() => {
     if (!mapLoaded && deliveries.length > 0) {
-      handleShowMap(deliveries[0]);  // Only load the first delivery's map
-      setMapLoaded(true);            // prevent re-running
+      handleShowMap(deliveries[0]);
+      setMapLoaded(true);   
     }
   }, [deliveries, mapLoaded]);
 
@@ -121,7 +118,7 @@ const DeliveryDashboard = () => {
         <DashSidebar />
     
         <main className="flex-1 overflow-auto mt-16 p-8">
-        {/* ✅ Popup for Order Delivered */}
+        {/*Popup for Order Delivered */}
         {showDeliveredPopup && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-green-500/80 rounded-full w-80 h-80 shadow-2xl flex flex-col justify-center items-center text-center animate-pop-up">
@@ -262,8 +259,6 @@ const DeliveryDashboard = () => {
       </main>
       </div>
   );
-  
-  
 };
 
 export default DeliveryDashboard;
