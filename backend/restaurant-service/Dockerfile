@@ -1,18 +1,20 @@
-# Use Node.js base image
+# Restaurant service container configuration
+
+# Base image with Node.js 20
 FROM node:20
 
-# Set working directory
+# Define application working directory
 WORKDIR /app
 
-# Copy package files first to install dependencies
+# Install dependencies separately to leverage Docker layer caching
 COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the source code
+# Copy all application files
 COPY . .
 
-# Expose the service port
+# Open port 9100 for external access
 EXPOSE 9100
 
-# Start the app using nodemon (for dev) or node (for prod)
+# Launch the application in development mode
 CMD ["npm", "run", "dev"]
