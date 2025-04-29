@@ -6,7 +6,7 @@ import { NOTIFICATION_SERVICE_URL, INTERNAL_SERVICE_API_KEY, ORDER_SERVICE_URL, 
 export const autoAssignDeliveryService = async (orderId, address) => {
   console.log('Auto-assigning delivery for order:', address);
   try {
-    // 1. Fetch delivery personnel from User Service
+    //Fetch delivery personnel from User Service
     const res = await axios.get(`${USER_SERVICE_URL}/api/users/role/delivery_person`, {
       headers: {
         Authorization: `Bearer ${SYSTEM_JWT}`
@@ -18,13 +18,13 @@ export const autoAssignDeliveryService = async (orderId, address) => {
       throw new Error('No available delivery personnel at the moment');
     }
 
-    // 2. Pick one (you can randomize or use logic like load balancing)
+    //Pick one (you can randomize or use logic like load balancing)
     const selectedDriver = availableDrivers[0];
 
     if (!selectedDriver) {
       throw new Error('No driver selected for assignment');
     }
-    // Update the selected driver to not available
+    //Update the selected driver to not available
     await axios.put(`${USER_SERVICE_URL}/api/users/update-user/${selectedDriver.id}`, {
       isAvailable: false
     }, {
@@ -33,7 +33,7 @@ export const autoAssignDeliveryService = async (orderId, address) => {
       }
     });
 
-    // 3. Assign delivery
+    //Assign delivery
     const assignedDelivery = await assignDeliveryService({
       orderId,
       deliveryPersonId: selectedDriver.id,
@@ -156,7 +156,7 @@ async function sendDeliveryUpdateEmail(delivery) {
     type: 'orderDelivered',
     data: {
       customerName: customer.data.name,
-      restaurantName: order.data.order.restaurantName,
+      restaurantName: "Maa's Kitchen",
       orderId: delivery.orderId.toString(),
       total: order.data.order.totalAmount,
       paymentMethod: order.data.order.paymentMethod,
