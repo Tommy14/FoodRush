@@ -7,7 +7,7 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate('/restaurants'); 
+      navigate('/my-orders'); // Redirect to the orders page after 3 seconds
     }, 3000);
 
     return () => clearTimeout(timer);

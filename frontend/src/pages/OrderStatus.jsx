@@ -19,6 +19,7 @@ const OrderStatus = () => {
     try {
       const enrichedOrders = await fetchCustomerOrders();
       setOrders(enrichedOrders);
+      console.log('Fetched orders:', enrichedOrders);
     } catch (error) {
       console.error('Failed to fetch orders:', error);
     }
@@ -195,6 +196,34 @@ const OrderStatus = () => {
                         <p className="font-medium text-sm leading-snug">{order.deliveryAddress}</p>
                       </div>
                     </div>
+                  </div>
+                  {/* 🧾 Ordered Items */}
+                  <div className="mt-6 border-t pt-4">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">Ordered Items</h3>
+                    <div className="max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                    <ul className="divide-y divide-gray-200">
+                      {order.items.map((item, idx) => (
+                        <li key={idx} className="flex items-center justify-between py-3">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={item.imageUrl}
+                              alt={item.name}
+                              className="w-10 h-10 rounded border object-cover"
+                            />
+                            <div>
+                              <p className="text-sm font-medium text-gray-800">{item.name}</p>
+                              <p className="text-xs text-gray-500">
+                                {item.quantity} × Rs. {item.price.toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-sm font-bold text-gray-700">
+                            Rs. {(item.price * item.quantity).toLocaleString()}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                   </div>
                 </div>
               );
