@@ -21,7 +21,6 @@ export default function Navbar() {
   const dashboardPaths = [
     "/restaurant-dashboard", 
     "/admin", 
-    "/delivery-panel", 
     "/manage-restaurants", 
     "/restaurant-orders", 
     "/create-restaurant", 

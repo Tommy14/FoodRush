@@ -19,8 +19,8 @@ const CompletedDeliveries = () => {
 
   const fetchCoordinates = async (delivery) => {
     try {
-      const restaurantCoords = await getRestaurantCoordinates(delivery._id);
-      const customerCoords = await getCustomerCoordinates(delivery.orderId);
+      const restaurantCoords = await getRestaurantCoordinates(delivery.orderId);
+      const customerCoords = await getCustomerCoordinates(delivery._id);
       return { restaurant: restaurantCoords, customer: customerCoords };
     } catch (err) {
       console.error("Error fetching coordinates:", err);
@@ -78,7 +78,7 @@ const CompletedDeliveries = () => {
                   <div className="flex-1 space-y-4 flex flex-col justify-between">
 
                     <div className="space-y-3">
-                      <Attribute label="Order ID" value={delivery.orderId} />
+                      <Attribute label="Order ID" value={delivery.orderId.slice(-6).toUpperCase()} />
                       <Attribute label="Customer" value={delivery.customerName || '—'} />
                       <Attribute label="Address" value={delivery.deliveryAddress || '—'} />
                       <Attribute label="Total Price" value={`Rs. ${delivery.totalPrice?.toLocaleString() || '—'}`} />
