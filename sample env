@@ -117,6 +117,8 @@ RESTAURANT_SERVICE=http://localhost:9100/api/restaurants
 ORDER_SERVICE=http://localhost:9200/api/orders
 DELIVERY_SERVICE=http://localhost:9300/api/delivery
 LOCATION_SERVICE=http://localhost:9500/api/location
+INTERNAL_SERVICE_API_KEY=foodrush@internalKey
 PAYMENT_SERVICE=http://localhost:9400/api/pay
 
 JWT_SECRET=2f6c0d73a9c14f989c3b6724ab3b3e91f6e4179d121c957f8329df348d6f3b7e23c774c2fda34952c892b9291c4a37d6
+SYSTEM_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZWxpdmVyeS1zeXN0ZW0iLCJyb2xlIjoiZGVsaXZlcnlfc2VydmljZSIsImlhdCI6MTc0NTA4NjU3OCwiZXhwIjoxNzc2NjIyNTc4fQ.4Y9L4f3JZFLnbpASpqDi1TL_TcLIHoFGiOZrLTyfoRE

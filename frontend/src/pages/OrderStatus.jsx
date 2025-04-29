@@ -26,7 +26,14 @@ const OrderStatus = () => {
 
   useEffect(() => {
     fetchOrders();
+  
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 10000);
+  
+    return () => clearInterval(interval);
   }, []);
+  
 
   const filteredOrders = orders
     .filter(order => {
