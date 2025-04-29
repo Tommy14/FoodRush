@@ -15,7 +15,7 @@ import LoadingScreen from "../../components/LoadingScreen";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../store/slices/authSlice";
 import { LoginService } from "../../services/authService";
-
+import { initializeCartForUser } from "../../store/slices/cartSlice";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -60,6 +60,7 @@ export default function LoginPage() {
 
         // Save in Redux
         dispatch(setCredentials({ token, user }));
+        dispatch(initializeCartForUser(user._id)); //initialize user-specific cart
   
       } else {
         setSnackbarType("error");

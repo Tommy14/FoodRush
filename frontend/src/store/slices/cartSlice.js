@@ -1,26 +1,39 @@
-// src/store/slices/cartSlice.js
 import { createSlice } from '@reduxjs/toolkit';
+import { logout } from '../slices/authSlice'; // 👈 Import logout action to listen inside extraReducers
 
-// Load cart from localStorage
-const loadCart = () => {
-  const savedCart = localStorage.getItem('cart');
+// Load cart from localStorage based on userId
+const loadCart = (userId) => {
+  if (!userId) return { items: [], restaurantId: null };
+  const savedCart = localStorage.getItem(`cart_${userId}`);
   if (savedCart) {
     const parsed = JSON.parse(savedCart);
-    // Ensure structure is correct
     return {
       items: parsed.items || [],
-      restaurantId: parsed.restaurantId || null
+      restaurantId: parsed.restaurantId || null,
     };
   }
   return { items: [], restaurantId: null };
 };
 
-const initialState = loadCart();
+// Initial cart is empty — user not known yet
+const initialState = {
+  items: [],
+  restaurantId: null,
+  userId: null, // track user
+};
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
+    initializeCartForUser: (state, action) => {
+      const userId = action.payload;
+      const loadedCart = loadCart(userId);
+      state.items = loadedCart.items;
+      state.restaurantId = loadedCart.restaurantId;
+      state.userId = userId;
+    },
+
     addToCart: (state, action) => {
       const { restaurantId, menuItemId, name, price, quantity, imageUrl } = action.payload;
 
@@ -51,6 +64,9 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = [];
       state.restaurantId = null;
+      if (state.userId) {
+        localStorage.removeItem(`cart_${state.userId}`);
+      }
     },
 
     updateQuantity: (state, action) => {
@@ -59,18 +75,37 @@ const cartSlice = createSlice({
       if (item) {
         item.quantity = quantity;
       }
-    }
+    },
+  },
+
+  // reducer to listen for logout
+  extraReducers: (builder) => {
+    builder.addCase(logout, (state) => {
+      state.items = [];
+      state.restaurantId = null;
+      if (state.userId) {
+        localStorage.removeItem(`cart_${state.userId}`);
+      }
+      state.userId = null; // clear user tracking
+    });
   }
 });
 
-// 🔥 Sync to localStorage OUTSIDE Immer draft logic
+// Manual reducer to sync after every change
 const { reducer, actions } = cartSlice;
 
-export const { addToCart, removeFromCart, clearCart, updateQuantity } = actions;
+export const { initializeCartForUser, addToCart, removeFromCart, clearCart, updateQuantity } = actions;
 
 export const cartReducer = (state, action) => {
   const newState = reducer(state, action);
-  localStorage.setItem('cart', JSON.stringify(newState));
+
+  if (newState.userId) {
+    localStorage.setItem(`cart_${newState.userId}`, JSON.stringify({
+      items: newState.items,
+      restaurantId: newState.restaurantId
+    }));
+  }
+
   return newState;
 };
 
