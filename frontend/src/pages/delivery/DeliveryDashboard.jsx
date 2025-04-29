@@ -185,7 +185,7 @@ const DeliveryDashboard = () => {
 
                 {/* Delivery Info Text */}
                 <div className="space-y-2 text-sm text-gray-700 mt-6">
-                  <p><span className="font-bold">Order ID:</span> {deliveries[0].orderId}</p>
+                  <p><span className="font-bold">Order ID:</span>#FR{deliveries[0].orderId.slice(-6).toUpperCase()}</p>
                   <p><span className="font-bold">Customer:</span> {deliveries[0].customerName}</p>
                   <p><span className="font-bold">Address:</span> {deliveries[0].deliveryAddress}</p>
                   <p><span className="font-bold">Item:</span> {deliveries[0].items?.[0]?.name || '—'}</p>

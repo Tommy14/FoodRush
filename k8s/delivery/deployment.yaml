@@ -38,7 +38,6 @@ spec:
                 secretKeyRef:
                   name: foodrush-secrets
                   key: SYSTEM_JWT
-            # Internal service URLs (Kubernetes Service Discovery names)
             - name: NOTIFICATION_SERVICE_URL
               value: "http://notification-service:9800"
             - name: ORDER_SERVICE_URL
