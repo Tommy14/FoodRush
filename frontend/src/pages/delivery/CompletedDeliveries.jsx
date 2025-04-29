@@ -19,7 +19,7 @@ const CompletedDeliveries = () => {
 
   const fetchCoordinates = async (delivery) => {
     try {
-      const restaurantCoords = await getRestaurantCoordinates(delivery.orderId);
+      const restaurantCoords = await getRestaurantCoordinates(delivery._id);
       const customerCoords = await getCustomerCoordinates(delivery.orderId);
       return { restaurant: restaurantCoords, customer: customerCoords };
     } catch (err) {
@@ -88,7 +88,7 @@ const CompletedDeliveries = () => {
 
                     <div>
                       <span className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-4 py-2 rounded-full mt-2">
-                        Delivered ✅
+                        Delivered
                       </span>
                     </div>
                   </div>
